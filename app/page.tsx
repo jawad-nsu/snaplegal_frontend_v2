@@ -1,9 +1,13 @@
+'use client'
+
+import { useRouter } from 'next/navigation'
 import { Search, MapPin, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import Image from 'next/image'
 
 export default function HomePage() {
+  const router = useRouter()
   const categories = [
     { name: 'AC Repair Services', icon: '🔧' },
     { name: 'Appliance Repair', icon: '🔌' },
@@ -157,6 +161,7 @@ export default function HomePage() {
             <div
               key={index}
               className="group cursor-pointer rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow"
+              onClick={() => router.push('/all-services')}
             >
               <div className="relative h-48">
                 <Image
