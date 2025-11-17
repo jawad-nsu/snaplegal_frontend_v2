@@ -176,6 +176,7 @@ const serviceData: Record<string, {
 export default function ServiceDetailsPage({ params }: { params: Promise<{ slug: string }> }) {
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null)
   const [selectedPackage, setSelectedPackage] = useState(1)
+  const [activeTab, setActiveTab] = useState('overview')
   
   const { slug } = use(params)
   const service = serviceData[slug]
@@ -273,43 +274,207 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
               </div>
             </div>
 
-            {/* What's Included */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h2 className="text-xl font-bold mb-4">What&apos;s Included</h2>
-              <div className="grid sm:grid-cols-2 gap-3">
-                {service.features.map((feature, index) => (
-                  <div key={index} className="flex items-start gap-2">
-                    <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-700">{feature}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* FAQs */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h2 className="text-xl font-bold mb-4">Frequently Asked Questions</h2>
-              <div className="space-y-3">
-                {service.faqs.map((faq, index) => (
-                  <div key={index} className="border rounded-lg">
+            {/* Tabs */}
+            <div className="bg-white rounded-lg shadow-sm">
+              <div className="border-b">
+                <div className="flex gap-6 px-6">
+                  {['Overview', 'FAQ', 'How to Order', 'Review', 'Details'].map((tab) => (
                     <button
-                      onClick={() => setExpandedFaq(expandedFaq === index ? null : index)}
-                      className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50"
+                      key={tab}
+                      onClick={() => setActiveTab(tab.toLowerCase().replace(/\s+/g, '-'))}
+                      className={`py-4 px-1 font-medium transition-colors border-b-2 ${
+                        activeTab === tab.toLowerCase().replace(/\s+/g, '-')
+                          ? 'text-pink-600 border-pink-600'
+                          : 'text-gray-600 border-transparent hover:text-gray-900'
+                      }`}
                     >
-                      <span className="font-medium">{faq.question}</span>
-                      {expandedFaq === index ? (
-                        <ChevronUp className="w-5 h-5 text-gray-500 flex-shrink-0" />
-                      ) : (
-                        <ChevronDown className="w-5 h-5 text-gray-500 flex-shrink-0" />
-                      )}
+                      {tab}
                     </button>
-                    {expandedFaq === index && (
-                      <div className="px-4 pb-4 text-gray-600 leading-relaxed">
-                        {faq.answer}
+                  ))}
+                </div>
+              </div>
+
+              {/* Tab Content */}
+              <div className="p-6">
+                {/* Overview Tab */}
+                {activeTab === 'overview' && (
+                  <div className="space-y-6">
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-3">Service Description</h3>
+                      <p className="text-gray-700 leading-relaxed">{service.description}</p>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-3">What&apos;s Included</h3>
+                      <div className="grid sm:grid-cols-2 gap-3">
+                        {service.features.map((feature, index) => (
+                          <div key={index} className="flex items-start gap-2">
+                            <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                            <span className="text-gray-700">{feature}</span>
+                          </div>
+                        ))}
                       </div>
-                    )}
+                    </div>
                   </div>
-                ))}
+                )}
+
+                {/* FAQ Tab */}
+                {activeTab === 'faq' && (
+                  <div className="space-y-3">
+                    {service.faqs.map((faq, index) => (
+                      <div key={index} className="border rounded-lg">
+                        <button
+                          onClick={() => setExpandedFaq(expandedFaq === index ? null : index)}
+                          className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50"
+                        >
+                          <span className="font-medium">{faq.question}</span>
+                          {expandedFaq === index ? (
+                            <ChevronUp className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                          ) : (
+                            <ChevronDown className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                          )}
+                        </button>
+                        {expandedFaq === index && (
+                          <div className="px-4 pb-4 text-gray-600 leading-relaxed">
+                            {faq.answer}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* How to Order Tab */}
+                {activeTab === 'how-to-order' && (
+                  <div className="space-y-4">
+                    <div className="space-y-3">
+                      <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center flex-shrink-0">
+                          <span className="text-pink-600 font-bold">1</span>
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-gray-900 mb-1">Select Your Package</h4>
+                          <p className="text-gray-600">Choose from Basic, Standard, or Premium packages based on your needs.</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center flex-shrink-0">
+                          <span className="text-pink-600 font-bold">2</span>
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-gray-900 mb-1">Book Your Service</h4>
+                          <p className="text-gray-600">Click &quot;Book Now&quot; and select your preferred date and time slot.</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center flex-shrink-0">
+                          <span className="text-pink-600 font-bold">3</span>
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-gray-900 mb-1">Confirm Your Details</h4>
+                          <p className="text-gray-600">Review your booking details and provide your address information.</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center flex-shrink-0">
+                          <span className="text-pink-600 font-bold">4</span>
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-gray-900 mb-1">Service Delivery</h4>
+                          <p className="text-gray-600">Our professional will arrive at your location at the scheduled time.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Review Tab */}
+                {activeTab === 'review' && (
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="flex items-center gap-2">
+                        <Star className="w-6 h-6 fill-yellow-400 text-yellow-400" />
+                        <span className="text-2xl font-bold">{service.rating}</span>
+                      </div>
+                      <div className="text-gray-600">
+                        Based on {service.reviewCount} reviews
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      {/* Sample Reviews */}
+                      <div className="border-b pb-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                            <span className="text-gray-600 font-semibold">A</span>
+                          </div>
+                          <div>
+                            <p className="font-semibold text-gray-900">Ahmed Rahman</p>
+                            <div className="flex items-center gap-1">
+                              {[...Array(5)].map((_, i) => (
+                                <Star
+                                  key={i}
+                                  className={`w-4 h-4 ${i < 5 ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                        <p className="text-gray-700 mt-2">Excellent service! The technician was professional and completed the work on time. Highly recommended!</p>
+                        <p className="text-sm text-gray-500 mt-2">2 days ago</p>
+                      </div>
+                      <div className="border-b pb-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                            <span className="text-gray-600 font-semibold">S</span>
+                          </div>
+                          <div>
+                            <p className="font-semibold text-gray-900">Sara Khan</p>
+                            <div className="flex items-center gap-1">
+                              {[...Array(5)].map((_, i) => (
+                                <Star
+                                  key={i}
+                                  className={`w-4 h-4 ${i < 4 ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                        <p className="text-gray-700 mt-2">Very satisfied with the quality of service. The team was clean, efficient, and respectful of my home.</p>
+                        <p className="text-sm text-gray-500 mt-2">1 week ago</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Details Tab */}
+                {activeTab === 'details' && (
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="font-semibold text-gray-900 mb-2">Service Category</h3>
+                      <p className="text-gray-700">{service.category}</p>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900 mb-2">Service Name</h3>
+                      <p className="text-gray-700">{service.name}</p>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900 mb-2">Rating</h3>
+                      <div className="flex items-center gap-2">
+                        <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                        <span className="text-gray-700">{service.rating} ({service.reviewCount} reviews)</span>
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900 mb-2">Available Packages</h3>
+                      <div className="space-y-2">
+                        {service.packages.map((pkg, index) => (
+                          <div key={index} className="text-gray-700">
+                            • {pkg.name} - ৳{pkg.price}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
