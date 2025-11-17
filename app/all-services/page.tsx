@@ -13,14 +13,17 @@ const serviceCategories = [
       {
         title: 'AC Servicing',
         image: '/plumbing.jpg',
+        slug: 'ac-servicing',
       },
       {
         title: 'AC Doctor',
         image: '/moving_service.webp',
+        slug: 'home-cleaning',
       },
       {
         title: 'AC Combo Packages',
         image: '/cleaning_service.jpg',
+        slug: 'home-cleaning',
       },
     ],
     services: [
@@ -36,14 +39,17 @@ const serviceCategories = [
       {
         title: 'Exclusive Combo Offer',
         image: '/gas-cooker-repair.jpg',
+        slug: 'home-cleaning',
       },
       {
         title: 'Oven Services',
         image: '/plumbing.jpg',
+        slug: 'home-cleaning',
       },
       {
         title: 'TV Services',
         image: '/moving_service.webp',
+        slug: 'home-cleaning',
       },
     ],
     services: [
@@ -65,14 +71,17 @@ const serviceCategories = [
       {
         title: 'Home Cleaning',
         image: '/cleaning_service.jpg',
+        slug: 'home-cleaning',
       },
       {
         title: 'Cleaning Combo',
         image: '/gas-cooker-repair.jpg',
+        slug: 'home-cleaning',
       },
       {
         title: 'Furniture & Carpet Cleaning',
         image: '/plumbing.jpg',
+        slug: 'home-cleaning',
       },
     ],
     services: [
@@ -89,14 +98,17 @@ const serviceCategories = [
       {
         title: 'Nail Extension',
         image: '/plumbing.jpg',
+        slug: 'home-cleaning',
       },
       {
         title: 'Salon Care',
         image: '/moving_service.webp',
+        slug: 'home-cleaning',
       },
       {
         title: 'At-home Hair Studio',
         image: '/cleaning_service.jpg',
+        slug: 'home-cleaning',
       },
     ],
     services: [
@@ -117,14 +129,17 @@ const serviceCategories = [
       {
         title: 'House Shifting',
         image: '/moving_service.webp',
+        slug: 'home-cleaning',
       },
       {
         title: 'Office Shifting',
         image: '/gas-cooker-repair.jpg',
+        slug: 'home-cleaning',
       },
       {
         title: 'Local Shifting',
         image: '/moving_service.webp',
+        slug: 'home-cleaning',
       },
     ],
     services: [
@@ -140,14 +155,17 @@ const serviceCategories = [
       {
         title: 'Plumbing Services',
         image: '/plumbing.jpg',
+        slug: 'home-cleaning',
       },
       {
         title: 'Electrical Services',
         image: '/moving_service.webp',
+        slug: 'home-cleaning',
       },
       {
         title: 'Painting Services',
         image: '/cleaning_service.jpg',
+        slug: 'home-cleaning',
       },
     ],
     services: [
@@ -258,9 +276,10 @@ export default function AllServicesPage() {
                 {/* Featured Services Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                   {category.featured.map((service, index) => (
-                    <button
-                      key={index}
-                      className="group relative overflow-hidden rounded-lg bg-gray-100 hover:shadow-lg transition-shadow"
+                   <Link
+                        key={index}
+                        href={`/services/${service.slug}`}
+                        className="group relative overflow-hidden rounded-lg bg-gray-100 hover:shadow-lg transition-shadow"
                     >
                       <div className="aspect-[4/3] relative">
                         <Image
@@ -275,7 +294,7 @@ export default function AllServicesPage() {
                           {service.title}
                         </h3>
                       </div>
-                    </button>
+                    </Link>
                   ))}
                 </div>
 
@@ -286,13 +305,14 @@ export default function AllServicesPage() {
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {category.services.map((service, index) => (
-                      <button
+                      <Link
                         key={index}
+                        href={`/services/${service.slug}`}
                         className="flex items-center gap-2 text-left text-gray-700 hover:text-pink-600 transition-colors"
                       >
                         <span className="w-2 h-2 rounded-full bg-pink-600" />
                         <span>{service}</span>
-                      </button>
+                      </Link>
                     ))}
                   </div>
                 </div>
