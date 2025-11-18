@@ -5,6 +5,7 @@ import { Search, MapPin, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import Image from 'next/image'
+import Navbar from '@/components/navbar'
 
 export default function HomePage() {
   const router = useRouter()
@@ -72,6 +73,9 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen">
+      {/* Navbar */}
+      <Navbar />
+
       {/* Hero Section */}
       <section
         className="relative h-[500px] bg-cover bg-center"

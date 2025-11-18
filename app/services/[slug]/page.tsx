@@ -3,7 +3,9 @@
 import { useState, use } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { MapPin, ShoppingCart, Star, ChevronDown, ChevronUp, CheckCircle, Info } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Star, ChevronDown, ChevronUp, CheckCircle, Info } from 'lucide-react'
+import Navbar from '@/components/navbar'
 
 const serviceData: Record<string, {
   name: string
@@ -177,6 +179,7 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null)
   const [selectedPackage, setSelectedPackage] = useState(1)
   const [activeTab, setActiveTab] = useState('overview')
+  const router = useRouter()
   
   const { slug } = use(params)
   const service = serviceData[slug]
@@ -198,35 +201,8 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-pink-600 rounded-lg flex items-center justify-center text-white font-bold">
-                S
-              </div>
-              <span className="text-xl font-bold">Sheba.xyz</span>
-            </Link>
-            
-            <div className="flex items-center gap-4">
-              <button className="flex items-center gap-1 text-gray-700 hover:text-pink-600">
-                <MapPin className="w-4 h-4" />
-                <span className="text-sm">Gulshan</span>
-              </button>
-              <button className="px-4 py-2 border-2 border-pink-600 text-pink-600 rounded-lg hover:bg-pink-50 font-medium">
-                Sheba Pay
-              </button>
-              <button className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 font-medium">
-                Login
-              </button>
-              <button className="relative">
-                <ShoppingCart className="w-6 h-6 text-gray-700" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+      {/* Navbar */}
+      <Navbar />
 
       {/* Breadcrumb */}
       <div className="bg-white border-b">
@@ -534,7 +510,10 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                 ))}
               </div>
 
-              <button className="w-full bg-pink-600 text-white py-3 rounded-lg font-bold hover:bg-pink-700 transition-colors mb-3">
+              <button 
+                onClick={() => router.push('/cart')}
+                className="w-full bg-pink-600 text-white py-3 rounded-lg font-bold hover:bg-pink-700 transition-colors mb-3"
+              >
                 Book Now - ৳{service.packages[selectedPackage].price}
               </button>
 

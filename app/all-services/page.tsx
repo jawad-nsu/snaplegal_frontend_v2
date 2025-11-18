@@ -1,9 +1,9 @@
 'use client'
 
-import { Search } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import Navbar from '@/components/navbar'
 
 const serviceCategories = [
   {
@@ -222,24 +222,8 @@ export default function AllServicesPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="text-2xl font-bold text-pink-600">
-              Sheba.xyz
-            </Link>
-            <div className="flex items-center gap-4">
-              <button className="text-gray-700 hover:text-pink-600">
-                Login
-              </button>
-              <button className="bg-pink-600 text-white px-6 py-2 rounded-lg hover:bg-pink-700">
-                Sign Up
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+      {/* Navbar */}
+      <Navbar />
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
