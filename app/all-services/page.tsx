@@ -18,20 +18,21 @@ const serviceCategories = [
       {
         title: 'AC Doctor',
         image: '/moving_service.webp',
-        slug: 'home-cleaning',
+        slug: 'ac-doctor',
       },
       {
         title: 'AC Combo Packages',
         image: '/cleaning_service.jpg',
-        slug: 'home-cleaning',
+        slug: 'ac-combo-packages',
       },
     ],
     services: [
-      'AC Cooling Problem',
-      'AC Installation & Uninstallation',
-      'VRF AC Service',
+      { title: 'AC Cooling Problem', slug: 'ac-cooling-problem' },
+      { title: 'AC Installation & Uninstallation', slug: 'ac-installation-uninstallation' },
+      { title: 'VRF AC Service', slug: 'vrf-ac-service' },
     ],
   },
+
   {
     id: 'appliance-repair',
     title: 'Appliance Repair',
@@ -39,31 +40,32 @@ const serviceCategories = [
       {
         title: 'Exclusive Combo Offer',
         image: '/gas-cooker-repair.jpg',
-        slug: 'home-cleaning',
+        slug: 'exclusive-combo-offer',
       },
       {
         title: 'Oven Services',
         image: '/plumbing.jpg',
-        slug: 'home-cleaning',
+        slug: 'oven-services',
       },
       {
         title: 'TV Services',
         image: '/moving_service.webp',
-        slug: 'home-cleaning',
+        slug: 'tv-services',
       },
     ],
     services: [
-      'Refrigerator Services',
-      'Washing Machine Services',
-      'Kitchen Hood Services',
-      'IPS Services',
-      'Treadmill Services',
-      'Water Purifier Services',
-      'Geyser Services',
-      'Gas Stove/Burner Services',
-      'Generator Services',
+      { title: 'Refrigerator Services', slug: 'refrigerator-services' },
+      { title: 'Washing Machine Services', slug: 'washing-machine-services' },
+      { title: 'Kitchen Hood Services', slug: 'kitchen-hood-services' },
+      { title: 'IPS Services', slug: 'ips-services' },
+      { title: 'Treadmill Services', slug: 'treadmill-services' },
+      { title: 'Water Purifier Services', slug: 'water-purifier-services' },
+      { title: 'Geyser Services', slug: 'geyser-services' },
+      { title: 'Gas Stove/Burner Services', slug: 'gas-stove-burner-services' },
+      { title: 'Generator Services', slug: 'generator-services' },
     ],
   },
+
   {
     id: 'cleaning-solution',
     title: 'Cleaning Solution',
@@ -76,21 +78,22 @@ const serviceCategories = [
       {
         title: 'Cleaning Combo',
         image: '/gas-cooker-repair.jpg',
-        slug: 'home-cleaning',
+        slug: 'cleaning-combo',
       },
       {
         title: 'Furniture & Carpet Cleaning',
         image: '/plumbing.jpg',
-        slug: 'home-cleaning',
+        slug: 'furniture-carpet-cleaning',
       },
     ],
     services: [
-      'Outdoor Cleaning',
-      'Appliance Cleaning',
-      'Tank & Pipe Cleaning',
-      'Special Cleaning Combo',
+      { title: 'Outdoor Cleaning', slug: 'outdoor-cleaning' },
+      { title: 'Appliance Cleaning', slug: 'appliance-cleaning' },
+      { title: 'Tank & Pipe Cleaning', slug: 'tank-pipe-cleaning' },
+      { title: 'Special Cleaning Combo', slug: 'special-cleaning-combo' },
     ],
   },
+
   {
     id: 'beauty-wellness',
     title: 'Beauty & Wellness',
@@ -98,30 +101,31 @@ const serviceCategories = [
       {
         title: 'Nail Extension',
         image: '/plumbing.jpg',
-        slug: 'home-cleaning',
+        slug: 'nail-extension',
       },
       {
         title: 'Salon Care',
         image: '/moving_service.webp',
-        slug: 'home-cleaning',
+        slug: 'salon-care',
       },
       {
         title: 'At-home Hair Studio',
         image: '/cleaning_service.jpg',
-        slug: 'home-cleaning',
+        slug: 'at-home-hair-studio',
       },
     ],
     services: [
-      'Makeup',
-      'Spa & Massage',
-      'Hair Care',
-      'Skin Care',
-      'Nail Care',
-      'Bridal Package',
-      'Body Treatment',
-      'Waxing',
+      { title: 'Makeup', slug: 'makeup' },
+      { title: 'Spa & Massage', slug: 'spa-massage' },
+      { title: 'Hair Care', slug: 'hair-care' },
+      { title: 'Skin Care', slug: 'skin-care' },
+      { title: 'Nail Care', slug: 'nail-care' },
+      { title: 'Bridal Package', slug: 'bridal-package' },
+      { title: 'Body Treatment', slug: 'body-treatment' },
+      { title: 'Waxing', slug: 'waxing' },
     ],
   },
+
   {
     id: 'shifting-moving',
     title: 'Shifting & Moving',
@@ -129,25 +133,26 @@ const serviceCategories = [
       {
         title: 'House Shifting',
         image: '/moving_service.webp',
-        slug: 'home-cleaning',
+        slug: 'house-shifting',
       },
       {
         title: 'Office Shifting',
         image: '/gas-cooker-repair.jpg',
-        slug: 'home-cleaning',
+        slug: 'office-shifting',
       },
       {
         title: 'Local Shifting',
         image: '/moving_service.webp',
-        slug: 'home-cleaning',
+        slug: 'local-shifting',
       },
     ],
     services: [
-      'Packing Service',
-      'Inter-city Shifting',
-      'International Shifting',
+      { title: 'Packing Service', slug: 'packing-service' },
+      { title: 'Inter-city Shifting', slug: 'inter-city-shifting' },
+      { title: 'International Shifting', slug: 'international-shifting' },
     ],
   },
+
   {
     id: 'home-repair',
     title: 'Home Repair',
@@ -155,29 +160,30 @@ const serviceCategories = [
       {
         title: 'Plumbing Services',
         image: '/plumbing.jpg',
-        slug: 'home-cleaning',
+        slug: 'plumbing-services',
       },
       {
         title: 'Electrical Services',
         image: '/moving_service.webp',
-        slug: 'home-cleaning',
+        slug: 'electrical-services',
       },
       {
         title: 'Painting Services',
         image: '/cleaning_service.jpg',
-        slug: 'home-cleaning',
+        slug: 'painting-services',
       },
     ],
     services: [
-      'Carpentry Services',
-      'Sanitary Services',
-      'Interior Design',
-      'Door & Lock Services',
-      'Welding Services',
-      'Glass & Glazing',
+      { title: 'Carpentry Services', slug: 'carpentry-services' },
+      { title: 'Sanitary Services', slug: 'sanitary-services' },
+      { title: 'Interior Design', slug: 'interior-design' },
+      { title: 'Door & Lock Services', slug: 'door-lock-services' },
+      { title: 'Welding Services', slug: 'welding-services' },
+      { title: 'Glass & Glazing', slug: 'glass-glazing' },
     ],
   },
 ]
+
 
 export default function AllServicesPage() {
   const [activeSection, setActiveSection] = useState('')
@@ -311,7 +317,7 @@ export default function AllServicesPage() {
                         className="flex items-center gap-2 text-left text-gray-700 hover:text-pink-600 transition-colors"
                       >
                         <span className="w-2 h-2 rounded-full bg-pink-600" />
-                        <span>{service}</span>
+                        <span>{service.title}</span>
                       </Link>
                     ))}
                   </div>
