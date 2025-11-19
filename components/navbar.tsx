@@ -16,10 +16,10 @@ export default function Navbar() {
           {/* Left Section - Logo and Location */}
           <div className="flex items-center gap-4">
             <Link href="/" className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-pink-500 via-purple-500 to-blue-500 rounded-lg flex items-center justify-center text-white font-bold text-sm">
-                xyz
-              </div>
-              <span className="text-xl font-bold text-gray-900">sheba</span>
+              {/* <div className="w-10 h-10 bg-gradient-to-br from-pink-500 via-purple-500 to-blue-500 rounded-lg flex items-center justify-center text-white font-bold text-sm">
+                SnapLegal
+              </div> */}
+              <span className="text-xl font-bold text-gray-900">SnapLegal</span>
             </Link>
             
             <button className="flex items-center gap-1 text-gray-700 hover:text-pink-600 transition-colors">
@@ -48,12 +48,12 @@ export default function Navbar() {
 
           {/* Right Section - Actions */}
           <div className="flex items-center gap-3">
-            <Button 
+            {/* <Button 
               variant="outline" 
               className="border-pink-600 text-pink-600 hover:bg-pink-50 font-medium"
             >
-              Sheba Pay
-            </Button>
+              Snap Pay
+            </Button> */}
             
             <button 
               className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center hover:bg-gray-300 transition-colors"

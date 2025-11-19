@@ -87,10 +87,10 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-black/20" />
         <div className="relative container mx-auto px-4 h-full flex flex-col justify-center items-center text-center">
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">
-            Your Personal Assistant
+            Your Personal Consultant - in a Snap.
           </h1>
           <p className="text-lg md:text-xl text-white mb-8">
-            One-stop solution for your services. Order any service, anytime.
+            One-stop solution for your Legal services. Order any service, anytime.
           </p>
 
           {/* Search Bar */}
