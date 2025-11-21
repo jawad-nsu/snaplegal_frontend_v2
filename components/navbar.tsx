@@ -26,6 +26,14 @@ export default function Navbar() {
               <MapPin className="w-4 h-4 text-pink-600" />
               <span className="text-sm font-medium">Gulshan</span>
             </button>
+
+            <Button 
+              variant="outline" 
+              className="border-pink-600 text-pink-600 hover:bg-pink-50 font-medium"
+              onClick={() => router.push('/all-services')}
+            >
+              All Services
+            </Button>
           </div>
 
           {/* Center Section - Search Bar */}
