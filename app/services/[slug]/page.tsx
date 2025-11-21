@@ -534,7 +534,7 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
               <h3 className="font-bold text-lg mb-4">CONTACT</h3>
               <div className="space-y-2 text-sm text-gray-300">
                 <p>16516 / 8809678001651</p>
-                <p>info@sheba.xyz</p>
+                <p>hello@snaplegal.com.bd</p>
                 <p className="mt-4 font-semibold text-white">Corporate Address</p>
                 <p>M&S Tower, Plot: 2, Road: 11,</p>
                 <p>Block: H, Banani, Dhaka</p>
