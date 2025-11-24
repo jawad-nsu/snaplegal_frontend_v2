@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { MapPin, ShoppingCart, User, Search, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react'
+import Navbar from '@/components/navbar'
 
 export default function ServiceOrdersPage() {
   const [filter, setFilter] = useState('All')
@@ -22,37 +23,7 @@ export default function ServiceOrdersPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2">
-              <span className="text-2xl font-bold">
-                <span className="text-gray-900">sheba</span>
-                <span className="text-pink-600 text-lg">.xyz</span>
-              </span>
-            </Link>
-            
-            <div className="flex items-center gap-4">
-              <button className="flex items-center gap-1 text-gray-700 hover:text-pink-600">
-                <MapPin className="w-4 h-4 text-red-600" />
-                <span className="text-sm">Gulshan</span>
-              </button>
-              <button className="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 font-medium">
-                Sheba Pay
-              </button>
-              <Link href="/account" className="relative">
-                <User className="w-6 h-6 text-gray-700" />
-              </Link>
-              <Link href="/cart" className="relative">
-                <ShoppingCart className="w-6 h-6 text-gray-900" />
-                <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                  2
-                </span>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8 max-w-7xl">

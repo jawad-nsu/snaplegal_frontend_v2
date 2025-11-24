@@ -4,10 +4,11 @@ import { useState, use } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { MapPin, ShoppingCart, User, Home, MessageCircle, Phone, Download, ChevronRight } from 'lucide-react'
+import Navbar from '@/components/navbar'
 
 export default function OrderDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
-  const [activeTab, setActiveTab] = useState('details')
+  const [activeTab, setActiveTab] = useState('overview')
 
   const order = {
     id: 'D-1108041',
@@ -45,37 +46,7 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2">
-              <span className="text-2xl font-bold">
-                <span className="text-gray-900">sheba</span>
-                <span className="text-pink-600 text-lg">.xyz</span>
-              </span>
-            </Link>
-            
-            <div className="flex items-center gap-4">
-              <button className="flex items-center gap-1 text-gray-700 hover:text-pink-600">
-                <MapPin className="w-4 h-4 text-red-600" />
-                <span className="text-sm">Gulshan</span>
-              </button>
-              <button className="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 font-medium">
-                Sheba Pay
-              </button>
-              <Link href="/account" className="relative">
-                <User className="w-6 h-6 text-gray-700" />
-              </Link>
-              <Link href="/cart" className="relative">
-                <ShoppingCart className="w-6 h-6 text-gray-900" />
-                <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                  2
-                </span>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8 max-w-7xl">
@@ -97,19 +68,22 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
         {/* Tabs */}
         <div className="mb-6">
           <div className="flex gap-6 border-b">
-            {['Details', 'FAQ', 'Support'].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab.toLowerCase())}
-                className={`pb-3 px-1 font-medium transition-colors ${
-                  activeTab === tab.toLowerCase()
-                    ? 'text-blue-600 border-b-2 border-blue-600'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
+            {['Overview', 'Details', 'FAQ', 'How to Order', 'Review'].map((tab) => {
+              const tabKey = tab.toLowerCase().replace(/\s+/g, '-')
+              return (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tabKey)}
+                  className={`pb-3 px-1 font-medium transition-colors ${
+                    activeTab === tabKey
+                      ? 'text-blue-600 border-b-2 border-blue-600'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  {tab}
+                </button>
+              )
+            })}
           </div>
         </div>
 
