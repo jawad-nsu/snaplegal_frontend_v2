@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { Star, ChevronDown, ChevronUp, CheckCircle, Info } from 'lucide-react'
 import Navbar from '@/components/navbar'
+import Footer from '@/components/footer'
 
 const serviceData: Record<string, {
   name: string
@@ -527,49 +528,7 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
       </div>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white mt-16">
-        <div className="container mx-auto px-4 py-12">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div>
-              <h3 className="font-bold text-lg mb-4">CONTACT</h3>
-              <div className="space-y-2 text-sm text-gray-300">
-                <p>16516 / 8809678001651</p>
-                <p>hello@snaplegal.com.bd</p>
-                <p className="mt-4 font-semibold text-white">Corporate Address</p>
-                <p>M&S Tower, Plot: 2, Road: 11,</p>
-                <p>Block: H, Banani, Dhaka</p>
-              </div>
-            </div>
-            <div>
-              <h3 className="font-bold text-lg mb-4">OTHER PAGES</h3>
-              <div className="space-y-2 text-sm text-gray-300">
-                <Link href="#" className="block hover:text-white">Blog</Link>
-                <Link href="#" className="block hover:text-white">Help</Link>
-                <Link href="#" className="block hover:text-white">Terms of use</Link>
-                <Link href="#" className="block hover:text-white">Privacy Policy</Link>
-              </div>
-            </div>
-            <div>
-              <h3 className="font-bold text-lg mb-4">COMPANY</h3>
-              <div className="space-y-2 text-sm text-gray-300">
-                <Link href="#" className="block hover:text-white">sManager</Link>
-                <Link href="#" className="block hover:text-white">sBusiness</Link>
-                <Link href="#" className="block hover:text-white">sDelivery</Link>
-                <Link href="#" className="block hover:text-white">sBondhu</Link>
-              </div>
-            </div>
-            <div>
-              <h3 className="font-bold text-lg mb-4">DOWNLOAD OUR APP</h3>
-              <p className="text-sm text-gray-300 mb-4">
-                Tackle your to-do list wherever you are with our mobile app & make your life easy.
-              </p>
-            </div>
-          </div>
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
-            <p>Copyright © 2025 Sheba Platform Limited | All Rights Reserved</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }
