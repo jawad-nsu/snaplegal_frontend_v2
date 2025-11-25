@@ -24,7 +24,7 @@ export default function AccountPage() {
     { id: 'my-offers', label: 'My Offers' },
     { id: 'my-promotions', label: 'My Promotions' },
     { id: 'free-services', label: 'Free Services' },
-    { id: 'sheba-credit', label: 'Sheba Credit' },
+    { id: 'sheba-credit', label: 'SnapLegal Credit' },
   ]
 
   const userInfo = {

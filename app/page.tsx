@@ -181,7 +181,7 @@ export default function HomePage() {
                 </button>
               ))}
               <button className="flex items-center justify-center min-w-[50px]">
-                <ChevronRight className="text-pink-600" size={32} />
+                <ChevronRight className="text-[var(--color-primary)]" size={32} />
               </button>
             </div>
           </div>
@@ -240,7 +240,7 @@ export default function HomePage() {
                   </span>
                   <span className="text-sm font-semibold text-gray-900">Starting at {service.startingPrice}</span>
                 </div>
-                <button className="w-full bg-gray-900 hover:bg-gray-800 text-white font-semibold py-3 rounded-xl transition-colors">
+                <button className="w-full mt-6 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer">
                   Book Now
                 </button>
               </div>
@@ -253,7 +253,7 @@ export default function HomePage() {
       <section className="container mx-auto px-4 py-12">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold">Recommended</h2>
-          <button className="flex items-center gap-1 text-pink-600 hover:underline font-medium">
+          <button className="flex items-center gap-1 text-[var(--color-primary)] hover:underline font-medium">
             View All <ChevronRight size={20} />
           </button>
         </div>
@@ -290,7 +290,7 @@ export default function HomePage() {
                   </span>
                   <span className="text-sm font-semibold text-gray-900">Starting at {service.startingPrice}</span>
                 </div>
-                <button className="w-full bg-gray-900 hover:bg-gray-800 text-white font-semibold py-3 rounded-xl transition-colors">
+                <button className="w-full mt-6 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer">
                   Book Now
                 </button>
               </div>
@@ -303,7 +303,7 @@ export default function HomePage() {
       <section className="container mx-auto px-4 py-12">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold">Trending</h2>
-          <button className="flex items-center gap-1 text-pink-600 hover:underline font-medium">
+          <button className="flex items-center gap-1 text-[var(--color-primary)] hover:underline font-medium">
             View All <ChevronRight size={20} />
           </button>
         </div>
@@ -340,7 +340,7 @@ export default function HomePage() {
                   </span>
                   <span className="text-sm font-semibold text-gray-900">Starting at {service.startingPrice}</span>
                 </div>
-                <button className="w-full bg-gray-900 hover:bg-gray-800 text-white font-semibold py-3 rounded-xl transition-colors">
+                <button className="w-full mt-6 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer">
                   Book Now
                 </button>
               </div>
@@ -367,7 +367,7 @@ export default function HomePage() {
             <div className="flex items-start gap-4">
               <div className="flex-shrink-0">
                 <svg
-                  className="w-12 h-12 text-pink-600"
+                  className="w-12 h-12 text-[var(--color-primary)]"
                   viewBox="0 0 24 24"
                   fill="currentColor"
                 >
@@ -383,7 +383,7 @@ export default function HomePage() {
             <div className="flex items-start gap-4">
               <div className="flex-shrink-0">
                 <svg
-                  className="w-12 h-12 text-pink-600"
+                  className="w-12 h-12 text-[var(--color-primary)]"
                   viewBox="0 0 24 24"
                   fill="currentColor"
                 >
@@ -399,7 +399,7 @@ export default function HomePage() {
             <div className="flex items-start gap-4">
               <div className="flex-shrink-0">
                 <svg
-                  className="w-12 h-12 text-pink-600"
+                  className="w-12 h-12 text-[var(--color-primary)]"
                   viewBox="0 0 24 24"
                   fill="currentColor"
                 >
@@ -415,7 +415,7 @@ export default function HomePage() {
             <div className="flex items-start gap-4">
               <div className="flex-shrink-0">
                 <svg
-                  className="w-12 h-12 text-pink-600"
+                  className="w-12 h-12 text-[var(--color-primary)]"
                   viewBox="0 0 24 24"
                   fill="currentColor"
                 >
@@ -444,7 +444,7 @@ export default function HomePage() {
         </div>
 
         {/* Statistics */}
-        <div className="grid md:grid-cols-3 gap-8 mt-16">
+        {/* <div className="grid md:grid-cols-3 gap-8 mt-16">
           <div className="bg-gray-50 rounded-lg p-8 text-center">
             <h3 className="text-4xl md:text-5xl font-bold text-gray-900 mb-2">
               15,000 +
@@ -465,7 +465,7 @@ export default function HomePage() {
             </h3>
             <p className="text-gray-600 text-lg">5 Star Received</p>
           </div>
-        </div>
+        </div> */}
       </section>
 
        {/* CTA Section for Requesting Services */}
@@ -475,12 +475,12 @@ export default function HomePage() {
             Can&apos;t find your desired service? Let us know 24/7 in 16516.
           </h2>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Button className="bg-pink-600 hover:bg-pink-700 text-white px-8 py-6 text-lg font-semibold">
+            <Button className="bg-[var(--color-primary)] hover:opacity-90 text-white px-8 py-6 text-lg font-semibold">
               Book an Appointment
             </Button>
             <Button 
               variant="outline" 
-              className="border-2 border-pink-600 text-pink-600 hover:bg-pink-50 px-8 py-6 text-lg font-semibold"
+              className="border-2 border-[var(--color-primary)] text-[var(--color-primary)] hover:bg-[var(--color-neutral)] px-8 py-6 text-lg font-semibold"
             >
               <svg 
                 className="w-5 h-5 mr-2" 

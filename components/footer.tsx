@@ -78,7 +78,7 @@ export default function Footer() {
             <ul className="space-y-2">
               <li>
                 <Link href="/how-it-works" className="text-gray-600 hover:text-pink-600 text-sm">
-                  How Sheba Works
+                  How SnapLegal Works
                 </Link>
               </li>
               <li>
@@ -93,12 +93,12 @@ export default function Footer() {
               </li>
               <li>
                 <Link href="/guides" className="text-gray-600 hover:text-pink-600 text-sm">
-                  Sheba Guides
+                  SnapLegal Guides
                 </Link>
               </li>
               <li>
                 <Link href="/faq" className="text-gray-600 hover:text-pink-600 text-sm">
-                  Sheba Answers
+                  SnapLegal Answers
                 </Link>
               </li>
               <li>
@@ -151,8 +151,8 @@ export default function Footer() {
             <h3 className="font-bold text-gray-900 mb-4">Business Solutions</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/sheba-pro" className="text-gray-600 hover:text-pink-600 text-sm">
-                  Sheba Pro
+                <Link href="/SnapLegal-pro" className="text-gray-600 hover:text-pink-600 text-sm">
+                  SnapLegal Pro
                 </Link>
               </li>
               <li>
@@ -176,8 +176,8 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/sheba-pay" className="text-gray-600 hover:text-pink-600 text-sm">
-                  Sheba Pay
+                <Link href="/SnapLegal-pay" className="text-gray-600 hover:text-pink-600 text-sm">
+                  SnapLegal Pay
                 </Link>
               </li>
               <li>
@@ -194,7 +194,7 @@ export default function Footer() {
             <ul className="space-y-2">
               <li>
                 <Link href="/about" className="text-gray-600 hover:text-pink-600 text-sm">
-                  About Sheba
+                  About SnapLegal
                 </Link>
               </li>
               <li>
@@ -259,9 +259,9 @@ export default function Footer() {
             {/* Logo and Copyright */}
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
-                <div className="bg-pink-600 text-white font-bold text-xl px-3 py-1 rounded">sheba</div>
+                <div className="bg-[var(--color-primary)] text-white font-bold text-xl px-3 py-1 rounded">SnapLegal</div>
               </div>
-              <span className="text-gray-600 text-sm">© Sheba Platform Limited. 2025</span>
+              <span className="text-gray-600 text-sm">© SnapLegal Platform Limited. 2025</span>
             </div>
 
             {/* Social Media Icons */}

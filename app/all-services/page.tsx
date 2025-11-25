@@ -364,10 +364,10 @@ export default function AllServicesPage() {
                       onClick={(e) => handleSidebarClick(e, category.id)}
                       className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${
                         activeSection === category.id && (!category.subCategories || !category.subCategories.some(sub => activeSection === sub.id))
-                          ? 'bg-pink-100 text-pink-600 font-semibold'
+                          ? 'bg-[var(--color-neutral)] text-[var(--color-primary)] font-semibold'
                           : category.subCategories && category.subCategories.some(sub => activeSection === sub.id)
-                          ? 'bg-pink-50 text-pink-600 font-medium'
-                          : 'text-gray-700 hover:bg-pink-50 hover:text-pink-600'
+                          ? 'bg-[var(--color-neutral)] text-[var(--color-primary)] font-medium'
+                          : 'text-gray-700 hover:bg-[var(--color-neutral)] hover:text-[var(--color-primary)]'
                       }`}
                     >
                       <span className="text-xl">{category.icon}</span>
@@ -375,21 +375,28 @@ export default function AllServicesPage() {
                     </a>
                     {category.subCategories && (
                       <div className="ml-8 mt-1 space-y-1">
-                        {category.subCategories.map((subCategory) => (
-                          <a
-                            key={subCategory.id}
-                            href={`#${subCategory.id}`}
-                            onClick={(e) => handleSidebarClick(e, subCategory.id)}
-                            className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${
-                              activeSection === subCategory.id
-                                ? 'bg-blue-100 text-blue-600 font-semibold'
-                                : 'text-gray-600 hover:bg-blue-50 hover:text-blue-600'
-                            }`}
-                          >
-                            {subCategory.icon && <span className="text-lg">{subCategory.icon}</span>}
-                            <span>{subCategory.title}</span>
-                          </a>
-                        ))}
+                        {category.subCategories.map((subCategory) => {
+                          const isPrimary = subCategory.id === 'fridge-repair' || subCategory.id === 'microwave-repair'
+                          return (
+                            <a
+                              key={subCategory.id}
+                              href={`#${subCategory.id}`}
+                              onClick={(e) => handleSidebarClick(e, subCategory.id)}
+                              className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${
+                                activeSection === subCategory.id
+                                  ? isPrimary
+                                    ? 'bg-[var(--color-neutral)] text-[var(--color-primary)] font-semibold'
+                                    : 'bg-blue-100 text-blue-600 font-semibold'
+                                  : isPrimary
+                                  ? 'text-gray-600 hover:bg-[var(--color-neutral)] hover:text-[var(--color-primary)]'
+                                  : 'text-gray-600 hover:bg-blue-50 hover:text-blue-600'
+                              }`}
+                            >
+                              {subCategory.icon && <span className="text-lg">{subCategory.icon}</span>}
+                              <span>{subCategory.title}</span>
+                            </a>
+                          )
+                        })}
                       </div>
                     )}
                   </div>
@@ -443,9 +450,9 @@ export default function AllServicesPage() {
                         <Link
                           key={index}
                           href={`/services/${service.slug}`}
-                          className="flex items-center gap-2 text-left text-gray-700 hover:text-pink-600 transition-colors"
+                          className="flex items-center gap-2 text-left text-gray-700 hover:text-[var(--color-primary)] transition-colors"
                         >
-                          <span className="w-2 h-2 rounded-full bg-pink-600" />
+                          <span className="w-2 h-2 rounded-full bg-[var(--color-primary)]" />
                           <span>{service.title}</span>
                         </Link>
                       ))}
@@ -495,16 +502,27 @@ export default function AllServicesPage() {
                           All {subCategory.title.toLowerCase()} services
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          {subCategory.services.map((service, index) => (
-                            <Link
-                              key={index}
-                              href={`/services/${service.slug}`}
-                              className="flex items-center gap-2 text-left text-gray-700 hover:text-blue-600 transition-colors"
-                            >
-                              <span className="w-2 h-2 rounded-full bg-blue-600" />
-                              <span>{service.title}</span>
-                            </Link>
-                          ))}
+                          {subCategory.services.map((service, index) => {
+                            const isPrimary = subCategory.id === 'fridge-repair' || subCategory.id === 'microwave-repair'
+                            return (
+                              <Link
+                                key={index}
+                                href={`/services/${service.slug}`}
+                                className={`flex items-center gap-2 text-left text-gray-700 transition-colors ${
+                                  isPrimary
+                                    ? 'hover:text-[var(--color-primary)]'
+                                    : 'hover:text-blue-600'
+                                }`}
+                              >
+                                <span className={`w-2 h-2 rounded-full ${
+                                  isPrimary
+                                    ? 'bg-[var(--color-primary)]'
+                                    : 'bg-blue-600'
+                                }`} />
+                                <span>{service.title}</span>
+                              </Link>
+                            )
+                          })}
                         </div>
                       </div>
                     )}

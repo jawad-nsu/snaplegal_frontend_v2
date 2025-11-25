@@ -4,7 +4,7 @@ import { useState, use } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { Star, ChevronDown, ChevronUp, CheckCircle, Info } from 'lucide-react'
+import { Star, ChevronDown, ChevronUp, CheckCircle, Info, MessageCircle, BookOpen, Reply } from 'lucide-react'
 import Navbar from '@/components/navbar'
 import Footer from '@/components/footer'
 
@@ -180,6 +180,8 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null)
   const [selectedPackage, setSelectedPackage] = useState(1)
   const [activeTab, setActiveTab] = useState('overview')
+  const [selectedTopic, setSelectedTopic] = useState<string>('all')
+  const [expandedThread, setExpandedThread] = useState<number | null>(null)
   const router = useRouter()
   
   const { slug } = use(params)
@@ -192,7 +194,7 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Service Not Found</h1>
-          <Link href="/all-services" className="text-pink-600 hover:underline">
+          <Link href="/all-services" className="text-[var(--color-primary)] hover:underline">
             Browse All Services
           </Link>
         </div>
@@ -209,11 +211,11 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
       <div className="bg-white border-b">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center gap-2 text-sm text-gray-600">
-            <Link href="/" className="hover:text-pink-600">Home</Link>
+            <Link href="/" className="hover:text-[var(--color-primary)]">Home</Link>
             <span>/</span>
-            <Link href="/all-services" className="hover:text-pink-600">All Services</Link>
+            <Link href="/all-services" className="hover:text-[var(--color-primary)]">All Services</Link>
             <span>/</span>
-            <Link href="/all-services" className="hover:text-pink-600">{service.category}</Link>
+            <Link href="/all-services" className="hover:text-[var(--color-primary)]">{service.category}</Link>
             <span>/</span>
             <span className="text-gray-900">{service.name}</span>
           </div>
@@ -255,13 +257,13 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
             <div className="bg-white rounded-lg shadow-sm">
               <div className="border-b">
                 <div className="flex gap-6 px-6">
-                  {['Overview', 'FAQ', 'How to Order', 'Review', 'Details'].map((tab) => (
+                  {['Overview', 'Details', 'Learning and Discussion', 'FAQ', 'How to Order', 'Review'].map((tab) => (
                     <button
                       key={tab}
                       onClick={() => setActiveTab(tab.toLowerCase().replace(/\s+/g, '-'))}
                       className={`py-4 px-1 font-medium transition-colors border-b-2 ${
                         activeTab === tab.toLowerCase().replace(/\s+/g, '-')
-                          ? 'text-pink-600 border-pink-600'
+                          ? 'text-[var(--color-primary)] border-[var(--color-primary)]'
                           : 'text-gray-600 border-transparent hover:text-gray-900'
                       }`}
                     >
@@ -325,8 +327,8 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                   <div className="space-y-4">
                     <div className="space-y-3">
                       <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-pink-600 font-bold">1</span>
+                        <div className="w-8 h-8 bg-[var(--color-neutral)] rounded-full flex items-center justify-center flex-shrink-0">
+                          <span className="text-[var(--color-primary)] font-bold">1</span>
                         </div>
                         <div>
                           <h4 className="font-semibold text-gray-900 mb-1">Select Your Package</h4>
@@ -334,8 +336,8 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-pink-600 font-bold">2</span>
+                        <div className="w-8 h-8 bg-[var(--color-neutral)] rounded-full flex items-center justify-center flex-shrink-0">
+                          <span className="text-[var(--color-primary)] font-bold">2</span>
                         </div>
                         <div>
                           <h4 className="font-semibold text-gray-900 mb-1">Book Your Service</h4>
@@ -343,8 +345,8 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-pink-600 font-bold">3</span>
+                        <div className="w-8 h-8 bg-[var(--color-neutral)] rounded-full flex items-center justify-center flex-shrink-0">
+                          <span className="text-[var(--color-primary)] font-bold">3</span>
                         </div>
                         <div>
                           <h4 className="font-semibold text-gray-900 mb-1">Confirm Your Details</h4>
@@ -352,8 +354,8 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-pink-600 font-bold">4</span>
+                        <div className="w-8 h-8 bg-[var(--color-neutral)] rounded-full flex items-center justify-center flex-shrink-0">
+                          <span className="text-[var(--color-primary)] font-bold">4</span>
                         </div>
                         <div>
                           <h4 className="font-semibold text-gray-900 mb-1">Service Delivery</h4>
@@ -452,6 +454,256 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                     </div>
                   </div>
                 )}
+
+                {/* Learning and Discussion Tab */}
+                {activeTab === 'learning-and-discussion' && (
+                  <div className="space-y-8">
+                    {/* Step-by-Step Tutorial Section */}
+                    <div>
+                      <div className="flex items-center gap-2 mb-4">
+                        <BookOpen className="w-6 h-6 text-[var(--color-primary)]" />
+                        <h3 className="text-xl font-bold text-gray-900">How {service.name} Works</h3>
+                      </div>
+                      <div className="bg-gradient-to-br from-[var(--color-neutral)] to-white rounded-lg p-6 border border-gray-200">
+                        <div className="space-y-6">
+                          <div className="flex items-start gap-4">
+                            <div className="flex-shrink-0 w-10 h-10 bg-[var(--color-primary)] text-white rounded-full flex items-center justify-center font-bold text-lg">
+                              1
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-gray-900 mb-2">Initial Assessment</h4>
+                              <p className="text-gray-700 leading-relaxed">
+                                Our professional technician arrives at your location and conducts a thorough assessment of your {service.name.toLowerCase()} needs. They will inspect the current condition, identify any issues, and discuss your requirements.
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-4">
+                            <div className="flex-shrink-0 w-10 h-10 bg-[var(--color-primary)] text-white rounded-full flex items-center justify-center font-bold text-lg">
+                              2
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-gray-900 mb-2">Service Execution</h4>
+                              <p className="text-gray-700 leading-relaxed">
+                                Using professional-grade tools and equipment, our expert performs the service with attention to detail. They follow industry best practices and safety protocols to ensure quality results.
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-4">
+                            <div className="flex-shrink-0 w-10 h-10 bg-[var(--color-primary)] text-white rounded-full flex items-center justify-center font-bold text-lg">
+                              3
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-gray-900 mb-2">Quality Check</h4>
+                              <p className="text-gray-700 leading-relaxed">
+                                After completing the service, the technician performs a final quality check to ensure everything meets our high standards. They test all components and verify that the work is completed satisfactorily.
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-4">
+                            <div className="flex-shrink-0 w-10 h-10 bg-[var(--color-primary)] text-white rounded-full flex items-center justify-center font-bold text-lg">
+                              4
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-gray-900 mb-2">Final Handover</h4>
+                              <p className="text-gray-700 leading-relaxed">
+                                The technician provides you with a detailed summary of the work completed, offers maintenance tips, and addresses any questions you may have. Payment is processed after you confirm satisfaction with the service.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Community Discussion Section */}
+                    <div className="border-t pt-8">
+                      <div className="flex items-center gap-2 mb-6">
+                        <MessageCircle className="w-6 h-6 text-[var(--color-primary)]" />
+                        <h3 className="text-xl font-bold text-gray-900">Community Discussion</h3>
+                      </div>
+
+                      {/* Topic Pills */}
+                      <div className="flex flex-wrap gap-2 mb-6">
+                        <button
+                          onClick={() => setSelectedTopic('all')}
+                          className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                            selectedTopic === 'all'
+                              ? 'bg-[var(--color-primary)] text-white shadow-md'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          All Topics
+                        </button>
+                        <button
+                          onClick={() => setSelectedTopic('tips')}
+                          className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                            selectedTopic === 'tips'
+                              ? 'bg-[var(--color-primary)] text-white shadow-md'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          Tips & Tricks
+                        </button>
+                        <button
+                          onClick={() => setSelectedTopic('troubleshooting')}
+                          className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                            selectedTopic === 'troubleshooting'
+                              ? 'bg-[var(--color-primary)] text-white shadow-md'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          Troubleshooting
+                        </button>
+                        <button
+                          onClick={() => setSelectedTopic('maintenance')}
+                          className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                            selectedTopic === 'maintenance'
+                              ? 'bg-[var(--color-primary)] text-white shadow-md'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          Maintenance
+                        </button>
+                        <button
+                          onClick={() => setSelectedTopic('cost')}
+                          className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                            selectedTopic === 'cost'
+                              ? 'bg-[var(--color-primary)] text-white shadow-md'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          Cost & Pricing
+                        </button>
+                      </div>
+
+                      {/* Discussion Threads */}
+                      <div className="space-y-4">
+                        {/* Sample Discussion Threads */}
+                        {[
+                          {
+                            id: 1,
+                            topic: 'tips',
+                            author: 'Rashid Ahmed',
+                            avatar: 'R',
+                            question: 'What are the best practices for maintaining my AC after servicing?',
+                            replies: [
+                              { author: 'Fatima Khan', avatar: 'F', reply: 'I recommend cleaning the filters monthly and scheduling regular check-ups every 3-4 months. Also, keep the outdoor unit clear of debris.', time: '2 hours ago' },
+                              { author: 'Hasan Ali', avatar: 'H', reply: 'Make sure to change the air filter regularly and keep the area around the AC unit clean. This helps maintain efficiency.', time: '5 hours ago' }
+                            ],
+                            time: '1 day ago',
+                            replyCount: 2
+                          },
+                          {
+                            id: 2,
+                            topic: 'troubleshooting',
+                            author: 'Sadia Rahman',
+                            avatar: 'S',
+                            question: 'My AC is not cooling properly even after servicing. What could be the issue?',
+                            replies: [
+                              { author: 'Tech Expert', avatar: 'T', reply: 'This could be due to low refrigerant levels, dirty coils, or a faulty compressor. I recommend calling a professional for diagnosis.', time: '3 hours ago' }
+                            ],
+                            time: '2 days ago',
+                            replyCount: 1
+                          },
+                          {
+                            id: 3,
+                            topic: 'maintenance',
+                            author: 'Karim Uddin',
+                            avatar: 'K',
+                            question: 'How often should I get professional AC servicing?',
+                            replies: [
+                              { author: 'Service Pro', avatar: 'P', reply: 'For optimal performance, professional servicing every 3-4 months is recommended, especially before and after peak seasons.', time: '1 day ago' },
+                              { author: 'Ahmed Hassan', avatar: 'A', reply: 'I do it quarterly and it keeps my AC running smoothly year-round.', time: '6 hours ago' }
+                            ],
+                            time: '3 days ago',
+                            replyCount: 2
+                          },
+                          {
+                            id: 4,
+                            topic: 'cost',
+                            author: 'Nadia Islam',
+                            avatar: 'N',
+                            question: 'What factors affect the cost of AC servicing?',
+                            replies: [
+                              { author: 'Cost Advisor', avatar: 'C', reply: 'Factors include AC unit size, condition, required repairs, location, and service package chosen. Premium packages offer more comprehensive service.', time: '4 hours ago' }
+                            ],
+                            time: '4 days ago',
+                            replyCount: 1
+                          }
+                        ]
+                          .filter(thread => selectedTopic === 'all' || thread.topic === selectedTopic)
+                          .map((thread) => (
+                            <div key={thread.id} className="bg-white border border-gray-200 rounded-lg p-5 hover:shadow-md transition-shadow">
+                              <div className="flex items-start gap-4">
+                                <div className="w-10 h-10 bg-[var(--color-primary)]/10 text-[var(--color-primary)] rounded-full flex items-center justify-center font-semibold flex-shrink-0">
+                                  {thread.avatar}
+                                </div>
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <span className="font-semibold text-gray-900">{thread.author}</span>
+                                    <span className="text-sm text-gray-500">•</span>
+                                    <span className="text-sm text-gray-500">{thread.time}</span>
+                                  </div>
+                                  <p className="text-gray-900 font-medium mb-3">{thread.question}</p>
+                                  
+                                  {/* Replies */}
+                                  {thread.replies.length > 0 && (
+                                    <div className="ml-4 border-l-2 border-gray-200 pl-4 space-y-3">
+                                      {expandedThread === thread.id ? (
+                                        <>
+                                          {thread.replies.map((reply, replyIndex) => (
+                                            <div key={replyIndex} className="flex items-start gap-3">
+                                              <div className="w-8 h-8 bg-gray-100 text-gray-600 rounded-full flex items-center justify-center text-sm font-semibold flex-shrink-0">
+                                                {reply.avatar}
+                                              </div>
+                                              <div className="flex-1">
+                                                <div className="flex items-center gap-2 mb-1">
+                                                  <span className="font-medium text-gray-900 text-sm">{reply.author}</span>
+                                                  <span className="text-xs text-gray-500">{reply.time}</span>
+                                                </div>
+                                                <p className="text-gray-700 text-sm">{reply.reply}</p>
+                                              </div>
+                                            </div>
+                                          ))}
+                                          <button
+                                            onClick={() => setExpandedThread(null)}
+                                            className="text-sm text-[var(--color-primary)] hover:underline font-medium"
+                                          >
+                                            Show less
+                                          </button>
+                                        </>
+                                      ) : (
+                                        <button
+                                          onClick={() => setExpandedThread(thread.id)}
+                                          className="text-sm text-[var(--color-primary)] hover:underline font-medium"
+                                        >
+                                          View {thread.replyCount} {thread.replyCount === 1 ? 'reply' : 'replies'}
+                                        </button>
+                                      )}
+                                    </div>
+                                  )}
+
+                                  {/* Reply Button */}
+                                  <button className="mt-3 flex items-center gap-2 text-sm text-[var(--color-primary)] hover:text-[var(--color-primary)]/80 font-medium">
+                                    <Reply className="w-4 h-4" />
+                                    Reply
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+
+                      {/* Ask Question Section */}
+                      <div className="mt-8 bg-[var(--color-neutral)] rounded-lg p-6 border border-gray-200">
+                        <h4 className="font-semibold text-gray-900 mb-3">Have a Question?</h4>
+                        <p className="text-sm text-gray-600 mb-4">Join the discussion and get help from our community</p>
+                        <button className="bg-[var(--color-primary)] text-white px-6 py-2.5 rounded-lg font-medium hover:opacity-90 transition-all shadow-sm">
+                          Ask a Question
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -468,12 +720,12 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                     onClick={() => setSelectedPackage(index)}
                     className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
                       selectedPackage === index
-                        ? 'border-pink-600 bg-pink-50'
-                        : 'border-gray-200 hover:border-pink-300'
+                        ? 'border-[var(--color-primary)] bg-[var(--color-neutral)]'
+                        : 'border-gray-200 hover:border-[var(--color-primary)]/50'
                     } ${pkg.popular ? 'relative' : ''}`}
                   >
                     {pkg.popular && (
-                      <div className="absolute -top-3 left-4 bg-pink-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+                      <div className="absolute -top-3 left-4 bg-[var(--color-primary)] text-white text-xs font-bold px-3 py-1 rounded-full">
                         MOST POPULAR
                       </div>
                     )}
@@ -481,7 +733,7 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                       <div>
                         <div className="font-bold text-lg">{pkg.name}</div>
                         <div className="flex items-center gap-2">
-                          <span className="text-2xl font-bold text-pink-600">৳{pkg.price}</span>
+                          <span className="text-2xl font-bold text-[var(--color-primary)]">৳{pkg.price}</span>
                           {pkg.originalPrice && (
                             <span className="text-sm text-gray-400 line-through">৳{pkg.originalPrice}</span>
                           )}
@@ -490,7 +742,7 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                       <div
                         className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
                           selectedPackage === index
-                            ? 'border-pink-600 bg-pink-600'
+                            ? 'border-[var(--color-primary)] bg-[var(--color-primary)]'
                             : 'border-gray-300'
                         }`}
                       >
@@ -513,7 +765,7 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
 
               <button 
                 onClick={() => router.push('/cart')}
-                className="w-full bg-pink-600 text-white py-3 rounded-lg font-bold hover:bg-pink-700 transition-colors mb-3"
+                className="w-full bg-[var(--color-primary)] text-white py-3 rounded-lg font-bold hover:opacity-90 transition-colors mb-3"
               >
                 Book Now - ৳{service.packages[selectedPackage].price}
               </button>

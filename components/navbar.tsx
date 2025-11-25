@@ -22,14 +22,14 @@ export default function Navbar() {
               <span className="text-xl font-bold text-gray-900">SnapLegal</span>
             </Link>
             
-            <button className="flex items-center gap-1 text-gray-700 hover:text-pink-600 transition-colors">
-              <MapPin className="w-4 h-4 text-pink-600" />
+            <button className="flex items-center gap-1 text-gray-700 hover:text-[var(--color-primary)] transition-colors">
+              <MapPin className="w-4 h-4 text-[var(--color-primary)]" />
               <span className="text-sm font-medium">Gulshan</span>
             </button>
 
             <Button 
               variant="outline" 
-              className="border-pink-600 text-pink-600 hover:bg-pink-50 font-medium"
+              className="border-[var(--color-primary)] text-[var(--color-primary)] hover:bg-[var(--color-neutral)] font-medium"
               onClick={() => router.push('/all-services')}
             >
               All Services
@@ -38,13 +38,13 @@ export default function Navbar() {
 
           {/* Center Section - Search Bar */}
           <div className="flex-1 max-w-2xl mx-4">
-            <div className="flex items-center gap-2 bg-white border border-gray-300 rounded-lg overflow-hidden focus-within:border-pink-600 focus-within:ring-2 focus-within:ring-pink-100">
+            <div className="flex items-center gap-2 bg-white border border-gray-300 rounded-lg overflow-hidden focus-within:border-[var(--color-primary)] focus-within:ring-2 focus-within:ring-[var(--color-neutral)]">
               <Input
                 placeholder="Find your service here e.g. AC, Car, Facial ..."
                 className="flex-1 border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
               />
               <Button 
-                className="bg-pink-600 hover:bg-pink-700 text-white rounded-none border-0 px-4"
+                className="bg-[var(--color-primary)] hover:opacity-90 text-white rounded-none border-0 px-4"
                 onClick={() => {
                   // Add search functionality here if needed
                 }}
@@ -75,7 +75,7 @@ export default function Navbar() {
               onClick={() => router.push('/cart')}
             >
               <ShoppingCart className="w-6 h-6 text-gray-700" />
-              <span className="absolute -top-2 -right-2 bg-pink-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+              <span className="absolute -top-2 -right-2 bg-[var(--color-primary)] text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                 2
               </span>
             </button>

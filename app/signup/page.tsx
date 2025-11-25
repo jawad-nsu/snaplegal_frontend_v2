@@ -94,7 +94,7 @@ export default function SignUpPage() {
                 <span className="text-sm">Gulshan</span>
               </button>
               <button className="px-4 py-2 border-2 border-pink-600 text-pink-600 rounded-lg hover:bg-pink-50 font-medium">
-                Sheba Pay
+                SnapLegal Pay
               </button>
               <Link href="/account" className="relative">
                 <User className="w-6 h-6 text-gray-700" />
