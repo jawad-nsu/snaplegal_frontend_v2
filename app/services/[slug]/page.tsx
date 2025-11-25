@@ -4,7 +4,7 @@ import { useState, use } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { Star, ChevronDown, ChevronUp, CheckCircle, Info, MessageCircle, BookOpen, Reply } from 'lucide-react'
+import { Star, ChevronDown, ChevronUp, CheckCircle, Info, MessageCircle, BookOpen, Reply, PlayCircle } from 'lucide-react'
 import Navbar from '@/components/navbar'
 import Footer from '@/components/footer'
 
@@ -180,8 +180,8 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null)
   const [selectedPackage, setSelectedPackage] = useState(1)
   const [activeTab, setActiveTab] = useState('overview')
-  const [selectedTopic, setSelectedTopic] = useState<string>('all')
   const [expandedThread, setExpandedThread] = useState<number | null>(null)
+  const [comment, setComment] = useState('')
   const router = useRouter()
   
   const { slug } = use(params)
@@ -368,7 +368,8 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
 
                 {/* Review Tab */}
                 {activeTab === 'review' && (
-                  <div className="space-y-6">
+                  <div className="space-y-8">
+                    {/* Overall Rating */}
                     <div className="flex items-center gap-4 mb-6">
                       <div className="flex items-center gap-2">
                         <Star className="w-6 h-6 fill-yellow-400 text-yellow-400" />
@@ -378,47 +379,121 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                         Based on {service.reviewCount} reviews
                       </div>
                     </div>
-                    <div className="space-y-4">
-                      {/* Sample Reviews */}
-                      <div className="border-b pb-4">
-                        <div className="flex items-center gap-2 mb-2">
-                          <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                            <span className="text-gray-600 font-semibold">A</span>
-                          </div>
-                          <div>
-                            <p className="font-semibold text-gray-900">Ahmed Rahman</p>
-                            <div className="flex items-center gap-1">
-                              {[...Array(5)].map((_, i) => (
-                                <Star
-                                  key={i}
-                                  className={`w-4 h-4 ${i < 5 ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
-                                />
-                              ))}
+
+                    {/* Service Provider Reviews (Top 3) */}
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-4">Service Provider (Top 3)</h3>
+                      <div className="space-y-4">
+                        {[
+                          {
+                            name: 'Ahmed Rahman',
+                            avatar: 'A',
+                            providerName: 'TechPro Services',
+                            rating: 5,
+                            review: 'Excellent service! The technician was professional, punctual, and very knowledgeable. He explained everything clearly and completed the work efficiently.',
+                            time: '2 days ago'
+                          },
+                          {
+                            name: 'Fatima Khan',
+                            avatar: 'F',
+                            providerName: 'Elite Home Solutions',
+                            rating: 5,
+                            review: 'Outstanding service provider! Very courteous and respectful. The technician arrived on time and did a thorough job. Highly recommend!',
+                            time: '5 days ago'
+                          },
+                          {
+                            name: 'Karim Uddin',
+                            avatar: 'K',
+                            providerName: 'QuickFix Experts',
+                            rating: 4,
+                            review: 'Great service overall. The provider was professional and the work quality was excellent. Minor delay in arrival but made up for it with quality work.',
+                            time: '1 week ago'
+                          }
+                        ].map((review, index) => (
+                          <div key={index} className="bg-white border border-gray-200 rounded-lg p-5 hover:shadow-md transition-shadow">
+                            <div className="flex items-start gap-4">
+                              <div className="w-12 h-12 bg-[var(--color-primary)]/10 text-[var(--color-primary)] rounded-full flex items-center justify-center font-semibold flex-shrink-0">
+                                {review.avatar}
+                              </div>
+                              <div className="flex-1">
+                                <div className="flex items-start justify-between mb-2">
+                                  <div>
+                                    <p className="font-semibold text-gray-900">{review.name}</p>
+                                    <span className="text-sm text-gray-500">{review.time}</span>
+                                  </div>
+                                  <div className="text-right">
+                                    <div className="inline-flex items-center gap-2 bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 rounded-full px-4 py-1.5">
+                                      {/* <p className="text-xs font-medium text-[var(--color-primary)]">Service Provider</p> */}
+                                      <p className="text-sm font-bold text-gray-900">{review.providerName}</p>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-1 mb-3">
+                                  {[...Array(5)].map((_, i) => (
+                                    <Star
+                                      key={i}
+                                      className={`w-4 h-4 ${i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                                    />
+                                  ))}
+                                </div>
+                                <p className="text-gray-700 leading-relaxed">{review.review}</p>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                        <p className="text-gray-700 mt-2">Excellent service! The technician was professional and completed the work on time. Highly recommended!</p>
-                        <p className="text-sm text-gray-500 mt-2">2 days ago</p>
+                        ))}
                       </div>
-                      <div className="border-b pb-4">
-                        <div className="flex items-center gap-2 mb-2">
-                          <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                            <span className="text-gray-600 font-semibold">S</span>
-                          </div>
-                          <div>
-                            <p className="font-semibold text-gray-900">Sara Khan</p>
-                            <div className="flex items-center gap-1">
-                              {[...Array(5)].map((_, i) => (
-                                <Star
-                                  key={i}
-                                  className={`w-4 h-4 ${i < 4 ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
-                                />
-                              ))}
+                    </div>
+
+                    {/* About Service Reviews (Top 3) */}
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-4">About Service (Top 3 Reviews)</h3>
+                      <div className="space-y-4">
+                        {[
+                          {
+                            name: 'Sara Khan',
+                            avatar: 'S',
+                            rating: 5,
+                            review: 'Very satisfied with the quality of service. The team was clean, efficient, and respectful of my home. The service exceeded my expectations!',
+                            time: '3 days ago'
+                          },
+                          {
+                            name: 'Hasan Ali',
+                            avatar: 'H',
+                            rating: 4,
+                            review: 'Good service overall. The technician was professional and the work was done well. Would use this service again in the future.',
+                            time: '1 week ago'
+                          },
+                          {
+                            name: 'Nadia Islam',
+                            avatar: 'N',
+                            rating: 5,
+                            review: 'Amazing experience! The service was thorough and the technician was very helpful. Everything was explained clearly and the results were perfect.',
+                            time: '2 weeks ago'
+                          }
+                        ].map((review, index) => (
+                          <div key={index} className="bg-white border border-gray-200 rounded-lg p-5 hover:shadow-md transition-shadow">
+                            <div className="flex items-start gap-4">
+                              <div className="w-12 h-12 bg-[var(--color-primary)]/10 text-[var(--color-primary)] rounded-full flex items-center justify-center font-semibold flex-shrink-0">
+                                {review.avatar}
+                              </div>
+                              <div className="flex-1">
+                                <div className="flex items-center justify-between mb-2">
+                                  <p className="font-semibold text-gray-900">{review.name}</p>
+                                  <span className="text-sm text-gray-500">{review.time}</span>
+                                </div>
+                                <div className="flex items-center gap-1 mb-3">
+                                  {[...Array(5)].map((_, i) => (
+                                    <Star
+                                      key={i}
+                                      className={`w-4 h-4 ${i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                                    />
+                                  ))}
+                                </div>
+                                <p className="text-gray-700 leading-relaxed">{review.review}</p>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                        <p className="text-gray-700 mt-2">Very satisfied with the quality of service. The team was clean, efficient, and respectful of my home.</p>
-                        <p className="text-sm text-gray-500 mt-2">1 week ago</p>
+                        ))}
                       </div>
                     </div>
                   </div>
@@ -514,65 +589,30 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                       </div>
                     </div>
 
+                    {/* Video Section */}
+                    <div className="border-t pt-8">
+                      <div className="flex items-center gap-2 mb-4">
+                        <PlayCircle className="w-6 h-6 text-[var(--color-primary)]" />
+                        <h3 className="text-xl font-bold text-gray-900">Video Tutorial</h3>
+                      </div>
+                      <div className="bg-gray-900 rounded-lg overflow-hidden aspect-video relative">
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <button className="w-20 h-20 bg-white/90 hover:bg-white rounded-full flex items-center justify-center transition-all group">
+                            <PlayCircle className="w-12 h-12 text-[var(--color-primary)] ml-1 group-hover:scale-110 transition-transform" />
+                          </button>
+                        </div>
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-6">
+                          <h4 className="text-white font-semibold text-lg mb-1">Watch: {service.name} Service Process</h4>
+                          <p className="text-white/80 text-sm">Learn how our professionals deliver {service.name.toLowerCase()} with step-by-step visual guidance</p>
+                        </div>
+                      </div>
+                    </div>
+
                     {/* Community Discussion Section */}
                     <div className="border-t pt-8">
                       <div className="flex items-center gap-2 mb-6">
                         <MessageCircle className="w-6 h-6 text-[var(--color-primary)]" />
                         <h3 className="text-xl font-bold text-gray-900">Community Discussion</h3>
-                      </div>
-
-                      {/* Topic Pills */}
-                      <div className="flex flex-wrap gap-2 mb-6">
-                        <button
-                          onClick={() => setSelectedTopic('all')}
-                          className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                            selectedTopic === 'all'
-                              ? 'bg-[var(--color-primary)] text-white shadow-md'
-                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                          }`}
-                        >
-                          All Topics
-                        </button>
-                        <button
-                          onClick={() => setSelectedTopic('tips')}
-                          className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                            selectedTopic === 'tips'
-                              ? 'bg-[var(--color-primary)] text-white shadow-md'
-                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                          }`}
-                        >
-                          Tips & Tricks
-                        </button>
-                        <button
-                          onClick={() => setSelectedTopic('troubleshooting')}
-                          className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                            selectedTopic === 'troubleshooting'
-                              ? 'bg-[var(--color-primary)] text-white shadow-md'
-                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                          }`}
-                        >
-                          Troubleshooting
-                        </button>
-                        <button
-                          onClick={() => setSelectedTopic('maintenance')}
-                          className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                            selectedTopic === 'maintenance'
-                              ? 'bg-[var(--color-primary)] text-white shadow-md'
-                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                          }`}
-                        >
-                          Maintenance
-                        </button>
-                        <button
-                          onClick={() => setSelectedTopic('cost')}
-                          className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                            selectedTopic === 'cost'
-                              ? 'bg-[var(--color-primary)] text-white shadow-md'
-                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                          }`}
-                        >
-                          Cost & Pricing
-                        </button>
                       </div>
 
                       {/* Discussion Threads */}
@@ -630,7 +670,6 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                             replyCount: 1
                           }
                         ]
-                          .filter(thread => selectedTopic === 'all' || thread.topic === selectedTopic)
                           .map((thread) => (
                             <div key={thread.id} className="bg-white border border-gray-200 rounded-lg p-5 hover:shadow-md transition-shadow">
                               <div className="flex items-start gap-4">
@@ -693,13 +732,31 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                           ))}
                       </div>
 
-                      {/* Ask Question Section */}
-                      <div className="mt-8 bg-[var(--color-neutral)] rounded-lg p-6 border border-gray-200">
-                        <h4 className="font-semibold text-gray-900 mb-3">Have a Question?</h4>
-                        <p className="text-sm text-gray-600 mb-4">Join the discussion and get help from our community</p>
-                        <button className="bg-[var(--color-primary)] text-white px-6 py-2.5 rounded-lg font-medium hover:opacity-90 transition-all shadow-sm">
-                          Ask a Question
-                        </button>
+                      {/* Comment Box Section */}
+                      <div className="mt-8 bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
+                        <h4 className="font-semibold text-gray-900 mb-4">Join the Discussion</h4>
+                        <div className="space-y-4">
+                          <textarea
+                            value={comment}
+                            onChange={(e) => setComment(e.target.value)}
+                            placeholder="Share your thoughts, ask questions, or provide helpful insights..."
+                            className="w-full min-h-[120px] px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent resize-none text-gray-900 placeholder-gray-400"
+                          />
+                          <div className="flex items-center justify-between">
+                            <p className="text-xs text-gray-500">Be respectful and helpful in your comments</p>
+                            <button 
+                              onClick={() => {
+                                if (comment.trim()) {
+                                  // Handle comment submission here
+                                  setComment('')
+                                }
+                              }}
+                              className="bg-[var(--color-primary)] text-white px-6 py-2.5 rounded-lg font-medium hover:opacity-90 transition-all shadow-sm"
+                            >
+                              Post Comment
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
