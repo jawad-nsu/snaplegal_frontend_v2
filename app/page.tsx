@@ -124,11 +124,10 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <section
-        className="relative h-[500px] bg-cover bg-center"
-        style={{
-          backgroundImage:
-            "url('/hero_banner.png')",
-        }}
+        className="w-full h-[300px] md:h-[500px] bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: "url('/hero_banner.png')",
+          }}
       >
         <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-black/20" />
         <div className="relative container mx-auto px-4 h-full flex flex-col justify-center items-center text-center">

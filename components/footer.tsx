@@ -4,24 +4,24 @@ export default function Footer() {
   return (
     <footer className="bg-white border-t">
       <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Categories Column */}
           <div>
-            <h3 className="font-bold text-gray-900 mb-4">Categories</h3>
+            <h3 className="bg-[var(--color-primary)] text-white font-bold text-xl px-3 py-1 rounded">SNAPLEGAL</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/all-services#legal-services" className="text-gray-600 hover:text-[var(--color-primary)] text-sm">
-                  Legal Services
+                <Link href="https://www.google.com/maps/place/SnapLegal/@23.7805327,90.4117023,17z/data=!3m1!4b1!4m6!3m5!1s0x3755c723c29b9d63:0xb47650183455f358!8m2!3d23.7805279!4d90.4163104!16s%2Fg%2F11ylqymddq?entry=ttu&g_ep=EgoyMDI1MTEyMy4xIKXMDSoASAFQAw%3D%3D" target='blank' className="text-gray-600 hover:text-[var(--color-primary)] text-sm">
+                  22/B, Navana Tower, 45 Gulshan Avenue, Gulshan-1 Circle, Dhaka-1212
                 </Link>
               </li>
               <li>
-                <Link href="/all-services#tax-vat" className="text-gray-600 hover:text-[var(--color-primary)] text-sm">
-                  TAX/VAT
+                <Link href="tel:+8801304449988" className="text-gray-600 hover:text-[var(--color-primary)] text-sm">
+                  +88 0130 444 99 88
                 </Link>
               </li>
               <li> 
-                <Link href="/all-services" className="text-gray-600 hover:text-[var(--color-primary)] text-sm">
-                  All Services
+                <Link href="mailto:hello@snaplegal.com.bd" className="text-gray-600 hover:text-[var(--color-primary)] text-sm">
+                  hello@snaplegal.com.bd
                 </Link>
               </li>
             </ul>
@@ -32,8 +32,8 @@ export default function Footer() {
             <h3 className="font-bold text-gray-900 mb-4">For Customers</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/how-it-works" className="text-gray-600 hover:text-[var(--color-primary)] text-sm">
-                  How SnapLegal Works
+                <Link href="/all-services" className="text-gray-600 hover:text-[var(--color-primary)] text-sm">
+                  All Services
                 </Link>
               </li>
               {/* <li>
@@ -41,24 +41,39 @@ export default function Footer() {
                   Customer Success Stories
                 </Link>
               </li> */}
-              {/* <li>
-                <Link href="/quality-guide" className="text-gray-600 hover:text-[var(--color-primary)] text-sm">
-                  Quality Guide
-                </Link>
-              </li> */}
               <li>
+                <Link href="/how-it-works" className="text-gray-600 hover:text-[var(--color-primary)] text-sm">
+                  How SnapLegal Works
+                </Link>
+              </li>
+              {/* <li>
                 <Link href="/guides" className="text-gray-600 hover:text-[var(--color-primary)] text-sm">
                   SnapLegal Guides
                 </Link>
-              </li>
+              </li> */}
               <li>
                 <Link href="/faq" className="text-gray-600 hover:text-[var(--color-primary)] text-sm">
                   SnapLegal FAQ
                 </Link>
               </li>
               <li>
-                <Link href="/all-services" className="text-gray-600 hover:text-[var(--color-primary)] text-sm">
-                  Browse Services
+                <Link href="/SnapLegal-pro" className="text-gray-600 hover:text-[var(--color-primary)] text-sm">
+                  Corporate Services
+                </Link>
+              </li>
+              {/* <li>
+                <Link href="/bulk-booking" className="text-gray-600 hover:text-[var(--color-primary)] text-sm">
+                  Bulk Booking
+                </Link>
+              </li> */}
+              {/* <li>
+                <Link href="/SnapLegal-pay" className="text-gray-600 hover:text-[var(--color-primary)] text-sm">
+                  SnapLegal Pay
+                </Link>
+              </li> */}
+              <li>
+                <Link href="/contact-sales" className="text-gray-600 hover:text-[var(--color-primary)] text-sm">
+                  Contact Sales
                 </Link>
               </li>
             </ul>
@@ -98,33 +113,6 @@ export default function Footer() {
                   Events
                 </Link>
               </li> */}
-            </ul>
-          </div>
-
-          {/* Business Solutions Column */}
-          <div>
-            <h3 className="font-bold text-gray-900 mb-4">Corporate</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link href="/SnapLegal-pro" className="text-gray-600 hover:text-[var(--color-primary)] text-sm">
-                  Corporate Services
-                </Link>
-              </li>
-              <li>
-                <Link href="/bulk-booking" className="text-gray-600 hover:text-[var(--color-primary)] text-sm">
-                  Bulk Booking
-                </Link>
-              </li>
-              {/* <li>
-                <Link href="/SnapLegal-pay" className="text-gray-600 hover:text-[var(--color-primary)] text-sm">
-                  SnapLegal Pay
-                </Link>
-              </li> */}
-              <li>
-                <Link href="/contact-sales" className="text-gray-600 hover:text-[var(--color-primary)] text-sm">
-                  Contact Sales
-                </Link>
-              </li>
             </ul>
           </div>
 
@@ -198,21 +186,21 @@ export default function Footer() {
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             {/* Logo and Copyright */}
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
+              {/* <div className="flex items-center gap-2">
                 <div className="bg-[var(--color-primary)] text-white font-bold text-xl px-3 py-1 rounded">SnapLegal</div>
-              </div>
-              <span className="text-gray-600 text-sm">© SnapLegal. 2025 | All Rights Reserved</span>
+              </div> */}
+              <span className="text-gray-600 text-sm">© SnapLegal 2025 | All Rights Reserved</span>
             </div>
             
             {/* <span className="text-gray-600 text-sm">Head Office: 22/B, Navana Tower, 45 Gulshan Ave, Dhaka-1212</span> */}
-            <a 
+            {/* <a 
               href="https://www.google.com/maps/place/SnapLegal/@23.7805327,90.4117023,17z/data=!3m1!4b1!4m6!3m5!1s0x3755c723c29b9d63:0xb47650183455f358!8m2!3d23.7805279!4d90.4163104!16s%2Fg%2F11ylqymddq?entry=ttu&g_ep=EgoyMDI1MTEyMy4xIKXMDSoASAFQAw%3D%3D" 
               target="_blank" 
               rel="noopener noreferrer"
               className="text-gray-600 text-sm hover:text-[var(--color-primary)]"
             >
               Head Office: 22/B, Navana Tower, 45 Gulshan Ave, Dhaka-1212
-            </a>
+            </a> */}
 
             {/* Social Media Icons */}
             <div className="flex items-center gap-4">
