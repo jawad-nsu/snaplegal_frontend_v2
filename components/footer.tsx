@@ -186,21 +186,8 @@ export default function Footer() {
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             {/* Logo and Copyright */}
             <div className="flex items-center gap-4">
-              {/* <div className="flex items-center gap-2">
-                <div className="bg-[var(--color-primary)] text-white font-bold text-xl px-3 py-1 rounded">SnapLegal</div>
-              </div> */}
               <span className="text-gray-600 text-sm">© SnapLegal 2025 | All Rights Reserved</span>
             </div>
-            
-            {/* <span className="text-gray-600 text-sm">Head Office: 22/B, Navana Tower, 45 Gulshan Ave, Dhaka-1212</span> */}
-            {/* <a 
-              href="https://www.google.com/maps/place/SnapLegal/@23.7805327,90.4117023,17z/data=!3m1!4b1!4m6!3m5!1s0x3755c723c29b9d63:0xb47650183455f358!8m2!3d23.7805279!4d90.4163104!16s%2Fg%2F11ylqymddq?entry=ttu&g_ep=EgoyMDI1MTEyMy4xIKXMDSoASAFQAw%3D%3D" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-gray-600 text-sm hover:text-[var(--color-primary)]"
-            >
-              Head Office: 22/B, Navana Tower, 45 Gulshan Ave, Dhaka-1212
-            </a> */}
 
             {/* Social Media Icons */}
             <div className="flex items-center gap-4">
