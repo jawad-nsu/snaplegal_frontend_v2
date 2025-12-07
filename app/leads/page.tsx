@@ -3,10 +3,11 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Search, Filter, Plus, X, Trash2, Edit2, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Search, Filter, Plus, X, Trash2, Edit2, ChevronLeft, ChevronRight, Upload } from 'lucide-react'
 import Navbar from '@/components/navbar'
 
-type LeadStage = 'New' | 'Contacted' | 'Qualified' | 'Proposal' | 'Negotiation' | 'Won' | 'Lost'
+type LeadStage = 'New' | 'Qualified' | 'Proposal' | 'Closed'
+type ClosedReason = 'Won' | 'Lost' | 'Lost (Unqualified)'
 type LeadSource = 'Website' | 'Referral' | 'Social Media' | 'Advertisement' | 'Cold Call' | 'Other'
 type LeadSubSource = 'Facebook Ads' | 'Google Ads' | 'LinkedIn' | 'Instagram' | 'Word of Mouth' | 'Email Campaign' | 'Other'
 
@@ -18,10 +19,17 @@ interface Lead {
   facebook?: string
   email?: string
   profession?: string
-  address?: string
+  street?: string
+  city?: string
+  thana?: string
+  district?: string
+  country?: string
+  postalCode?: string
   desiredService?: string
   initialDiscussion?: string
   stage: LeadStage
+  closedReason?: ClosedReason
+  closedReasonText?: string
   leadSource: LeadSource
   leadSubSource?: LeadSubSource
   leadOwner: string
@@ -51,10 +59,15 @@ const defaultLeads: Lead[] = [
     facebook: 'ahmed.rahman',
     email: 'ahmed@example.com',
     profession: 'Business Owner',
-    address: 'Gulshan, Dhaka',
+    street: 'House 45, Road 12',
+    city: 'Gulshan',
+    thana: 'Gulshan',
+    district: 'Dhaka',
+    country: 'Bangladesh',
+    postalCode: '1212',
     desiredService: 'AC Servicing',
     initialDiscussion: 'Interested in monthly AC maintenance',
-    stage: 'Qualified',
+    stage: 'Proposal',
     leadSource: 'Website',
     leadSubSource: 'Google Ads',
     leadOwner: 'John Doe',
@@ -68,10 +81,15 @@ const defaultLeads: Lead[] = [
     mobile: '+8801723456789',
     email: 'fatima@example.com',
     profession: 'Teacher',
-    address: 'Dhanmondi, Dhaka',
+    street: 'Road 27, House 8',
+    city: 'Dhanmondi',
+    thana: 'Dhanmondi',
+    district: 'Dhaka',
+    country: 'Bangladesh',
+    postalCode: '1205',
     desiredService: 'Home Cleaning',
     initialDiscussion: 'Needs deep cleaning service',
-    stage: 'Contacted',
+    stage: 'New',
     leadSource: 'Social Media',
     leadSubSource: 'Facebook Ads',
     leadOwner: 'Jane Smith',
@@ -84,7 +102,12 @@ const defaultLeads: Lead[] = [
     mobile: '+8801734567890',
     email: 'karim@example.com',
     profession: 'Engineer',
-    address: 'Banani, Dhaka',
+    street: 'Road 11, House 23',
+    city: 'Banani',
+    thana: 'Banani',
+    district: 'Dhaka',
+    country: 'Bangladesh',
+    postalCode: '1213',
     desiredService: 'Plumbing Services',
     initialDiscussion: 'Urgent plumbing issue',
     stage: 'New',
@@ -100,10 +123,15 @@ const defaultLeads: Lead[] = [
     mobile: '+8801745678901',
     email: 'sadia@example.com',
     profession: 'Doctor',
-    address: 'Uttara, Dhaka',
+    street: 'Sector 7, Road 15',
+    city: 'Uttara',
+    thana: 'Uttara',
+    district: 'Dhaka',
+    country: 'Bangladesh',
+    postalCode: '1230',
     desiredService: 'Beauty & Wellness',
     initialDiscussion: 'Looking for spa services',
-    stage: 'Proposal',
+    stage: 'Qualified',
     leadSource: 'Website',
     leadSubSource: 'Instagram',
     leadOwner: 'Jane Smith',
@@ -116,10 +144,16 @@ const defaultLeads: Lead[] = [
     mobile: '+8801756789012',
     email: 'hasan@example.com',
     profession: 'Student',
-    address: 'Mirpur, Dhaka',
+    street: 'Block C, Road 5',
+    city: 'Mirpur',
+    thana: 'Mirpur',
+    district: 'Dhaka',
+    country: 'Bangladesh',
+    postalCode: '1216',
     desiredService: 'Electrical Services',
     initialDiscussion: 'Need electrical repair',
-    stage: 'Won',
+    stage: 'Closed',
+    closedReason: 'Won',
     leadSource: 'Advertisement',
     leadSubSource: 'Email Campaign',
     leadOwner: 'John Doe',
@@ -135,7 +169,12 @@ const fieldOptions = [
   { value: 'facebook', label: 'Facebook' },
   { value: 'email', label: 'Email' },
   { value: 'profession', label: 'Profession' },
-  { value: 'address', label: 'Address' },
+  { value: 'street', label: 'Street' },
+  { value: 'city', label: 'City' },
+  { value: 'thana', label: 'Thana' },
+  { value: 'district', label: 'District' },
+  { value: 'country', label: 'Country' },
+  { value: 'postalCode', label: 'Postal Code' },
   { value: 'desiredService', label: 'Desired Service' },
   { value: 'initialDiscussion', label: 'Initial Discussion' },
   { value: 'stage', label: 'Stage' },
@@ -154,7 +193,7 @@ const operatorOptions = [
   { value: 'isNotEmpty', label: 'Is Not Empty' },
 ]
 
-const stageOptions: LeadStage[] = ['New', 'Contacted', 'Qualified', 'Proposal', 'Negotiation', 'Won', 'Lost']
+const stageOptions: LeadStage[] = ['New', 'Qualified', 'Proposal', 'Closed']
 const sourceOptions: LeadSource[] = ['Website', 'Referral', 'Social Media', 'Advertisement', 'Cold Call', 'Other']
 const subSourceOptions: LeadSubSource[] = ['Facebook Ads', 'Google Ads', 'LinkedIn', 'Instagram', 'Word of Mouth', 'Email Campaign', 'Other']
 
@@ -312,13 +351,22 @@ export default function LeadsPage() {
 
           <div className="flex items-center justify-between">
             <h1 className="text-3xl font-bold text-gray-900">Leads</h1>
-            <button
-              onClick={() => router.push('/leads/new')}
-              className="flex items-center gap-2 bg-[var(--color-primary)] text-white px-4 py-2 rounded-lg hover:opacity-90 transition-colors"
-            >
-              <Plus className="w-5 h-5" />
-              New Lead
-            </button>
+            <div className="flex items-center gap-3">
+              <Link
+                href="/leads/upload"
+                className="flex items-center gap-2 border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <Upload className="w-5 h-5" />
+                Bulk Upload
+              </Link>
+              <button
+                onClick={() => router.push('/leads/new')}
+                className="flex items-center gap-2 bg-[var(--color-primary)] text-white px-4 py-2 rounded-lg hover:opacity-90 transition-colors"
+              >
+                <Plus className="w-5 h-5" />
+                New Lead
+              </button>
+            </div>
           </div>
         </div>
 
@@ -529,12 +577,18 @@ export default function LeadsPage() {
                         <td className="py-4 px-4 text-sm text-gray-700">{getFieldValue(lead, 'desiredService')}</td>
                         <td className="py-4 px-4">
                           <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                            lead.stage === 'Won' ? 'bg-green-100 text-green-700' :
-                            lead.stage === 'Lost' ? 'bg-red-100 text-red-700' :
-                            lead.stage === 'Qualified' ? 'bg-blue-100 text-blue-700' :
+                            lead.stage === 'Closed' && lead.closedReason === 'Won' ? 'bg-green-100 text-green-700' :
+                            (lead.stage === 'Closed' && (lead.closedReason === 'Lost' || lead.closedReason === 'Lost (Unqualified)')) ? 'bg-red-100 text-red-700' :
+                            lead.stage === 'Closed' ? 'bg-gray-100 text-gray-700' :
+                            lead.stage === 'Proposal' ? 'bg-orange-100 text-orange-700' :
+                            lead.stage === 'Qualified' ? 'bg-purple-100 text-purple-700' :
+                            lead.stage === 'New' ? 'bg-blue-100 text-blue-700' :
                             'bg-gray-100 text-gray-700'
                           }`}>
-                            {lead.stage}
+                            {lead.stage === 'Closed' && lead.closedReason === 'Won' ? 'Closed Won' : 
+                             lead.stage === 'Closed' && lead.closedReason === 'Lost' ? 'Closed Lost' :
+                             lead.stage === 'Closed' && lead.closedReason === 'Lost (Unqualified)' ? 'Closed Lost (Unqualified)' :
+                             lead.stage === 'Closed' ? 'Closed' : lead.stage}
                           </span>
                         </td>
                         <td className="py-4 px-4 text-sm text-gray-700">{lead.leadSource}</td>

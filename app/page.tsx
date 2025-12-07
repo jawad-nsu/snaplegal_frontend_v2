@@ -11,6 +11,28 @@ import Footer from '@/components/footer'
 
 export default function HomePage() {
   const router = useRouter()
+  
+  // Helper function to convert service title to slug
+  const getServiceSlug = (title: string): string => {
+    const slugMap: Record<string, string> = {
+      'AC Servicing': 'ac-servicing',
+      'Home Cleaning': 'home-cleaning',
+      'Plumbing & Sanitary Services': 'plumbing-sanitary-services',
+      'House Shifting Services': 'house-shifting-services',
+      'Gas Stove/Burner Services': 'gas-stove-burner-services',
+      'DigiGO': 'digigo',
+      'On Demand Driver': 'on-demand-driver',
+      'Salon Care': 'salon-care',
+    }
+    return slugMap[title] || title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+  }
+
+  const handleBookNow = (e: React.MouseEvent, serviceTitle: string) => {
+    e.stopPropagation() // Prevent card onClick from firing
+    const slug = getServiceSlug(serviceTitle)
+    router.push(`/services/${slug}`)
+  }
+
   const categories = [
     { name: 'AC Repair Services', icon: '🔧' },
     { name: 'Appliance Repair', icon: '🔌' },
@@ -240,7 +262,10 @@ export default function HomePage() {
                   </span>
                   <span className="text-sm font-semibold text-gray-900">Starting at {service.startingPrice}</span>
                 </div>
-                <button className="w-full mt-6 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer">
+                <button 
+                  onClick={(e) => handleBookNow(e, service.title)}
+                  className="w-full mt-6 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
+                >
                   Book Now
                 </button>
               </div>
@@ -290,7 +315,10 @@ export default function HomePage() {
                   </span>
                   <span className="text-sm font-semibold text-gray-900">Starting at {service.startingPrice}</span>
                 </div>
-                <button className="w-full mt-6 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer">
+                <button 
+                  onClick={(e) => handleBookNow(e, service.title)}
+                  className="w-full mt-6 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
+                >
                   Book Now
                 </button>
               </div>
@@ -340,7 +368,10 @@ export default function HomePage() {
                   </span>
                   <span className="text-sm font-semibold text-gray-900">Starting at {service.startingPrice}</span>
                 </div>
-                <button className="w-full mt-6 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer">
+                <button 
+                  onClick={(e) => handleBookNow(e, service.title)}
+                  className="w-full mt-6 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
+                >
                   Book Now
                 </button>
               </div>
