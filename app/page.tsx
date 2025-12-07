@@ -146,20 +146,19 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <section
-        className="relative h-[500px] bg-cover bg-center"
-        style={{
-          backgroundImage:
-            "url('/hero_banner.jpg')",
-        }}
+        className="w-full h-[300px] md:h-[500px] bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: "url('/hero_banner.png')",
+          }}
       >
         <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-black/20" />
         <div className="relative container mx-auto px-4 h-full flex flex-col justify-center items-center text-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">
+          {/* <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">
             Your Personal Consultant - in a Snap.
           </h1>
           <p className="text-lg md:text-xl text-white mb-8">
             One-stop solution for your Legal services. Order any service, anytime.
-          </p>
+          </p> */}
 
           {/* Search Bar */}
           {/* <div className="w-full max-w-6xl bg-white rounded-lg shadow-lg p-2 flex gap-2">
@@ -228,7 +227,7 @@ export default function HomePage() {
 
       {/* For Your Home */}
       <section className="container mx-auto px-4 py-12">
-        <h2 className="text-2xl font-bold mb-6">For Your Home</h2>
+        <h2 className="text-2xl font-bold mb-6">Legal Services</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {homeServices.map((service, index) => (
             <div
@@ -382,97 +381,65 @@ export default function HomePage() {
 
       
       {/* Why Choose Us Section */}
-      <section className="container mx-auto max-w-6xl  px-4 py-16">
-        <div className="text-center mb-4">
-          <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-2">
-            WHY CHOOSE US
-          </p>
+      <section className="container mx-auto max-w-6xl  px-4 pt-6">
+        <div className="bg-blue-50 rounded-lg px-8 py-12 ">
+          <div className="text-center mb-4">
+          <h3 className="text-2xl font-semibold text-gray-600 tracking-wide mb-2">
+            WHY CHOOSE <span className="text-[var(--color-primary)]">SnapLegal</span>?
+          </h3>
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-            Because we care about your safety..
+            Because your legal peace of mind matters most.
           </h2>
         </div>
 
         <div className="grid md:grid-cols-2 gap-8 items-center mt-12">
           {/* Features Grid */}
-          <div className="grid grid-cols-2 gap-8">
-            <div className="flex items-start gap-4">
-              <div className="flex-shrink-0">
-                <svg
-                  className="w-12 h-12 text-[var(--color-primary)]"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M12 2C8.13 2 5 5.13 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.87-3.13-7-7-7zm1 14h-2v-1h2v1zm0-3h-2c0-3.25 3-3 3-5 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 2.5-3 2.75-3 5z" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="font-bold text-lg text-gray-900 mb-1">Ensuring</h3>
-                <p className="text-gray-600">Masks</p>
-              </div>
-            </div>
 
-            <div className="flex items-start gap-4">
-              <div className="flex-shrink-0">
-                <svg
-                  className="w-12 h-12 text-[var(--color-primary)]"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M20 15.5c-1.25 0-2.45-.2-3.57-.57-.1-.03-.21-.05-.31-.05-.26 0-.51.1-.71.29l-2.2 2.2c-2.83-1.44-5.15-3.75-6.59-6.58l2.2-2.21c.28-.26.36-.65.25-1C8.7 6.45 8.5 5.25 8.5 4c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1 0 9.39 7.61 17 17 17 .55 0 1-.45 1-1v-3.5c0-.55-.45-1-1-1z" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="font-bold text-lg text-gray-900 mb-1">24/7</h3>
-                <p className="text-gray-600">Support</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-4">
-              <div className="flex-shrink-0">
-                <svg
-                  className="w-12 h-12 text-[var(--color-primary)]"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M9.5 14c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5-2.5-1.12-2.5-2.5zm5 .5c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5.67 1.5 1.5 1.5 1.5-.67 1.5-1.5zm6.5 3c0 1.11-.89 2-2 2H5c-1.11 0-2-.89-2-2V5c0-1.11.89-2 2-2h4c.55 0 1 .45 1 1v1h4V4c0-.55.45-1 1-1h4c1.11 0 2 .89 2 2v12.5z" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="font-bold text-lg text-gray-900 mb-1">Sanitising</h3>
-                <p className="text-gray-600">Hands & Equipment</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-4">
-              <div className="flex-shrink-0">
-                <svg
-                  className="w-12 h-12 text-[var(--color-primary)]"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M21.16 7.26l-1.41-1.41-3.56 3.55 1.41 1.41s3.45-3.52 3.56-3.55zM11 3h2v5h-2V3zM6.4 10.81L7.81 9.4 4.26 5.84 2.84 7.26c.11.03 3.56 3.55 3.56 3.55zM20 14h-3.18C16.4 12.84 15.3 12 14 12h-4c-1.3 0-2.4.84-2.82 2H4c-.55 0-1 .45-1 1s.45 1 1 1h3.18c.42 1.16 1.52 2 2.82 2h4c1.3 0 2.4-.84 2.82-2H20c.55 0 1-.45 1-1s-.45-1-1-1z" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="font-bold text-lg text-gray-900 mb-1">Ensuring</h3>
-                <p className="text-gray-600">Gloves</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Image */}
-          <div className="relative">
-            <div className="rounded-lg overflow-hidden shadow-xl">
-              <Image
-                src="/why-choose-us.webp"
-                alt="Safety ensured workers in pink uniforms"
-                width={600}
-                height={400}
-                className="w-full"
-              />
-            </div>
-          </div>
+        {/* Card 1 */}
+        <div className="flex flex-col items-start gap-2">
+          <h3 className="font-bold text-lg text-gray-900">
+            Expert Legal Guidance
+          </h3>
+          <p className="text-gray-600">
+            Access qualified legal consultants who ensure accuracy, compliance, and clarity in every service.
+          </p>
         </div>
+
+        {/* Card 2 */}
+        <div className="flex flex-col items-start gap-2">
+          <h3 className="font-bold text-lg text-gray-900">
+            24/7 Client Support
+          </h3>
+          <p className="text-gray-600">
+            Get assistance anytime — our system is always available for urgent legal needs and ongoing queries.
+          </p>
+        </div>
+
+        {/* Card 3 */}
+        <div className="flex flex-col items-start gap-2">
+          <h3 className="font-bold text-lg text-gray-900">
+            Secure & Confidential Handling
+          </h3>
+          <p className="text-gray-600">
+            Your documents and information are safeguarded with strict data-protection protocols.
+          </p>
+        </div>
+
+        {/* Card 4 */}
+        <div className="flex flex-col items-start gap-2">
+          <h3 className="font-bold text-lg text-gray-900">
+            Transparent & Fair Pricing
+          </h3>
+          <p className="text-gray-600">
+            No hidden charges — clear fees and honest service from start to finish.
+          </p>
+        </div>
+
+        </div>
+        </div>
+        
+
+        
 
         {/* Statistics */}
         {/* <div className="grid md:grid-cols-3 gap-8 mt-16">
@@ -503,24 +470,32 @@ export default function HomePage() {
        <section className="container mx-auto max-w-6xl px-4 py-12">
         <div className="bg-gray-100 rounded-lg px-8 py-12 text-center">
           <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8">
-            Can&apos;t find your desired service? Let us know 24/7 in 16516.
+            Looking for something else? We&apos;re here always.
           </h2>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button className="bg-[var(--color-primary)] hover:opacity-90 text-white px-8 py-6 text-lg font-semibold">
               Book an Appointment
             </Button>
-            <Button 
+
+            <Button
+              asChild
               variant="outline" 
               className="border-2 border-[var(--color-primary)] text-[var(--color-primary)] hover:bg-[var(--color-neutral)] px-8 py-6 text-lg font-semibold"
             >
-              <svg 
-                className="w-5 h-5 mr-2" 
-                viewBox="0 0 24 24" 
-                fill="currentColor"
+              <Link
+                href="https://wa.me/8801304449988?text=Hello%2C%20I%27m%20reaching%20from%20snaplegal.com.bd%20website"
+                target="blank"
+                // href="tel:+8801304449988"
               >
-                <path d="M20 15.5c-1.25 0-2.45-.2-3.57-.57-.1-.03-.21-.05-.31-.05-.26 0-.51.1-.71.29l-2.2 2.2c-2.83-1.44-5.15-3.75-6.59-6.58l2.2-2.21c.28-.26.36-.65.25-1C8.7 6.45 8.5 5.25 8.5 4c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1 0 9.39 7.61 17 17 17 .55 0 1-.45 1-1v-3.5c0-.55-.45-1-1-1z" />
-              </svg>
-              16516
+                <svg
+                  className="w-5 h-5 mr-2" 
+                  viewBox="0 0 24 24" 
+                            fill="currentColor"
+                >
+                  <path d="M20.52 3.48A11.8 11.8 0 0 0 12.04 0C5.46 0 .17 5.29.17 11.87c0 2.09.55 4.14 1.6 5.95L0 24l6.37-1.66c1.72.94 3.67 1.43 5.67 1.43h.01c6.58 0 11.87-5.29 11.87-11.87a11.8 11.8 0 0 0-3.4-8.42zM12.05 21.48c-1.74 0-3.45-.47-4.94-1.36l-.35-.21-3.78.98 1.01-3.68-.23-.38a9.85 9.85 0 0 1-1.49-5.22C2.27 6.55 6.51 2.3 12.04 2.3c2.63 0 5.1 1.02 6.96 2.88a9.75 9.75 0 0 1 2.88 6.96c-.01 5.53-4.26 9.77-9.83 9.77zm5.48-7.35c-.3-.15-1.77-.87-2.05-.97-.28-.1-.48-.15-.69.15-.2.3-.79.97-.96 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.47-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.6.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.69-1.65-.95-2.27-.25-.6-.5-.52-.69-.53-.17-.01-.37-.01-.57-.01-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.22 3.08c.15.2 2.1 3.18 5.08 4.46.71.3 1.26.48 1.69.62.71.23 1.36.2 1.87.12.57-.08 1.77-.72 2.02-1.41.25-.7.25-1.3.17-1.41-.07-.1-.27-.17-.57-.32z"/>
+                </svg>
+                +88 0130 444 99 88
+              </Link>
             </Button>
           </div>
         </div>
