@@ -168,28 +168,25 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
   const router = useRouter()
   const { id } = use(params)
   const [lead, setLead] = useState<Lead | null>(mockLeads[id] || null)
-  const [tasks, setTasks] = useState<Task[]>([
-    {
-      id: '1',
-      subject: 'Follow up call',
-      description: 'Call client to discuss AC maintenance schedule',
-      status: 'Not Started',
-      priority: 'High',
-      dueDate: '2024-01-25',
-      assignedTo: 'John Doe',
-      createdAt: '2024-01-20',
-    },
-    {
-      id: '2',
-      subject: 'Send proposal',
-      description: 'Email the service proposal document',
-      status: 'In Progress',
-      priority: 'Normal',
-      dueDate: '2024-01-22',
-      assignedTo: 'John Doe',
-      createdAt: '2024-01-19',
-    },
-  ])
+  
+  // Initialize tasks with default "Follow up call" task for new leads
+  const [tasks, setTasks] = useState<Task[]>(() => {
+    const currentLead = mockLeads[id] || null
+    if (currentLead) {
+      // Create default task for new lead
+      const defaultTask: Task = {
+        id: `task-${Date.now()}`,
+        subject: 'Follow up call',
+        description: '',
+        status: 'Not Started',
+        priority: 'Normal',
+        assignedTo: currentLead.leadOwner || 'Unassigned',
+        createdAt: new Date().toISOString().split('T')[0],
+      }
+      return [defaultTask]
+    }
+    return []
+  })
   const [showTaskForm, setShowTaskForm] = useState(false)
   const [taskFilter, setTaskFilter] = useState<TaskStatus | 'All'>('All')
   const [newTask, setNewTask] = useState({
@@ -732,7 +729,6 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
                       >
                         <option value="">Select subject</option>
                         <option value="Follow up">Follow up</option>
-                        <option value="Send Proposal">Send Proposal</option>
                         <option value="Other">Other</option>
                       </select>
                     </div>
@@ -901,7 +897,6 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
                                       className="w-full px-2 py-1.5 border border-gray-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                                     >
                                       <option value="Follow up">Follow up</option>
-                                      <option value="Send Proposal">Send Proposal</option>
                                       <option value="Other">Other</option>
                                     </select>
                                   </div>

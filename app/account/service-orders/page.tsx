@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { MapPin, ShoppingCart, User, Search, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Search, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react'
 import Navbar from '@/components/navbar'
 
 export default function ServiceOrdersPage() {
@@ -33,7 +33,7 @@ export default function ServiceOrdersPage() {
             {/* Breadcrumb */}
             <div className="mb-6">
               <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Link href="/" className="hover:text-pink-600 text-gray-900">
+                <Link href="/" className="hover:text-[var(--color-primary)] text-gray-900">
                   Home
                 </Link>
                 <span className="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
@@ -62,14 +62,14 @@ export default function ServiceOrdersPage() {
                   <input
                     type="text"
                     placeholder="Search"
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                   />
                 </div>
                 <div className="relative">
                   <select
                     value={filter}
                     onChange={(e) => setFilter(e.target.value)}
-                    className="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-pink-500"
+                    className="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                   >
                     <option>All</option>
                     <option>Initiated</option>
@@ -89,7 +89,7 @@ export default function ServiceOrdersPage() {
                       <th className="text-left py-3 px-4 font-semibold text-gray-900">ID</th>
                       <th className="text-left py-3 px-4 font-semibold text-gray-900">Service</th>
                       <th className="text-left py-3 px-4 font-semibold text-gray-900">Schedule</th>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-900">Due Price</th>
+                      <th className="text-left py-3 px-4 font-semibold text-gray-900">Price</th>
                       <th className="text-left py-3 px-4"></th>
                     </tr>
                   </thead>
@@ -120,7 +120,7 @@ export default function ServiceOrdersPage() {
                         <td className="py-4 px-4 text-gray-700">{order.schedule}</td>
                         <td className="py-4 px-4 text-gray-900 font-medium">৳{order.duePrice.toFixed(2)}</td>
                         <td className="py-4 px-4">
-                          <Link href={`/account/service-orders/${order.id}`} className="text-pink-600 hover:text-pink-700 font-medium">
+                          <Link href={`/account/service-orders/${order.id}`} className="text-[var(--color-primary)] hover:opacity-80 font-medium">
                             Details &gt;
                           </Link>
                         </td>

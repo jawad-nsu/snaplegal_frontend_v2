@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { MapPin, ShoppingCart, User, Edit2, Home, FileText, Trash2, Upload, X } from 'lucide-react'
+import { User, Edit2, Home, FileText, Trash2, Upload, X, Tag, Gift, Sparkles, TrendingUp } from 'lucide-react'
 import Navbar from '@/components/navbar'
 
 export default function AccountPage() {
@@ -16,15 +16,65 @@ export default function AccountPage() {
   const [showUploadModal, setShowUploadModal] = useState(false)
   const [newDocName, setNewDocName] = useState('')
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [showAddressModal, setShowAddressModal] = useState(false)
+  const [addressType, setAddressType] = useState('')
+  const [addressLocation, setAddressLocation] = useState('')
+  const [addresses, setAddresses] = useState([
+    { id: '1', type: 'Home', location: 'Gulshan' },
+    { id: '2', type: 'Add Work', location: '' },
+  ])
+  const [promotions] = useState([
+    {
+      id: '1',
+      title: 'New Customer Special',
+      description: 'Get 20% off on your first service booking',
+      discountType: 'percentage',
+      discountValue: 20,
+      code: 'NEW20',
+      validUntil: '2024-12-31',
+      status: 'active',
+      minOrder: 500,
+    },
+    {
+      id: '2',
+      title: 'Weekend Cleaning Deal',
+      description: 'Flat ৳300 off on home cleaning services',
+      discountType: 'fixed',
+      discountValue: 300,
+      code: 'CLEAN300',
+      validUntil: '2024-03-31',
+      status: 'active',
+      minOrder: 1000,
+    },
+    {
+      id: '3',
+      title: 'AC Service Combo',
+      description: '15% discount on AC servicing packages',
+      discountType: 'percentage',
+      discountValue: 15,
+      code: 'AC15',
+      validUntil: '2024-04-30',
+      status: 'active',
+      minOrder: 800,
+    },
+    {
+      id: '4',
+      title: 'Referral Bonus',
+      description: 'Refer a friend and get ৳200 credit',
+      discountType: 'fixed',
+      discountValue: 200,
+      code: 'REFER200',
+      validUntil: '2024-12-31',
+      status: 'active',
+      minOrder: 0,
+    },
+  ])
 
   const menuItems = [
     { id: 'my-account', label: 'My Account' },
     { id: 'my-documents', label: 'My Documents' },
     { id: 'my-addresses', label: 'My Addresses' },
-    { id: 'my-offers', label: 'My Offers' },
     { id: 'my-promotions', label: 'My Promotions' },
-    { id: 'free-services', label: 'Free Services' },
-    { id: 'sheba-credit', label: 'SnapLegal Credit' },
   ]
 
   const userInfo = {
@@ -34,11 +84,6 @@ export default function AccountPage() {
     dateOfBirth: 'N/A',
     gender: 'N/A',
   }
-
-  const addresses = [
-    { id: '1', type: 'Home', location: 'Gulshan' },
-    { id: '2', type: 'Add Work', location: '' },
-  ]
 
   const getBreadcrumbLabel = () => {
     const activeItem = menuItems.find(item => item.id === activeTab)
@@ -90,6 +135,20 @@ export default function AccountPage() {
     }
   }
 
+  const handleAddAddress = () => {
+    if (addressType) {
+      const newAddress = {
+        id: Date.now().toString(),
+        type: addressType,
+        location: addressLocation,
+      }
+      setAddresses([...addresses, newAddress])
+      setShowAddressModal(false)
+      setAddressType('')
+      setAddressLocation('')
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -103,7 +162,7 @@ export default function AccountPage() {
             {/* Breadcrumb */}
             <div className="mb-6">
               <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Link href="/" className="hover:text-pink-600">
+                <Link href="/" className="hover:text-[var(--color-primary)]">
                   Home
                 </Link>
                 <span className="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
@@ -147,7 +206,7 @@ export default function AccountPage() {
                     <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center">
                       <User className="w-16 h-16 text-gray-400" />
                     </div>
-                    <button className="absolute bottom-0 right-0 w-8 h-8 bg-pink-600 rounded-full flex items-center justify-center hover:bg-pink-700 transition-colors">
+                    <button className="absolute bottom-0 right-0 w-8 h-8 bg-[var(--color-primary)] rounded-full flex items-center justify-center hover:opacity-90 transition-colors">
                       <Edit2 className="w-4 h-4 text-white" />
                     </button>
                   </div>
@@ -185,7 +244,7 @@ export default function AccountPage() {
                   <h1 className="text-3xl font-bold text-gray-900">My Documents</h1>
                   <button
                     onClick={() => setShowUploadModal(true)}
-                    className="px-6 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors font-medium flex items-center gap-2"
+                    className="px-6 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:opacity-90 transition-colors font-medium flex items-center gap-2"
                   >
                     <Upload className="w-4 h-4" />
                     Upload Document
@@ -203,12 +262,12 @@ export default function AccountPage() {
                     {documents.map((doc) => (
                       <div
                         key={doc.id}
-                        className="border-2 border-gray-200 rounded-lg p-6 hover:border-pink-300 transition-colors"
+                        className="border-2 border-gray-200 rounded-lg p-6 hover:border-[var(--color-primary)] transition-colors"
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-4 flex-1">
-                            <div className="w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                              <FileText className="w-6 h-6 text-pink-600" />
+                            <div className="w-12 h-12 bg-[var(--color-neutral)] rounded-lg flex items-center justify-center flex-shrink-0">
+                              <FileText className="w-6 h-6 text-[var(--color-primary)]" />
                             </div>
                             <div className="flex-1">
                               {editingDocId === doc.id ? (
@@ -217,7 +276,7 @@ export default function AccountPage() {
                                     type="text"
                                     value={editName}
                                     onChange={(e) => setEditName(e.target.value)}
-                                    className="px-3 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+                                    className="px-3 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                                     autoFocus
                                   />
                                   <button
@@ -246,7 +305,7 @@ export default function AccountPage() {
                             <div className="flex items-center gap-2">
                               <button
                                 onClick={() => handleStartEdit(doc)}
-                                className="p-2 text-gray-600 hover:text-pink-600 transition-colors"
+                                className="p-2 text-gray-600 hover:text-[var(--color-primary)] transition-colors"
                                 title="Rename"
                               >
                                 <Edit2 className="w-5 h-5" />
@@ -272,7 +331,10 @@ export default function AccountPage() {
               <div className="bg-white rounded-lg shadow-sm p-8">
                 <div className="flex items-center justify-between mb-8">
                   <h1 className="text-3xl font-bold text-gray-900">Saved Addresses</h1>
-                  <button className="px-6 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors font-medium">
+                  <button 
+                    onClick={() => setShowAddressModal(true)}
+                    className="px-6 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:opacity-90 transition-colors font-medium"
+                  >
                     Add New Address
                   </button>
                 </div>
@@ -282,11 +344,11 @@ export default function AccountPage() {
                   {addresses.map((address) => (
                     <div
                       key={address.id}
-                      className="border-2 border-gray-200 rounded-lg p-6 hover:border-pink-300 transition-colors cursor-pointer"
+                      className="border-2 border-gray-200 rounded-lg p-6 hover:border-[var(--color-primary)] transition-colors cursor-pointer"
                     >
                       <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                          <Home className="w-6 h-6 text-pink-600" />
+                        <div className="w-12 h-12 bg-[var(--color-neutral)] rounded-lg flex items-center justify-center flex-shrink-0">
+                          <Home className="w-6 h-6 text-[var(--color-primary)]" />
                         </div>
                         <div className="flex-1">
                           <h3 className="text-lg font-bold text-gray-900 mb-1">{address.type}</h3>
@@ -328,7 +390,7 @@ export default function AccountPage() {
                         value={newDocName}
                         onChange={(e) => setNewDocName(e.target.value)}
                         placeholder="e.g., National ID, Passport"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                       />
                     </div>
                     <div>
@@ -338,7 +400,7 @@ export default function AccountPage() {
                       <input
                         type="file"
                         onChange={handleFileSelect}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                         accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                       />
                       {selectedFile && (
@@ -349,7 +411,7 @@ export default function AccountPage() {
                       <button
                         onClick={handleUploadDocument}
                         disabled={!selectedFile || !newDocName}
-                        className="flex-1 bg-pink-600 text-white py-2 rounded-lg hover:bg-pink-700 transition-colors font-medium disabled:bg-gray-300 disabled:cursor-not-allowed"
+                        className="flex-1 bg-[var(--color-primary)] text-white py-2 rounded-lg hover:opacity-90 transition-colors font-medium disabled:bg-gray-300 disabled:cursor-not-allowed"
                       >
                         Upload
                       </button>
@@ -369,7 +431,174 @@ export default function AccountPage() {
               </div>
             )}
 
-            {activeTab !== 'my-account' && activeTab !== 'my-addresses' && activeTab !== 'my-documents' && (
+            {/* Add Address Modal */}
+            {showAddressModal && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-xl font-bold text-gray-900">Add New Address</h2>
+                    <button
+                      onClick={() => {
+                        setShowAddressModal(false)
+                        setAddressType('')
+                        setAddressLocation('')
+                      }}
+                      className="text-gray-500 hover:text-gray-700"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Address Type
+                      </label>
+                      <input
+                        type="text"
+                        value={addressType}
+                        onChange={(e) => setAddressType(e.target.value)}
+                        placeholder="e.g., Home, Work, Office"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Location
+                      </label>
+                      <textarea
+                        value={addressLocation}
+                        onChange={(e) => setAddressLocation(e.target.value)}
+                        placeholder="Enter your full address"
+                        rows={4}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] resize-none"
+                      />
+                    </div>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={handleAddAddress}
+                        disabled={!addressType}
+                        className="flex-1 bg-[var(--color-primary)] text-white py-2 rounded-lg hover:opacity-90 transition-colors font-medium disabled:bg-gray-300 disabled:cursor-not-allowed"
+                      >
+                        Add Address
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowAddressModal(false)
+                          setAddressType('')
+                          setAddressLocation('')
+                        }}
+                        className="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'my-promotions' && (
+              <div className="space-y-6">
+                <div className="bg-white rounded-lg shadow-sm p-8">
+                  <h1 className="text-3xl font-bold text-gray-900 mb-8">My Promotions</h1>
+                  
+                  {/* Promotions Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {promotions.map((promo) => (
+                      <div
+                        key={promo.id}
+                        className="relative overflow-hidden bg-gradient-to-br from-pink-500 via-pink-600 to-[var(--color-primary)] rounded-xl shadow-lg p-6 text-white border-2 border-white/20"
+                      >
+                        {/* Decorative Background Elements */}
+                        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                          {/* Sparkle Graphics */}
+                          <Sparkles className="absolute top-4 right-4 w-8 h-8 text-white/30 animate-pulse" />
+                          <Gift className="absolute bottom-4 left-4 w-12 h-12 text-white/20 animate-bounce" style={{ animationDuration: '3s' }} />
+                          
+                          {/* Circular Pattern */}
+                          <div className="absolute -top-8 -right-8 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+                          <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
+                        </div>
+
+                        <div className="relative">
+                          {/* Header */}
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Tag className="w-5 h-5 text-yellow-300" />
+                                <h3 className="text-xl font-bold drop-shadow-lg">{promo.title}</h3>
+                              </div>
+                              <p className="text-white/90 text-sm mb-3">{promo.description}</p>
+                            </div>
+                            <div className="bg-white/20 rounded-lg px-3 py-1.5 backdrop-blur-sm">
+                              <TrendingUp className="w-5 h-5" />
+                            </div>
+                          </div>
+
+                          {/* Discount Badge */}
+                          <div className="bg-white/25 backdrop-blur-sm rounded-lg p-4 mb-4 border border-white/30">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <p className="text-xs text-white/80 mb-1">Discount</p>
+                                <p className="text-3xl font-bold text-yellow-300 drop-shadow-md">
+                                  {promo.discountType === 'percentage' 
+                                    ? `${promo.discountValue}%` 
+                                    : `৳${promo.discountValue}`}
+                                </p>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-xs text-white/80 mb-1">Promo Code</p>
+                                <div className="bg-white/30 rounded-lg px-4 py-2 border-2 border-dashed border-white/50">
+                                  <p className="text-lg font-bold tracking-wider">{promo.code}</p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Details */}
+                          <div className="space-y-2 text-sm">
+                            {promo.minOrder > 0 && (
+                              <div className="flex items-center gap-2 text-white/90">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span>Min. order: ৳{promo.minOrder.toLocaleString()}</span>
+                              </div>
+                            )}
+                            <div className="flex items-center gap-2 text-white/90">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                              </svg>
+                              <span>Valid until: {new Date(promo.validUntil).toLocaleDateString()}</span>
+                            </div>
+                          </div>
+
+                          {/* Copy Code Button */}
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(promo.code)
+                              alert(`Promo code "${promo.code}" copied to clipboard!`)
+                            }}
+                            className="w-full mt-4 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white font-semibold py-3 rounded-lg transition-all duration-200 border border-white/30 hover:border-white/50"
+                          >
+                            Copy Code
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {promotions.length === 0 && (
+                    <div className="text-center py-12">
+                      <Gift className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                      <p className="text-gray-600">No active promotions available at the moment.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {activeTab !== 'my-account' && activeTab !== 'my-addresses' && activeTab !== 'my-documents' && activeTab !== 'my-promotions' && (
               <div className="bg-white rounded-lg shadow-sm p-8">
                 <h1 className="text-3xl font-bold text-gray-900 mb-8">
                   {menuItems.find(item => item.id === activeTab)?.label}

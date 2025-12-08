@@ -109,13 +109,13 @@ export default function CartPage() {
             <div className="bg-white rounded-lg shadow-sm p-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <Home className="w-5 h-5 text-pink-600" />
+                  <Home className="w-5 h-5 text-[var(--color-primary)]" />
                   <div>
                     <p className="font-semibold text-gray-900">Sharif H (+8801773241632)</p>
                     <p className="text-sm text-gray-600">Delivery Address</p>
                   </div>
                 </div>
-                <Link href="#" className="text-pink-600 hover:underline font-medium">
+                <Link href="#" className="text-[var(--color-primary)] hover:opacity-80 font-medium">
                   Change
                 </Link>
               </div>
@@ -131,7 +131,7 @@ export default function CartPage() {
                       type="checkbox"
                       checked={selectAll}
                       onChange={handleSelectAll}
-                      className="w-4 h-4 text-pink-600 border-gray-300 rounded focus:ring-pink-500"
+                      className="w-4 h-4 text-[var(--color-primary)] border-gray-300 rounded focus:ring-[var(--color-primary)]"
                     />
                     <span className="text-sm text-gray-700">Select all items</span>
                   </label>
@@ -152,7 +152,7 @@ export default function CartPage() {
                             type="checkbox"
                             checked={item.selected}
                             onChange={() => handleItemSelect(item.id)}
-                            className="w-4 h-4 text-pink-600 border-gray-300 rounded focus:ring-pink-500"
+                            className="w-4 h-4 text-[var(--color-primary)] border-gray-300 rounded focus:ring-[var(--color-primary)]"
                           />
                           <span className="text-sm font-medium text-gray-700">
                             {item.parentService}
@@ -167,7 +167,7 @@ export default function CartPage() {
                           type="checkbox"
                           checked={item.selected}
                           onChange={() => handleItemSelect(item.id)}
-                          className="w-4 h-4 text-pink-600 border-gray-300 rounded focus:ring-pink-500"
+                          className="w-4 h-4 text-[var(--color-primary)] border-gray-300 rounded focus:ring-[var(--color-primary)]"
                         />
                         <div className="flex gap-4 flex-1">
                           <div className="relative w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
@@ -185,7 +185,7 @@ export default function CartPage() {
                             <div className="mb-2">
                               <select
                                 value={item.tonnage}
-                                className="text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-pink-500"
+                                className="text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                               >
                                 <option>1-2.5 Ton</option>
                                 <option>3-5 Ton</option>
@@ -291,10 +291,10 @@ export default function CartPage() {
                     <Tag className="w-5 h-5 text-gray-600" />
                     <span className="text-sm font-medium text-gray-700">Add promo & offer</span>
                   </div>
-                  <div className="flex items-center gap-1 text-pink-600">
-                    <span className="text-sm">0 offers</span>
-                    <ChevronDown className="w-4 h-4" />
-                  </div>
+                    <div className="flex items-center gap-1 text-[var(--color-primary)]">
+                      <span className="text-sm">0 offers</span>
+                      <ChevronDown className="w-4 h-4" />
+                    </div>
                 </div>
               </div>
 
@@ -308,7 +308,7 @@ export default function CartPage() {
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Write comment here..."
-                  className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500 resize-none"
+                  className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] resize-none"
                   rows={3}
                 />
               </div>
@@ -320,15 +320,15 @@ export default function CartPage() {
                     type="checkbox"
                     checked={agreeToTerms}
                     onChange={(e) => setAgreeToTerms(e.target.checked)}
-                    className="w-4 h-4 text-pink-600 border-gray-300 rounded focus:ring-pink-500 mt-1"
+                    className="w-4 h-4 text-[var(--color-primary)] border-gray-300 rounded focus:ring-[var(--color-primary)] mt-1"
                   />
                   <span className="text-sm text-gray-700">
                     By placing order, I agree to the{' '}
-                    <Link href="#" className="text-pink-600 hover:underline">
+                    <Link href="#" className="text-[var(--color-primary)] hover:opacity-80">
                       Terms & conditions
                     </Link>{' '}
                     &{' '}
-                    <Link href="#" className="text-pink-600 hover:underline">
+                    <Link href="#" className="text-[var(--color-primary)] hover:opacity-80">
                       Privacy policy
                     </Link>
                   </span>
@@ -339,7 +339,7 @@ export default function CartPage() {
               <button
                 onClick={() => router.push('/checkout')}
                 disabled={!agreeToTerms || selectedItems.length === 0}
-                className="w-full bg-pink-600 text-white py-4 rounded-lg font-bold hover:bg-pink-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                className="w-full bg-[var(--color-primary)] text-white py-4 rounded-lg font-bold hover:opacity-90 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
               >
                 Proceed to pay
               </button>

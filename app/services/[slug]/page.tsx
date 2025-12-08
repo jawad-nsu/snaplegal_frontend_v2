@@ -223,7 +223,7 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 pb-20 lg:pb-8">
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Left Content */}
           <div className="lg:col-span-2 space-y-6">
@@ -767,72 +767,124 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
 
           {/* Right Sidebar - Booking Card */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-lg p-6 sticky top-24">
-              <h3 className="text-lg font-bold mb-4">Choose Your Package</h3>
-              
-              <div className="space-y-3 mb-6">
-                {service.packages.map((pkg, index) => (
-                  <div
-                    key={index}
-                    onClick={() => setSelectedPackage(index)}
-                    className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
-                      selectedPackage === index
-                        ? 'border-[var(--color-primary)] bg-[var(--color-neutral)]'
-                        : 'border-gray-200 hover:border-[var(--color-primary)]/50'
-                    } ${pkg.popular ? 'relative' : ''}`}
-                  >
-                    {pkg.popular && (
-                      <div className="absolute -top-3 left-4 bg-[var(--color-primary)] text-white text-xs font-bold px-3 py-1 rounded-full">
-                        MOST POPULAR
-                      </div>
-                    )}
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <div className="font-bold text-lg">{pkg.name}</div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-2xl font-bold text-[var(--color-primary)]">৳{pkg.price}</span>
-                          {pkg.originalPrice && (
-                            <span className="text-sm text-gray-400 line-through">৳{pkg.originalPrice}</span>
+            <div className="bg-white rounded-lg shadow-lg border border-gray-200 sticky top-24 flex flex-col max-h-[calc(100vh-8rem)]">
+              {/* Scrollable Package Selection */}
+              <div className="p-4 overflow-y-auto flex-1">
+                <h3 className="text-base font-bold mb-3">Choose Your Package</h3>
+                
+                <div className="space-y-2 mb-4">
+                  {service.packages.map((pkg, index) => (
+                    <div
+                      key={index}
+                      onClick={() => setSelectedPackage(index)}
+                      className={`border-2 rounded-lg p-3 cursor-pointer transition-all ${
+                        selectedPackage === index
+                          ? 'border-[var(--color-primary)] bg-[var(--color-neutral)]'
+                          : 'border-gray-200 hover:border-[var(--color-primary)]/50'
+                      } ${pkg.popular ? 'relative' : ''}`}
+                    >
+                      {pkg.popular && (
+                        <div className="absolute -top-2 left-3 bg-[var(--color-primary)] text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                          POPULAR
+                        </div>
+                      )}
+                      <div className="flex items-start justify-between mb-1">
+                        <div className="flex-1">
+                          <div className="font-semibold text-sm">{pkg.name}</div>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-lg font-bold text-[var(--color-primary)]">৳{pkg.price}</span>
+                            {pkg.originalPrice && (
+                              <span className="text-xs text-gray-400 line-through">৳{pkg.originalPrice}</span>
+                            )}
+                          </div>
+                        </div>
+                        <div
+                          className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ml-2 ${
+                            selectedPackage === index
+                              ? 'border-[var(--color-primary)] bg-[var(--color-primary)]'
+                              : 'border-gray-300'
+                          }`}
+                        >
+                          {selectedPackage === index && (
+                            <div className="w-1.5 h-1.5 bg-white rounded-full" />
                           )}
                         </div>
                       </div>
-                      <div
-                        className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                          selectedPackage === index
-                            ? 'border-[var(--color-primary)] bg-[var(--color-primary)]'
-                            : 'border-gray-300'
-                        }`}
-                      >
-                        {selectedPackage === index && (
-                          <div className="w-2 h-2 bg-white rounded-full" />
+                      <ul className="space-y-0.5 text-xs text-gray-600 mt-2">
+                        {pkg.features.slice(0, 3).map((feature, fIndex) => (
+                          <li key={fIndex} className="flex items-start gap-1">
+                            <CheckCircle className="w-3 h-3 text-green-500 flex-shrink-0 mt-0.5" />
+                            <span className="line-clamp-1">{feature}</span>
+                          </li>
+                        ))}
+                        {pkg.features.length > 3 && (
+                          <li className="text-xs text-gray-500 pl-4">+{pkg.features.length - 3} more</li>
                         )}
-                      </div>
+                      </ul>
                     </div>
-                    <ul className="space-y-1 text-sm text-gray-600">
-                      {pkg.features.map((feature, fIndex) => (
-                        <li key={fIndex} className="flex items-start gap-1">
-                          <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                          <span>{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
 
-              <button 
-                onClick={() => router.push('/cart')}
-                className="w-full bg-[var(--color-primary)] text-white py-3 rounded-lg font-bold hover:opacity-90 transition-colors mb-3"
-              >
-                Book Now - ৳{service.packages[selectedPackage].price}
-              </button>
-
-              <div className="flex items-start gap-2 text-xs text-gray-600 bg-blue-50 p-3 rounded-lg">
-                <Info className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                <p>Our professional will arrive at your doorstep within your selected time slot. Payment after service completion.</p>
+              {/* Fixed Book Now Button Section */}
+              <div className="p-4 border-t border-gray-200 bg-white">
+                <div className="mb-3">
+                  <p className="text-xs text-gray-600 mb-1">Selected Package</p>
+                  <p className="font-semibold text-sm text-gray-900">{service.packages[selectedPackage].name}</p>
+                  <p className="text-xl font-bold text-[var(--color-primary)] mt-1">
+                    ৳{service.packages[selectedPackage].price}
+                    {service.packages[selectedPackage].originalPrice && (
+                      <span className="text-sm text-gray-400 line-through ml-2">
+                        ৳{service.packages[selectedPackage].originalPrice}
+                      </span>
+                    )}
+                  </p>
+                </div>
+                <button 
+                  onClick={() => router.push('/cart')}
+                  className="w-full bg-[var(--color-primary)] text-white py-3 rounded-lg font-bold hover:opacity-90 transition-colors shadow-md mb-2"
+                >
+                  Book Now
+                </button>
+                <button 
+                  onClick={() => router.push(`/services/${slug}/consultation`)}
+                  className="w-full bg-white border-2 border-[var(--color-primary)] text-[var(--color-primary)] py-3 rounded-lg font-bold hover:bg-[var(--color-neutral)] transition-colors mb-2"
+                >
+                  Book a free consultation
+                </button>
+                <div className="flex items-start gap-2 text-xs text-gray-600 bg-blue-50 p-2 rounded-lg">
+                  <Info className="w-3 h-3 text-blue-600 flex-shrink-0 mt-0.5" />
+                  <p className="leading-tight">Professional arrives at your doorstep. Payment after service completion.</p>
+                </div>
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Mobile Floating Book Now Button */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50 lg:hidden">
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex items-center justify-between mb-2">
+            <div>
+              <p className="text-xs text-gray-600">{service.packages[selectedPackage].name}</p>
+              <p className="text-lg font-bold text-[var(--color-primary)]">
+                ৳{service.packages[selectedPackage].price}
+              </p>
+            </div>
+            <button 
+              onClick={() => router.push('/cart')}
+              className="bg-[var(--color-primary)] text-white px-6 py-3 rounded-lg font-bold hover:opacity-90 transition-colors"
+            >
+              Book Now
+            </button>
+          </div>
+          <button 
+            onClick={() => router.push(`/services/${slug}/consultation`)}
+            className="w-full bg-white border-2 border-[var(--color-primary)] text-[var(--color-primary)] py-2.5 rounded-lg font-bold hover:bg-[var(--color-neutral)] transition-colors"
+          >
+            Book a free consultation
+          </button>
         </div>
       </div>
 

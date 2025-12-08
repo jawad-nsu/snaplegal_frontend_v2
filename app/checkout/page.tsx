@@ -1,13 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
-import { MapPin, ShoppingCart, ChevronDown, ChevronUp, ChevronRight, CreditCard, User } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { ChevronDown, ChevronUp, ChevronRight, CreditCard, DollarSign } from 'lucide-react'
 import Navbar from '@/components/navbar'
 
-type PaymentMethod = 'bkash' | 'other-cards' | 'city-bank' | 'pay-later'
+type PaymentMethod = 'bkash' | 'card' | 'cash'
 
 export default function CheckoutPage() {
+  const router = useRouter()
   const [selectedPayment, setSelectedPayment] = useState<PaymentMethod>('bkash')
   const [showBreakdown, setShowBreakdown] = useState(false)
 
@@ -54,7 +55,7 @@ export default function CheckoutPage() {
 
             <button
               onClick={() => setShowBreakdown(!showBreakdown)}
-              className="flex items-center gap-1 text-red-600 hover:text-red-700 mb-4"
+              className="flex items-center gap-1 text-[var(--color-primary)] hover:opacity-80 mb-4"
             >
               {showBreakdown ? 'Hide breakdown' : 'Show breakdown'}
               {showBreakdown ? (
@@ -131,74 +132,59 @@ export default function CheckoutPage() {
                   value="bkash"
                   checked={selectedPayment === 'bkash'}
                   onChange={(e) => setSelectedPayment(e.target.value as PaymentMethod)}
-                  className="w-5 h-5 text-pink-600 border-gray-300 focus:ring-pink-500"
+                  className="w-5 h-5 text-[var(--color-primary)] border-gray-300 focus:ring-[var(--color-primary)]"
                 />
                 <div className="flex items-center gap-3 flex-1">
-                  <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-pink-600 rounded-lg flex items-center justify-center">
+                  <div className="w-12 h-12 bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary)]/80 rounded-lg flex items-center justify-center">
                     <span className="text-white font-bold text-sm">bKash</span>
                   </div>
                   <span className="font-medium text-gray-900">bKash</span>
                 </div>
               </label>
 
-              {/* Other Cards */}
+              {/* Card */}
               <label className="flex items-center gap-4 p-4 border-2 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
                 <input
                   type="radio"
                   name="payment"
-                  value="other-cards"
-                  checked={selectedPayment === 'other-cards'}
+                  value="card"
+                  checked={selectedPayment === 'card'}
                   onChange={(e) => setSelectedPayment(e.target.value as PaymentMethod)}
-                  className="w-5 h-5 text-pink-600 border-gray-300 focus:ring-pink-500"
+                  className="w-5 h-5 text-[var(--color-primary)] border-gray-300 focus:ring-[var(--color-primary)]"
                 />
                 <div className="flex items-center gap-3 flex-1">
                   <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                     <CreditCard className="w-6 h-6 text-blue-600" />
                   </div>
-                  <span className="font-medium text-gray-900">Other Cards</span>
+                  <span className="font-medium text-gray-900">Card</span>
                 </div>
               </label>
 
-              {/* City Bank (American Express) */}
+              {/* Cash on Delivery */}
               <label className="flex items-center gap-4 p-4 border-2 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
                 <input
                   type="radio"
                   name="payment"
-                  value="city-bank"
-                  checked={selectedPayment === 'city-bank'}
+                  value="cash"
+                  checked={selectedPayment === 'cash'}
                   onChange={(e) => setSelectedPayment(e.target.value as PaymentMethod)}
-                  className="w-5 h-5 text-pink-600 border-gray-300 focus:ring-pink-500"
+                  className="w-5 h-5 text-[var(--color-primary)] border-gray-300 focus:ring-[var(--color-primary)]"
                 />
                 <div className="flex items-center gap-3 flex-1">
-                  <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-                    <span className="text-red-600 font-semibold text-xs text-center">city bank</span>
+                  <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                    <DollarSign className="w-6 h-6 text-green-600" />
                   </div>
-                  <span className="font-medium text-gray-900">City Bank (American Express)</span>
-                </div>
-              </label>
-
-              {/* Pay Later */}
-              <label className="flex items-center gap-4 p-4 border-2 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                <input
-                  type="radio"
-                  name="payment"
-                  value="pay-later"
-                  checked={selectedPayment === 'pay-later'}
-                  onChange={(e) => setSelectedPayment(e.target.value as PaymentMethod)}
-                  className="w-5 h-5 text-pink-600 border-gray-300 focus:ring-pink-500"
-                />
-                <div className="flex items-center gap-3 flex-1">
-                  <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
-                    <span className="text-white font-bold text-lg">৳</span>
-                  </div>
-                  <span className="font-medium text-gray-900">Pay Later</span>
+                  <span className="font-medium text-gray-900">Cash on Delivery</span>
                 </div>
               </label>
             </div>
 
-            {/* Make Payment Button */}
-            <button className="w-full bg-red-600 text-white py-4 rounded-lg font-bold hover:bg-red-700 transition-colors">
-              Make Payment
+            {/* Proceed Button */}
+            <button 
+              onClick={() => router.push('/account/service-orders/D-1108041')}
+              className="w-full bg-[var(--color-primary)] text-white py-4 rounded-lg font-bold hover:opacity-90 transition-colors"
+            >
+              Proceed
             </button>
           </div>
         </div>

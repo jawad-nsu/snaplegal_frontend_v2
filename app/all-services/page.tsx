@@ -3,6 +3,8 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { Star, Clock } from 'lucide-react'
 import Navbar from '@/components/navbar'
 import Footer from '@/components/footer'
 
@@ -16,16 +18,28 @@ const serviceCategories = [
         title: 'AC Servicing',
         image: '/plumbing.jpg',
         slug: 'ac-servicing',
+        rating: '4.9',
+        description: 'Professional AC servicing and maintenance to keep your air conditioner running efficiently.',
+        deliveryTime: '2-3 hours',
+        startingPrice: '৳800',
       },
       {
         title: 'AC Doctor',
         image: '/moving_service.webp',
         slug: 'ac-doctor',
+        rating: '4.8',
+        description: 'Expert AC diagnosis and repair services for all your air conditioning needs.',
+        deliveryTime: '1-2 hours',
+        startingPrice: '৳600',
       },
       {
         title: 'AC Combo Packages',
         image: '/cleaning_service.jpg',
         slug: 'ac-combo-packages',
+        rating: '4.7',
+        description: 'Complete AC maintenance packages with multiple services at discounted rates.',
+        deliveryTime: '3-4 hours',
+        startingPrice: '৳1,200',
       },
     ],
     services: [
@@ -49,11 +63,19 @@ const serviceCategories = [
             title: 'Fridge Servicing',
             image: '/plumbing.jpg',
             slug: 'fridge-servicing',
+            rating: '4.8',
+            description: 'Professional fridge servicing and maintenance to keep your refrigerator running efficiently.',
+            deliveryTime: '2-3 hours',
+            startingPrice: '৳700',
           },
           {
             title: 'Fridge Gas Refill',
             image: '/moving_service.webp',
             slug: 'fridge-gas-refill',
+            rating: '4.7',
+            description: 'Expert fridge gas refill service to restore cooling performance.',
+            deliveryTime: '1-2 hours',
+            startingPrice: '৳500',
           },
         ],
         services: [
@@ -71,11 +93,19 @@ const serviceCategories = [
             title: 'Microwave Servicing',
             image: '/cleaning_service.jpg',
             slug: 'microwave-servicing',
+            rating: '4.6',
+            description: 'Complete microwave servicing and repair for all brands and models.',
+            deliveryTime: '1-2 hours',
+            startingPrice: '৳600',
           },
           {
             title: 'Microwave Installation',
             image: '/gas-cooker-repair.jpg',
             slug: 'microwave-installation',
+            rating: '4.8',
+            description: 'Professional microwave installation service with safety checks.',
+            deliveryTime: '1 hour',
+            startingPrice: '৳400',
           },
         ],
         services: [
@@ -90,16 +120,28 @@ const serviceCategories = [
         title: 'Exclusive Combo Offer',
         image: '/gas-cooker-repair.jpg',
         slug: 'exclusive-combo-offer',
+        rating: '4.9',
+        description: 'Special combo packages for multiple appliance services at discounted rates.',
+        deliveryTime: '4-6 hours',
+        startingPrice: '৳2,000',
       },
       {
         title: 'Oven Services',
         image: '/plumbing.jpg',
         slug: 'oven-services',
+        rating: '4.7',
+        description: 'Professional oven repair, servicing, and installation services.',
+        deliveryTime: '2-3 hours',
+        startingPrice: '৳800',
       },
       {
         title: 'TV Services',
         image: '/moving_service.webp',
         slug: 'tv-services',
+        rating: '4.8',
+        description: 'Expert TV repair, installation, and maintenance services for all brands.',
+        deliveryTime: '2-4 hours',
+        startingPrice: '৳900',
       },
     ],
     services: [
@@ -124,16 +166,28 @@ const serviceCategories = [
         title: 'Home Cleaning',
         image: '/cleaning_service.jpg',
         slug: 'home-cleaning',
+        rating: '4.7',
+        description: 'Comprehensive home cleaning services for a spotless and fresh living space.',
+        deliveryTime: '3-5 hours',
+        startingPrice: '৳1,500',
       },
       {
         title: 'Cleaning Combo',
         image: '/gas-cooker-repair.jpg',
         slug: 'cleaning-combo',
+        rating: '4.8',
+        description: 'Special combo packages combining multiple cleaning services at great value.',
+        deliveryTime: '4-6 hours',
+        startingPrice: '৳2,500',
       },
       {
         title: 'Furniture & Carpet Cleaning',
         image: '/plumbing.jpg',
         slug: 'furniture-carpet-cleaning',
+        rating: '4.6',
+        description: 'Deep cleaning services for furniture, carpets, and upholstery.',
+        deliveryTime: '2-4 hours',
+        startingPrice: '৳1,200',
       },
     ],
     services: [
@@ -153,16 +207,28 @@ const serviceCategories = [
         title: 'Nail Extension',
         image: '/plumbing.jpg',
         slug: 'nail-extension',
+        rating: '4.8',
+        description: 'Professional nail extension services with premium quality materials.',
+        deliveryTime: '2-3 hours',
+        startingPrice: '৳1,500',
       },
       {
         title: 'Salon Care',
         image: '/moving_service.webp',
         slug: 'salon-care',
+        rating: '4.7',
+        description: 'Complete salon services including hair, makeup, and beauty treatments.',
+        deliveryTime: '2-4 hours',
+        startingPrice: '৳1,200',
       },
       {
         title: 'At-home Hair Studio',
         image: '/cleaning_service.jpg',
         slug: 'at-home-hair-studio',
+        rating: '4.9',
+        description: 'Premium hair styling and treatment services at your doorstep.',
+        deliveryTime: '1-2 hours',
+        startingPrice: '৳800',
       },
     ],
     services: [
@@ -186,16 +252,28 @@ const serviceCategories = [
         title: 'House Shifting',
         image: '/moving_service.webp',
         slug: 'house-shifting',
+        rating: '4.9',
+        description: 'Complete house shifting solutions with packing, moving, and unpacking services.',
+        deliveryTime: 'Same day',
+        startingPrice: '৳3,000',
       },
       {
         title: 'Office Shifting',
         image: '/gas-cooker-repair.jpg',
         slug: 'office-shifting',
+        rating: '4.8',
+        description: 'Professional office relocation services with minimal business disruption.',
+        deliveryTime: '1-2 days',
+        startingPrice: '৳5,000',
       },
       {
         title: 'Local Shifting',
         image: '/moving_service.webp',
         slug: 'local-shifting',
+        rating: '4.7',
+        description: 'Affordable local shifting services within the city.',
+        deliveryTime: 'Same day',
+        startingPrice: '৳2,000',
       },
     ],
     services: [
@@ -214,16 +292,28 @@ const serviceCategories = [
         title: 'Plumbing Services',
         image: '/plumbing.jpg',
         slug: 'plumbing-services',
+        rating: '4.8',
+        description: 'Professional plumbing and sanitary services for your home. Expert technicians available 24/7.',
+        deliveryTime: '2-4 hours',
+        startingPrice: '৳500',
       },
       {
         title: 'Electrical Services',
         image: '/moving_service.webp',
         slug: 'electrical-services',
+        rating: '4.7',
+        description: 'Expert electrical repair, installation, and maintenance services.',
+        deliveryTime: '2-3 hours',
+        startingPrice: '৳600',
       },
       {
         title: 'Painting Services',
         image: '/cleaning_service.jpg',
         slug: 'painting-services',
+        rating: '4.6',
+        description: 'Professional interior and exterior painting services with quality materials.',
+        deliveryTime: '1-2 days',
+        startingPrice: '৳2,500',
       },
     ],
     services: [
@@ -239,7 +329,35 @@ const serviceCategories = [
 
 
 export default function AllServicesPage() {
+  const router = useRouter()
   const [activeSection, setActiveSection] = useState('')
+
+  // Helper function to convert service title to slug
+  const getServiceSlug = (title: string): string => {
+    // Try to find the slug from the service categories
+    for (const category of serviceCategories) {
+      if (category.featured) {
+        const found = category.featured.find(s => s.title === title)
+        if (found) return found.slug
+      }
+      if (category.subCategories) {
+        for (const subCategory of category.subCategories) {
+          if (subCategory.featured) {
+            const found = subCategory.featured.find(s => s.title === title)
+            if (found) return found.slug
+          }
+        }
+      }
+    }
+    // Fallback to generating slug from title
+    return title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+  }
+
+  const handleBookNow = (e: React.MouseEvent, serviceTitle: string) => {
+    e.stopPropagation() // Prevent card onClick from firing
+    const slug = getServiceSlug(serviceTitle)
+    router.push(`/services/${slug}`)
+  }
 
   useEffect(() => {
     const updateActiveSection = () => {
@@ -417,27 +535,64 @@ export default function AllServicesPage() {
 
                   {/* Featured Services Grid */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    {category.featured.map((service, index) => (
-                     <Link
+                    {category.featured.map((service, index) => {
+                      const serviceWithDetails = service as typeof service & {
+                        rating?: string
+                        description?: string
+                        deliveryTime?: string
+                        startingPrice?: string
+                      }
+
+                      return (
+                        <div
                           key={index}
-                          href={`/services/${service.slug}`}
-                          className="group relative overflow-hidden rounded-lg bg-gray-100 hover:shadow-lg transition-shadow"
-                      >
-                        <div className="aspect-[4/3] relative">
-                          <Image
-                            src={service.image || "/placeholder.svg"}
-                            alt={service.title}
-                            fill
-                            className="object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
+                          className="group cursor-pointer rounded-2xl overflow-hidden bg-white shadow-md hover:shadow-2xl transition-all duration-300 border border-gray-100"
+                          onClick={() => router.push(`/services/${service.slug}`)}
+                        >
+                          <div className="relative h-56 overflow-hidden p-3">
+                            <div className="relative h-full w-full rounded-xl overflow-hidden">
+                              <Image
+                                src={service.image || "/placeholder.svg"}
+                                alt={service.title}
+                                fill
+                                className="object-cover group-hover:scale-110 transition-transform duration-300"
+                              />
+                            </div>
+                          </div>
+                          <div className="p-5">
+                            <div className="flex items-start justify-between mb-2">
+                              <h3 className="font-bold text-lg text-gray-900 leading-tight">{service.title}</h3>
+                              {serviceWithDetails.rating && (
+                                <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg flex-shrink-0 ml-2">
+                                  <Star size={16} className="fill-yellow-400 text-yellow-400" />
+                                  <span className="font-semibold text-sm">{serviceWithDetails.rating}</span>
+                                </div>
+                              )}
+                            </div>
+                            {serviceWithDetails.description && (
+                              <p className="text-sm text-gray-600 mb-4 line-clamp-2">{serviceWithDetails.description}</p>
+                            )}
+                            <div className="flex items-center justify-between mb-4">
+                              {serviceWithDetails.deliveryTime && (
+                                <span className="text-sm text-gray-600">
+                                  <Clock size={16} className="inline mr-1" />
+                                  {serviceWithDetails.deliveryTime}
+                                </span>
+                              )}
+                              {serviceWithDetails.startingPrice && (
+                                <span className="text-sm font-semibold text-gray-900">Starting at {serviceWithDetails.startingPrice}</span>
+                              )}
+                            </div>
+                            <button 
+                              onClick={(e) => handleBookNow(e, service.title)}
+                              className="w-full mt-6 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
+                            >
+                              Book Now
+                            </button>
+                          </div>
                         </div>
-                        <div className="p-4 text-center">
-                          <h3 className="font-semibold text-gray-900">
-                            {service.title}
-                          </h3>
-                        </div>
-                      </Link>
-                    ))}
+                      )
+                    })}
                   </div>
 
                   {/* All Services List */}
@@ -471,27 +626,64 @@ export default function AllServicesPage() {
                     {/* Featured Services Grid */}
                     {subCategory.featured && subCategory.featured.length > 0 && (
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                        {subCategory.featured.map((service, index) => (
-                         <Link
+                        {subCategory.featured.map((service, index) => {
+                          const serviceWithDetails = service as typeof service & {
+                            rating?: string
+                            description?: string
+                            deliveryTime?: string
+                            startingPrice?: string
+                          }
+
+                          return (
+                            <div
                               key={index}
-                              href={`/services/${service.slug}`}
-                              className="group relative overflow-hidden rounded-lg bg-gray-100 hover:shadow-lg transition-shadow"
-                          >
-                            <div className="aspect-[4/3] relative">
-                              <Image
-                                src={service.image || "/placeholder.svg"}
-                                alt={service.title}
-                                fill
-                                className="object-cover group-hover:scale-105 transition-transform duration-300"
-                              />
+                              className="group cursor-pointer rounded-2xl overflow-hidden bg-white shadow-md hover:shadow-2xl transition-all duration-300 border border-gray-100"
+                              onClick={() => router.push(`/services/${service.slug}`)}
+                            >
+                              <div className="relative h-56 overflow-hidden p-3">
+                                <div className="relative h-full w-full rounded-xl overflow-hidden">
+                                  <Image
+                                    src={service.image || "/placeholder.svg"}
+                                    alt={service.title}
+                                    fill
+                                    className="object-cover group-hover:scale-110 transition-transform duration-300"
+                                  />
+                                </div>
+                              </div>
+                              <div className="p-5">
+                                <div className="flex items-start justify-between mb-2">
+                                  <h3 className="font-bold text-lg text-gray-900 leading-tight">{service.title}</h3>
+                                  {serviceWithDetails.rating && (
+                                    <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg flex-shrink-0 ml-2">
+                                      <Star size={16} className="fill-yellow-400 text-yellow-400" />
+                                      <span className="font-semibold text-sm">{serviceWithDetails.rating}</span>
+                                    </div>
+                                  )}
+                                </div>
+                                {serviceWithDetails.description && (
+                                  <p className="text-sm text-gray-600 mb-4 line-clamp-2">{serviceWithDetails.description}</p>
+                                )}
+                                <div className="flex items-center justify-between mb-4">
+                                  {serviceWithDetails.deliveryTime && (
+                                    <span className="text-sm text-gray-600">
+                                      <Clock size={16} className="inline mr-1" />
+                                      {serviceWithDetails.deliveryTime}
+                                    </span>
+                                  )}
+                                  {serviceWithDetails.startingPrice && (
+                                    <span className="text-sm font-semibold text-gray-900">Starting at {serviceWithDetails.startingPrice}</span>
+                                  )}
+                                </div>
+                                <button 
+                                  onClick={(e) => handleBookNow(e, service.title)}
+                                  className="w-full mt-6 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
+                                >
+                                  Book Now
+                                </button>
+                              </div>
                             </div>
-                            <div className="p-4 text-center">
-                              <h3 className="font-semibold text-gray-900">
-                                {service.title}
-                              </h3>
-                            </div>
-                          </Link>
-                        ))}
+                          )
+                        })}
                       </div>
                     )}
 
