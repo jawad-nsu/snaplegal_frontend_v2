@@ -22,7 +22,8 @@ import {
   MessageCircle,
   CheckCircle,
   XCircle as XCircleIcon,
-  Send
+  Send,
+  ShoppingCart
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -122,7 +123,37 @@ interface ChatConversation {
   messages: ChatMessage[]
 }
 
-type TabType = 'users' | 'vendors' | 'categories' | 'subcategories' | 'services' | 'service-requests' | 'chats'
+type OrderStatus = 'Submitted' | 'Confirmed' | 'Assigned' | 'In-Progress' | 'Review' | 'Delivered' | 'Closed'
+
+interface Order {
+  id: string
+  orderNumber: string
+  serviceName: string
+  vendorId: string
+  vendorName: string
+  clientId: string
+  clientName: string
+  clientPhone: string
+  clientEmail: string
+  clientAddress: string
+  status: OrderStatus
+  orderDate: string
+  scheduledDate?: string
+  scheduledTime?: string
+  subtotal: number
+  additionalCost: number
+  deliveryCharge: number
+  discount: number
+  total: number
+  paymentStatus: 'pending' | 'paid' | 'refunded'
+  items: Array<{
+    name: string
+    details: string
+    price: number
+  }>
+}
+
+type TabType = 'users' | 'vendors' | 'categories' | 'subcategories' | 'services' | 'service-requests' | 'chats' | 'orders'
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<TabType>('users')
@@ -236,6 +267,197 @@ export default function AdminDashboard() {
   const [rejectionReason, setRejectionReason] = useState<Record<string, string>>({})
   const [showRejectModal, setShowRejectModal] = useState<string | null>(null)
   const [adminChatMessage, setAdminChatMessage] = useState('')
+
+  // Orders data
+  const [orders, setOrders] = useState<Order[]>([
+    {
+      id: '1',
+      orderNumber: 'ORD-001',
+      serviceName: 'AC Servicing',
+      vendorId: '1',
+      vendorName: 'AC Repair Pro',
+      clientId: '1',
+      clientName: 'Ahmed Rahman',
+      clientPhone: '+8801712345678',
+      clientEmail: 'ahmed@example.com',
+      clientAddress: '123 Main Street, Gulshan, Dhaka',
+      status: 'In-Progress',
+      orderDate: '2024-01-15',
+      scheduledDate: '2024-01-16',
+      scheduledTime: '9:00 AM - 10:00 AM',
+      subtotal: 800,
+      additionalCost: 0,
+      deliveryCharge: 0,
+      discount: 0,
+      total: 800,
+      paymentStatus: 'paid',
+      items: [
+        { name: 'AC Check Up', details: '1 - 2.5 Ton', price: 800 }
+      ]
+    },
+    {
+      id: '2',
+      orderNumber: 'ORD-002',
+      serviceName: 'Home Cleaning',
+      vendorId: '2',
+      vendorName: 'Home Cleaners BD',
+      clientId: '2',
+      clientName: 'Fatima Khan',
+      clientPhone: '+8801723456789',
+      clientEmail: 'fatima@example.com',
+      clientAddress: '456 Park Avenue, Chittagong',
+      status: 'Confirmed',
+      orderDate: '2024-01-16',
+      scheduledDate: '2024-01-17',
+      scheduledTime: '2:00 PM - 5:00 PM',
+      subtotal: 1500,
+      additionalCost: 200,
+      deliveryCharge: 0,
+      discount: 100,
+      total: 1600,
+      paymentStatus: 'paid',
+      items: [
+        { name: 'Deep Cleaning', details: '3 Bedroom Apartment', price: 1500 }
+      ]
+    },
+    {
+      id: '3',
+      orderNumber: 'ORD-003',
+      serviceName: 'Plumbing Services',
+      vendorId: '3',
+      vendorName: 'Plumbing Experts',
+      clientId: '3',
+      clientName: 'Karim Uddin',
+      clientPhone: '+8801734567890',
+      clientEmail: 'karim@example.com',
+      clientAddress: '789 Oak Road, Sylhet',
+      status: 'Assigned',
+      orderDate: '2024-01-17',
+      scheduledDate: '2024-01-18',
+      scheduledTime: '10:00 AM - 12:00 PM',
+      subtotal: 500,
+      additionalCost: 0,
+      deliveryCharge: 0,
+      discount: 0,
+      total: 500,
+      paymentStatus: 'pending',
+      items: [
+        { name: 'Pipe Repair', details: 'Kitchen Sink', price: 500 }
+      ]
+    },
+    {
+      id: '4',
+      orderNumber: 'ORD-004',
+      serviceName: 'Electrical Services',
+      vendorId: '1',
+      vendorName: 'AC Repair Pro',
+      clientId: '4',
+      clientName: 'Sadia Rahman',
+      clientPhone: '+8801745678901',
+      clientEmail: 'sadia@example.com',
+      clientAddress: '321 Elm Street, Dhaka',
+      status: 'Review',
+      orderDate: '2024-01-18',
+      scheduledDate: '2024-01-19',
+      scheduledTime: '11:00 AM - 1:00 PM',
+      subtotal: 1200,
+      additionalCost: 300,
+      deliveryCharge: 0,
+      discount: 150,
+      total: 1350,
+      paymentStatus: 'paid',
+      items: [
+        { name: 'Wiring Installation', details: 'Living Room', price: 1200 }
+      ]
+    },
+    {
+      id: '5',
+      orderNumber: 'ORD-005',
+      serviceName: 'House Shifting',
+      vendorId: '2',
+      vendorName: 'Home Cleaners BD',
+      clientId: '5',
+      clientName: 'Hasan Ali',
+      clientPhone: '+8801756789012',
+      clientEmail: 'hasan@example.com',
+      clientAddress: '654 Pine Avenue, Dhaka',
+      status: 'Delivered',
+      orderDate: '2024-01-19',
+      scheduledDate: '2024-01-20',
+      scheduledTime: '8:00 AM - 12:00 PM',
+      subtotal: 3000,
+      additionalCost: 500,
+      deliveryCharge: 0,
+      discount: 200,
+      total: 3300,
+      paymentStatus: 'paid',
+      items: [
+        { name: 'Full House Shifting', details: '3 Bedroom House', price: 3000 }
+      ]
+    },
+    {
+      id: '6',
+      orderNumber: 'ORD-006',
+      serviceName: 'Salon Care',
+      vendorId: '3',
+      vendorName: 'Plumbing Experts',
+      clientId: '6',
+      clientName: 'Nadia Islam',
+      clientPhone: '+8801767890123',
+      clientEmail: 'nadia@example.com',
+      clientAddress: '987 Maple Street, Chittagong',
+      status: 'Submitted',
+      orderDate: '2024-01-20',
+      subtotal: 1200,
+      additionalCost: 0,
+      deliveryCharge: 0,
+      discount: 0,
+      total: 1200,
+      paymentStatus: 'pending',
+      items: [
+        { name: 'Haircut & Styling', details: 'Women', price: 1200 }
+      ]
+    },
+  ])
+
+  // Order filters
+  const [orderSearch, setOrderSearch] = useState('')
+  const [orderStatusFilter, setOrderStatusFilter] = useState<string>('all')
+  const [orderPaymentStatusFilter, setOrderPaymentStatusFilter] = useState<string>('all')
+  const [orderDateFrom, setOrderDateFrom] = useState('')
+  const [orderDateTo, setOrderDateTo] = useState('')
+
+  // Order assignment state
+  const [showAssignVendorModal, setShowAssignVendorModal] = useState(false)
+  const [selectedOrderForAssignment, setSelectedOrderForAssignment] = useState<Order | null>(null)
+  const [selectedVendorId, setSelectedVendorId] = useState<string>('')
+
+  const handleAssignVendor = (order: Order) => {
+    setSelectedOrderForAssignment(order)
+    setSelectedVendorId(order.vendorId || '')
+    setShowAssignVendorModal(true)
+  }
+
+  const handleConfirmAssignment = () => {
+    if (selectedOrderForAssignment && selectedVendorId) {
+      const selectedVendor = vendors.find(v => v.id === selectedVendorId)
+      if (selectedVendor) {
+        setOrders(orders.map(order => 
+          order.id === selectedOrderForAssignment.id
+            ? { 
+                ...order, 
+                vendorId: selectedVendorId, 
+                vendorName: selectedVendor.name,
+                status: order.status === 'Submitted' ? 'Assigned' : order.status
+              }
+            : order
+        ))
+        setShowAssignVendorModal(false)
+        setSelectedOrderForAssignment(null)
+        setSelectedVendorId('')
+      }
+    }
+  }
 
   // Form states
   const [userForm, setUserForm] = useState<{ name: string; email: string; phone: string; status: 'active' | 'inactive' }>({ name: '', email: '', phone: '', status: 'active' })
@@ -870,6 +1092,278 @@ export default function AdminDashboard() {
 
   const selectedChat = selectedChatOrderId ? chatConversations.find(c => c.orderId === selectedChatOrderId) : null
 
+  // Filter orders
+  const filteredOrders = orders.filter(order => {
+    const matchesSearch = orderSearch === '' ||
+      order.orderNumber.toLowerCase().includes(orderSearch.toLowerCase()) ||
+      order.serviceName.toLowerCase().includes(orderSearch.toLowerCase()) ||
+      order.vendorName.toLowerCase().includes(orderSearch.toLowerCase()) ||
+      order.clientName.toLowerCase().includes(orderSearch.toLowerCase()) ||
+      order.clientPhone.includes(orderSearch) ||
+      order.clientEmail.toLowerCase().includes(orderSearch.toLowerCase())
+    const matchesStatus = orderStatusFilter === 'all' || order.status === orderStatusFilter
+    const matchesPaymentStatus = orderPaymentStatusFilter === 'all' || order.paymentStatus === orderPaymentStatusFilter
+    const matchesDateFrom = orderDateFrom === '' || order.orderDate >= orderDateFrom
+    const matchesDateTo = orderDateTo === '' || order.orderDate <= orderDateTo
+    return matchesSearch && matchesStatus && matchesPaymentStatus && matchesDateFrom && matchesDateTo
+  })
+
+  const clearOrderFilters = () => {
+    setOrderSearch('')
+    setOrderStatusFilter('all')
+    setOrderPaymentStatusFilter('all')
+    setOrderDateFrom('')
+    setOrderDateTo('')
+  }
+
+  const renderOrdersTab = () => (
+    <div className="space-y-4">
+      {/* Filters */}
+      <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+        <div className="flex items-center gap-2 mb-4">
+          <Filter size={20} className="text-gray-500" />
+          <h3 className="font-semibold text-gray-700">Filters</h3>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Search</label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+              <Input
+                value={orderSearch}
+                onChange={(e) => setOrderSearch(e.target.value)}
+                placeholder="Search orders..."
+                className="pl-10"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Order Status</label>
+            <select
+              value={orderStatusFilter}
+              onChange={(e) => setOrderStatusFilter(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            >
+              <option value="all">All Status</option>
+              <option value="Submitted">Submitted</option>
+              <option value="Confirmed">Confirmed</option>
+              <option value="Assigned">Assigned</option>
+              <option value="In-Progress">In-Progress</option>
+              <option value="Review">Review</option>
+              <option value="Delivered">Delivered</option>
+              <option value="Closed">Closed</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Payment Status</label>
+            <select
+              value={orderPaymentStatusFilter}
+              onChange={(e) => setOrderPaymentStatusFilter(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            >
+              <option value="all">All Payment</option>
+              <option value="pending">Pending</option>
+              <option value="paid">Paid</option>
+              <option value="refunded">Refunded</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Date From</label>
+            <Input
+              type="date"
+              value={orderDateFrom}
+              onChange={(e) => setOrderDateFrom(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Date To</label>
+            <Input
+              type="date"
+              value={orderDateTo}
+              onChange={(e) => setOrderDateTo(e.target.value)}
+            />
+          </div>
+        </div>
+        <div className="mt-4 flex items-center justify-between">
+          <div className="text-sm text-gray-500">
+            Showing {filteredOrders.length} of {orders.length} orders
+          </div>
+          {(orderSearch || orderStatusFilter !== 'all' || orderPaymentStatusFilter !== 'all' || orderDateFrom || orderDateTo) && (
+            <Button
+              variant="outline"
+              onClick={clearOrderFilters}
+            >
+              <XCircle size={16} className="mr-2" />
+              Clear Filters
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Orders Table */}
+      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order #</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vendor</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {filteredOrders.length === 0 ? (
+                <tr>
+                  <td colSpan={9} className="px-6 py-8 text-center text-gray-500">
+                    No orders found matching the filters
+                  </td>
+                </tr>
+              ) : (
+                filteredOrders.map((order) => (
+                  <tr key={order.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{order.orderNumber}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{order.serviceName}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{order.vendorName}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm">
+                        <div className="font-medium text-gray-900">{order.clientName}</div>
+                        <div className="text-gray-500">{order.clientPhone}</div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        order.status === 'Delivered' ? 'bg-green-100 text-green-800' :
+                        order.status === 'Closed' ? 'bg-gray-100 text-gray-800' :
+                        order.status === 'In-Progress' ? 'bg-blue-100 text-blue-800' :
+                        order.status === 'Review' ? 'bg-yellow-100 text-yellow-800' :
+                        order.status === 'Confirmed' || order.status === 'Assigned' ? 'bg-purple-100 text-purple-800' :
+                        'bg-orange-100 text-orange-800'
+                      }`}>
+                        {order.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        order.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' :
+                        order.paymentStatus === 'refunded' ? 'bg-red-100 text-red-800' :
+                        'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {order.paymentStatus}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">৳{order.total.toLocaleString()}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <div>{order.orderDate}</div>
+                      {order.scheduledDate && (
+                        <div className="text-xs text-gray-400">Scheduled: {order.scheduledDate}</div>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => {
+                            // View order details - could open a modal or navigate
+                            alert(`Order Details:\n\nOrder: ${order.orderNumber}\nService: ${order.serviceName}\nVendor: ${order.vendorName}\nClient: ${order.clientName}\nStatus: ${order.status}\nTotal: ৳${order.total}\n\nItems:\n${order.items.map(item => `- ${item.name} (${item.details}): ৳${item.price}`).join('\n')}`)
+                          }}
+                          className="text-indigo-600 hover:text-indigo-900"
+                        >
+                          View
+                        </button>
+                        {(order.status === 'Submitted' || order.status === 'Confirmed' || !order.vendorId) && (
+                          <button
+                            onClick={() => handleAssignVendor(order)}
+                            className="text-green-600 hover:text-green-900 font-medium"
+                            title="Assign/Route to Vendor"
+                          >
+                            Assign
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Assign Vendor Modal */}
+      {showAssignVendorModal && selectedOrderForAssignment && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div className="flex items-center justify-between p-6 border-b">
+              <h2 className="text-xl font-bold">Assign Order to Vendor</h2>
+              <button onClick={() => {
+                setShowAssignVendorModal(false)
+                setSelectedOrderForAssignment(null)
+                setSelectedVendorId('')
+              }} className="text-gray-400 hover:text-gray-600">
+                <X size={24} />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <p className="text-sm text-gray-600 mb-2">
+                  <span className="font-medium">Order:</span> {selectedOrderForAssignment.orderNumber}
+                </p>
+                <p className="text-sm text-gray-600 mb-2">
+                  <span className="font-medium">Service:</span> {selectedOrderForAssignment.serviceName}
+                </p>
+                <p className="text-sm text-gray-600 mb-4">
+                  <span className="font-medium">Current Vendor:</span> {selectedOrderForAssignment.vendorName || 'Not Assigned'}
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Select Vendor</label>
+                <select
+                  value={selectedVendorId}
+                  onChange={(e) => setSelectedVendorId(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                >
+                  <option value="">Select a vendor...</option>
+                  {vendors
+                    .filter(v => v.status === 'active')
+                    .map((vendor) => (
+                      <option key={vendor.id} value={vendor.id}>
+                        {vendor.name} - {vendor.district} {vendor.serviceCategories.some(cat => cat === selectedOrderForAssignment.serviceName || selectedOrderForAssignment.serviceName.includes(cat)) ? '(✓)' : ''}
+                      </option>
+                    ))}
+                </select>
+                <p className="text-xs text-gray-500 mt-1">
+                  Only active vendors are shown. Vendors matching the service category are marked with (✓).
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 p-6 border-t">
+              <Button variant="outline" onClick={() => {
+                setShowAssignVendorModal(false)
+                setSelectedOrderForAssignment(null)
+                setSelectedVendorId('')
+              }}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleConfirmAssignment}
+                className="bg-[var(--color-primary)] hover:opacity-90"
+                disabled={!selectedVendorId}
+              >
+                <CheckCircle size={16} className="mr-2" />
+                Assign Vendor
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+
   const renderChatsTab = () => {
     const handleSendMessage = (orderId: string) => {
       if (!adminChatMessage.trim()) return
@@ -1334,6 +1828,15 @@ export default function AdminDashboard() {
               <MessageCircle size={20} />
               Chats
             </button>
+            <button
+              onClick={() => setActiveTab('orders')}
+              className={`px-6 py-4 font-medium text-sm flex items-center gap-2 border-b-2 transition-colors ${
+                activeTab === 'orders' ? 'border-[var(--color-primary)] text-[var(--color-primary)]' : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <ShoppingCart size={20} />
+              Orders
+            </button>
           </div>
         </div>
 
@@ -1348,8 +1851,9 @@ export default function AdminDashboard() {
               {activeTab === 'services' && 'All Services'}
               {activeTab === 'service-requests' && 'Vendor Service Requests'}
               {activeTab === 'chats' && 'Vendor-Client Chats'}
+              {activeTab === 'orders' && 'All Orders'}
             </h2>
-            {(activeTab !== 'service-requests' && activeTab !== 'chats') && (
+            {(activeTab !== 'service-requests' && activeTab !== 'chats' && activeTab !== 'orders') && (
               <Button onClick={handleAdd} className="bg-[var(--color-primary)] hover:opacity-90">
                 <Plus size={16} className="mr-2" />
                 Add New
@@ -1364,6 +1868,7 @@ export default function AdminDashboard() {
           {activeTab === 'services' && renderServicesTab()}
           {activeTab === 'service-requests' && renderServiceRequestsTab()}
           {activeTab === 'chats' && renderChatsTab()}
+          {activeTab === 'orders' && renderOrdersTab()}
         </div>
       </div>
 
