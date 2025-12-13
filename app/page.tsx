@@ -146,7 +146,7 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <section
-        className="w-full h-[300px] md:h-[500px] bg-cover bg-center bg-no-repeat"
+        className="relative w-full h-[300px] md:h-[500px] bg-cover bg-center bg-no-repeat"
           style={{
             backgroundImage: "url('/hero_banner.png')",
           }}
