@@ -1,13 +1,14 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Navbar from '@/components/navbar'
 
-export default function VerifyOTPPage() {
+function VerifyOTPContent() {
   const router = useRouter()
-  const searchParams = useSearchParams()
+  // searchParams available if needed for future use
+  const _searchParams = useSearchParams()
   const [verificationMethod, setVerificationMethod] = useState<'phone' | 'email' | 'whatsapp'>('phone')
   const [otp, setOtp] = useState(['', '', '', '', '', ''])
   const [isVerified, setIsVerified] = useState(false)
@@ -344,6 +345,20 @@ export default function VerifyOTPPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function VerifyOTPPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    }>
+      <VerifyOTPContent />
+    </Suspense>
   )
 }
 
