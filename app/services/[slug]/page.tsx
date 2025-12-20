@@ -4,7 +4,7 @@ import { useState, use } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { Star, ChevronDown, ChevronUp, CheckCircle, Info, MessageCircle, BookOpen, Reply, PlayCircle } from 'lucide-react'
+import { Star, ChevronDown, ChevronUp, CheckCircle, Info, MessageCircle, BookOpen, Reply, PlayCircle, Filter, ArrowUpDown } from 'lucide-react'
 import Navbar from '@/components/navbar'
 import Footer from '@/components/footer'
 
@@ -183,12 +183,20 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
   const [expandedThread, setExpandedThread] = useState<number | null>(null)
   const [faqQuery, setFaqQuery] = useState('')
   const [comment, setComment] = useState('')
+  const [providerFilterStar, setProviderFilterStar] = useState<number | null>(null)
+  const [providerSortBy, setProviderSortBy] = useState<'rating' | 'date'>('rating')
+  const [serviceFilterStar, setServiceFilterStar] = useState<number | null>(null)
+  const [serviceSortBy, setServiceSortBy] = useState<'rating' | 'date'>('rating')
+  const [isInfoSourceExpanded, setIsInfoSourceExpanded] = useState(false)
   const router = useRouter()
   
   const { slug } = use(params)
   const service = serviceData[slug]
   console.log('serviceData', serviceData)
   console.log('service', service)
+
+  // Get current timestamp (calculated once on mount)
+  const [now] = useState(() => typeof window !== 'undefined' ? Date.now() : 0)
 
   if (!service) {
     return (
@@ -292,6 +300,30 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                       <h3 className="text-lg font-bold text-gray-900 mb-3">Service Description</h3>
                       <p className="text-gray-700 leading-relaxed">{service.description}</p>
                     </div>
+
+                    {/* Required Documents */}
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-3">Required Documents</h3>
+                      <div className="space-y-2">
+                        <div className="flex items-start gap-2">
+                          <span className="text-gray-700">•</span>
+                          <span className="text-gray-700">Valid identification proof (NID/Passport)</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-gray-700">•</span>
+                          <span className="text-gray-700">Property ownership documents or rental agreement (if applicable)</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-gray-700">•</span>
+                          <span className="text-gray-700">Previous service records (if available)</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-gray-700">•</span>
+                          <span className="text-gray-700">Any relevant warranty or guarantee documents</span>
+                        </div>
+                      </div>
+                    </div>
+
                     <div>
                       <h3 className="text-lg font-bold text-gray-900 mb-3">What&apos;s Included</h3>
                       <div className="grid sm:grid-cols-2 gap-3">
@@ -301,6 +333,193 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                             <span className="text-gray-700">{feature}</span>
                           </div>
                         ))}
+                      </div>
+                    </div>
+
+                    {/* What's Not Included */}
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-3">What&apos;s Not Included</h3>
+                      <div className="space-y-2">
+                        <div className="flex items-start gap-2">
+                          <span className="text-red-500 font-bold">×</span>
+                          <span className="text-gray-700">Major repairs or replacements requiring specialized parts</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-red-500 font-bold">×</span>
+                          <span className="text-gray-700">Structural modifications or alterations</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-red-500 font-bold">×</span>
+                          <span className="text-gray-700">Cost of replacement parts or materials (quoted separately)</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-red-500 font-bold">×</span>
+                          <span className="text-gray-700">Services outside the scope of the selected package</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-red-500 font-bold">×</span>
+                          <span className="text-gray-700">Emergency services outside regular business hours (additional charges apply)</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Service Provider Authority */}
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-3">Service Provider Authority</h3>
+                      <p className="text-gray-700 leading-relaxed">
+                        Our service providers are licensed professionals with the necessary certifications and authority to perform {service.name.toLowerCase()} services. All consultants undergo thorough background checks and hold valid licenses from relevant regulatory bodies.
+                      </p>
+                    </div>
+
+                    {/* Timeline */}
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-3">Timeline</h3>
+                      <div className="bg-gradient-to-br from-[var(--color-neutral)] to-white rounded-lg p-6 border border-gray-200">
+                        <div className="space-y-4">
+                          <div className="flex items-start gap-4">
+                            <div className="flex-shrink-0 w-8 h-8 bg-[var(--color-primary)] text-white rounded-full flex items-center justify-center font-bold">
+                              1
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-gray-900 mb-1">Booking Confirmation</h4>
+                              <p className="text-sm text-gray-700">Within 24 hours of booking</p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-4">
+                            <div className="flex-shrink-0 w-8 h-8 bg-[var(--color-primary)] text-white rounded-full flex items-center justify-center font-bold">
+                              2
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-gray-900 mb-1">Service Scheduling</h4>
+                              <p className="text-sm text-gray-700">Service scheduled within 2-3 business days</p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-4">
+                            <div className="flex-shrink-0 w-8 h-8 bg-[var(--color-primary)] text-white rounded-full flex items-center justify-center font-bold">
+                              3
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-gray-900 mb-1">Service Completion</h4>
+                              <p className="text-sm text-gray-700">Typically completed within 1-3 hours depending on package selected</p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-4">
+                            <div className="flex-shrink-0 w-8 h-8 bg-[var(--color-primary)] text-white rounded-full flex items-center justify-center font-bold">
+                              4
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-gray-900 mb-1">Follow-up & Support</h4>
+                              <p className="text-sm text-gray-700">Post-service support available for 7 days after completion</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Additional Notes */}
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-3">Additional Notes</h3>
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <ul className="space-y-2 text-gray-700 text-sm">
+                          <li className="flex items-start gap-2">
+                            <Info className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                            <span>Please ensure the service area is accessible and clear before the technician arrives.</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <Info className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                            <span>Our technicians will arrive with all necessary tools and equipment.</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <Info className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                            <span>Payment is due after service completion and your satisfaction confirmation.</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <Info className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                            <span>For any special requirements or concerns, please mention them during booking.</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <Info className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                            <span>We offer a satisfaction guarantee - if you&apos;re not happy, we&apos;ll make it right.</span>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+
+                    {/* Info Source */}
+                    <div className="border-t pt-6">
+                      <div className="border rounded-lg">
+                        <button
+                          onClick={() => setIsInfoSourceExpanded(!isInfoSourceExpanded)}
+                          className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50"
+                        >
+                          <h3 className="text-lg font-bold text-gray-900">Info Source</h3>
+                          {isInfoSourceExpanded ? (
+                            <ChevronUp className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                          ) : (
+                            <ChevronDown className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                          )}
+                        </button>
+                        {isInfoSourceExpanded && (
+                          <div className="px-4 pb-4">
+                            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                              <p className="text-sm text-gray-600 leading-relaxed mb-3">
+                                The information provided on this page is based on industry standards, regulatory guidelines, and our service provider network. Details may vary based on specific service requirements, location, and individual circumstances. For the most accurate and up-to-date information, please contact our customer service team or consult with a service provider directly.
+                              </p>
+                              <div className="space-y-2">
+                                <p className="text-sm font-semibold text-gray-900">
+                                  Source{' '}
+                                  <a
+                                    href="https://www.example.com/service-information"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-[var(--color-primary)] hover:underline"
+                                  >
+                                    URL
+                                  </a>
+                                  :
+                                </p>
+                                <ul className="space-y-1.5 ml-4">
+                                  <li className="flex items-start gap-2">
+                                    <span className="text-gray-700">•</span>
+                                    <a
+                                      href="https://www.example.com/service-information"
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-sm text-[var(--color-primary)] hover:underline"
+                                    >
+                                      Service Information Guide
+                                    </a>
+                                  </li>
+                                  <li className="flex items-start gap-2">
+                                    <span className="text-gray-700">•</span>
+                                    <a
+                                      href="https://www.regulatory-authority.gov/service-guidelines"
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-sm text-[var(--color-primary)] hover:underline"
+                                    >
+                                      Regulatory Service Guidelines
+                                    </a>
+                                  </li>
+                                  <li className="flex items-start gap-2">
+                                    <span className="text-gray-700">•</span>
+                                    <a
+                                      href="https://www.industry-standards.org/best-practices"
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-sm text-[var(--color-primary)] hover:underline"
+                                    >
+                                      Industry Best Practices
+                                    </a>
+                                  </li>
+                                </ul>
+                              </div>
+                              <p className="text-xs text-gray-500 mt-3">
+                                Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                              </p>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -321,24 +540,24 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                       <p className="text-sm text-gray-500">No FAQs match your search.</p>
                     ) : (
                       filteredFaqs.map((faq, index) => (
-                        <div key={index} className="border rounded-lg">
-                          <button
-                            onClick={() => setExpandedFaq(expandedFaq === index ? null : index)}
-                            className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50"
-                          >
-                            <span className="font-medium">{faq.question}</span>
-                            {expandedFaq === index ? (
-                              <ChevronUp className="w-5 h-5 text-gray-500 flex-shrink-0" />
-                            ) : (
-                              <ChevronDown className="w-5 h-5 text-gray-500 flex-shrink-0" />
-                            )}
-                          </button>
-                          {expandedFaq === index && (
-                            <div className="px-4 pb-4 text-gray-600 leading-relaxed">
-                              {faq.answer}
-                            </div>
+                      <div key={index} className="border rounded-lg">
+                        <button
+                          onClick={() => setExpandedFaq(expandedFaq === index ? null : index)}
+                          className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50"
+                        >
+                          <span className="font-medium">{faq.question}</span>
+                          {expandedFaq === index ? (
+                            <ChevronUp className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                          ) : (
+                            <ChevronDown className="w-5 h-5 text-gray-500 flex-shrink-0" />
                           )}
-                        </div>
+                        </button>
+                        {expandedFaq === index && (
+                          <div className="px-4 pb-4 text-gray-600 leading-relaxed">
+                            {faq.answer}
+                          </div>
+                        )}
+                      </div>
                       ))
                     )}
                   </div>
@@ -358,33 +577,112 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                       </div>
                     </div>
 
-                    {/* About Service Reviews (Top 3) */}
+                    {/* About Service Reviews */}
                     <div>
-                      <h3 className="text-lg font-bold text-gray-900 mb-4">About Service (Top 3 Reviews)</h3>
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-bold text-gray-900">About Service Reviews</h3>
+                      </div>
+                      
+                      {/* Filter and Sort Controls */}
+                      <div className="flex flex-wrap items-center gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <Filter className="w-4 h-4 text-gray-600" />
+                          <label className="text-sm font-medium text-gray-700">Filter by:</label>
+                          <select
+                            value={serviceFilterStar || ''}
+                            onChange={(e) => setServiceFilterStar(e.target.value ? Number(e.target.value) : null)}
+                            className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                          >
+                            <option value="">All Stars</option>
+                            <option value="5">5 Stars</option>
+                            <option value="4">4 Stars</option>
+                            <option value="3">3 Stars</option>
+                            <option value="2">2 Stars</option>
+                            <option value="1">1 Star</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <ArrowUpDown className="w-4 h-4 text-gray-600" />
+                          <label className="text-sm font-medium text-gray-700">Sort by:</label>
+                          <select
+                            value={serviceSortBy}
+                            onChange={(e) => setServiceSortBy(e.target.value as 'rating' | 'date')}
+                            className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                          >
+                            <option value="rating">Rating</option>
+                            <option value="date">Date</option>
+                          </select>
+                        </div>
+                      </div>
+
                       <div className="space-y-4">
-                        {[
+                        {(() => {
+                          const serviceReviews = [
                           {
-                            name: 'Sara Khan',
-                            avatar: 'S',
+                              name: 'Sara Khan',
+                              avatar: 'S',
                             rating: 5,
-                            review: 'Very satisfied with the quality of service. The team was clean, efficient, and respectful of my home. The service exceeded my expectations!',
-                            time: '3 days ago'
+                              review: 'Very satisfied with the quality of service. The team was clean, efficient, and respectful of my home. The service exceeded my expectations!',
+                              time: '3 days ago',
+                              date: new Date(now - 3 * 24 * 60 * 60 * 1000)
+                            },
+                            {
+                              name: 'Hasan Ali',
+                              avatar: 'H',
+                              rating: 4,
+                              review: 'Good service overall. The technician was professional and the work was done well. Would use this service again in the future.',
+                              time: '1 week ago',
+                              date: new Date(now - 7 * 24 * 60 * 60 * 1000)
+                            },
+                            {
+                              name: 'Nadia Islam',
+                              avatar: 'N',
+                              rating: 5,
+                              review: 'Amazing experience! The service was thorough and the technician was very helpful. Everything was explained clearly and the results were perfect.',
+                              time: '2 weeks ago',
+                              date: new Date(now - 14 * 24 * 60 * 60 * 1000)
+                            },
+                            {
+                              name: 'Rashid Ahmed',
+                              avatar: 'R',
+                              rating: 4,
+                              review: 'Professional service. The technician was knowledgeable and completed the work on time. Very pleased with the results.',
+                              time: '4 days ago',
+                              date: new Date(now - 4 * 24 * 60 * 60 * 1000)
                           },
                           {
-                            name: 'Hasan Ali',
-                            avatar: 'H',
-                            rating: 4,
-                            review: 'Good service overall. The technician was professional and the work was done well. Would use this service again in the future.',
-                            time: '1 week ago'
+                            name: 'Fatima Khan',
+                            avatar: 'F',
+                            rating: 5,
+                              review: 'Excellent service! Everything was done perfectly and the technician was very courteous. Highly recommend!',
+                              time: '1 day ago',
+                              date: new Date(now - 1 * 24 * 60 * 60 * 1000)
                           },
                           {
-                            name: 'Nadia Islam',
-                            avatar: 'N',
-                            rating: 5,
-                            review: 'Amazing experience! The service was thorough and the technician was very helpful. Everything was explained clearly and the results were perfect.',
-                            time: '2 weeks ago'
-                          }
-                        ].map((review, index) => (
+                            name: 'Karim Uddin',
+                            avatar: 'K',
+                              rating: 3,
+                              review: 'Service was decent but could have been better. The technician was okay but took longer than expected.',
+                              time: '10 days ago',
+                              date: new Date(now - 10 * 24 * 60 * 60 * 1000)
+                            }
+                          ]
+
+                          // Filter by star rating
+                          let filtered = serviceFilterStar 
+                            ? serviceReviews.filter(r => r.rating === serviceFilterStar)
+                            : serviceReviews
+
+                          // Sort
+                          filtered = [...filtered].sort((a, b) => {
+                            if (serviceSortBy === 'rating') {
+                              return b.rating - a.rating
+                            } else {
+                              return b.date.getTime() - a.date.getTime()
+                            }
+                          })
+
+                          return filtered.map((review, index) => (
                           <div key={index} className="bg-white border border-gray-200 rounded-lg p-5 hover:shadow-md transition-shadow">
                             <div className="flex items-start gap-4">
                               <div className="w-12 h-12 bg-[var(--color-primary)]/10 text-[var(--color-primary)] rounded-full flex items-center justify-center font-semibold flex-shrink-0">
@@ -392,8 +690,8 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                               </div>
                               <div className="flex-1">
                                 <div className="flex items-center justify-between mb-2">
-                                  <p className="font-semibold text-gray-900">{review.name}</p>
-                                  <span className="text-sm text-gray-500">{review.time}</span>
+                                    <p className="font-semibold text-gray-900">{review.name}</p>
+                                    <span className="text-sm text-gray-500">{review.time}</span>
                                 </div>
                                 <div className="flex items-center gap-1 mb-3">
                                   {[...Array(5)].map((_, i) => (
@@ -407,7 +705,8 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                               </div>
                             </div>
                           </div>
-                        ))}
+                          ))
+                        })()}
                       </div>
                     </div>
                   </div>
@@ -494,36 +793,118 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                       </div>
                     </div>
 
-                    {/* Service Provider Reviews (Top 3) */}
+                    {/* Service Provider Reviews */}
                     <div className="border-t pt-8">
-                      <h3 className="text-lg font-bold text-gray-900 mb-4">Service Provider (Top 3)</h3>
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-bold text-gray-900">Service Provider Reviews</h3>
+                      </div>
+                      
+                      {/* Filter and Sort Controls */}
+                      <div className="flex flex-wrap items-center gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <Filter className="w-4 h-4 text-gray-600" />
+                          <label className="text-sm font-medium text-gray-700">Filter by:</label>
+                          <select
+                            value={providerFilterStar || ''}
+                            onChange={(e) => setProviderFilterStar(e.target.value ? Number(e.target.value) : null)}
+                            className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                          >
+                            <option value="">All Stars</option>
+                            <option value="5">5 Stars</option>
+                            <option value="4">4 Stars</option>
+                            <option value="3">3 Stars</option>
+                            <option value="2">2 Stars</option>
+                            <option value="1">1 Star</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <ArrowUpDown className="w-4 h-4 text-gray-600" />
+                          <label className="text-sm font-medium text-gray-700">Sort by:</label>
+                          <select
+                            value={providerSortBy}
+                            onChange={(e) => setProviderSortBy(e.target.value as 'rating' | 'date')}
+                            className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                          >
+                            <option value="rating">Rating</option>
+                            <option value="date">Date</option>
+                          </select>
+                        </div>
+                      </div>
+
                       <div className="space-y-4">
-                        {[
-                          {
-                            name: 'Ahmed Rahman',
-                            avatar: 'A',
-                            providerName: 'TechPro Services',
+                        {(() => {
+                          const providerReviews = [
+                            {
+                              name: 'Ahmed Rahman',
+                              avatar: 'A',
+                              providerName: 'TechPro Services',
                             rating: 5,
-                            review: 'Excellent service! The technician was professional, punctual, and very knowledgeable. He explained everything clearly and completed the work efficiently.',
-                            time: '2 days ago'
-                          },
-                          {
-                            name: 'Fatima Khan',
-                            avatar: 'F',
-                            providerName: 'Elite Home Solutions',
-                            rating: 5,
-                            review: 'Outstanding service provider! Very courteous and respectful. The technician arrived on time and did a thorough job. Highly recommend!',
-                            time: '5 days ago'
-                          },
-                          {
-                            name: 'Karim Uddin',
-                            avatar: 'K',
-                            providerName: 'QuickFix Experts',
+                              review: 'Excellent service! The technician was professional, punctual, and very knowledgeable. He explained everything clearly and completed the work efficiently.',
+                              time: '2 days ago',
+                              date: new Date(now - 2 * 24 * 60 * 60 * 1000)
+                            },
+                            {
+                              name: 'Fatima Khan',
+                              avatar: 'F',
+                              providerName: 'Elite Home Solutions',
+                              rating: 5,
+                              review: 'Outstanding service provider! Very courteous and respectful. The technician arrived on time and did a thorough job. Highly recommend!',
+                              time: '5 days ago',
+                              date: new Date(now - 5 * 24 * 60 * 60 * 1000)
+                            },
+                            {
+                              name: 'Karim Uddin',
+                              avatar: 'K',
+                              providerName: 'QuickFix Experts',
                             rating: 4,
-                            review: 'Great service overall. The provider was professional and the work quality was excellent. Minor delay in arrival but made up for it with quality work.',
-                            time: '1 week ago'
-                          }
-                        ].map((review, index) => (
+                              review: 'Great service overall. The provider was professional and the work quality was excellent. Minor delay in arrival but made up for it with quality work.',
+                              time: '1 week ago',
+                              date: new Date(now - 7 * 24 * 60 * 60 * 1000)
+                          },
+                          {
+                              name: 'Rashid Ahmed',
+                              avatar: 'R',
+                              providerName: 'ProFix Solutions',
+                            rating: 5,
+                              review: 'Amazing experience! The service provider was extremely professional and completed the job perfectly. Highly satisfied!',
+                              time: '3 days ago',
+                              date: new Date(now - 3 * 24 * 60 * 60 * 1000)
+                            },
+                            {
+                              name: 'Sadia Rahman',
+                              avatar: 'S',
+                              providerName: 'Expert Services',
+                              rating: 3,
+                              review: 'Service was okay. The provider did the job but took longer than expected. Could be improved.',
+                              time: '2 weeks ago',
+                              date: new Date(now - 14 * 24 * 60 * 60 * 1000)
+                            },
+                            {
+                              name: 'Hasan Ali',
+                              avatar: 'H',
+                              providerName: 'Quality Care Services',
+                              rating: 4,
+                              review: 'Good service provider. Professional and efficient. Would recommend to others.',
+                              time: '6 days ago',
+                              date: new Date(now - 6 * 24 * 60 * 60 * 1000)
+                            }
+                          ]
+
+                          // Filter by star rating
+                          let filtered = providerFilterStar 
+                            ? providerReviews.filter(r => r.rating === providerFilterStar)
+                            : providerReviews
+
+                          // Sort
+                          filtered = [...filtered].sort((a, b) => {
+                            if (providerSortBy === 'rating') {
+                              return b.rating - a.rating
+                            } else {
+                              return b.date.getTime() - a.date.getTime()
+                            }
+                          })
+
+                          return filtered.map((review, index) => (
                           <div key={index} className="bg-white border border-gray-200 rounded-lg p-5 hover:shadow-md transition-shadow">
                             <div className="flex items-start gap-4">
                               <div className="w-12 h-12 bg-[var(--color-primary)]/10 text-[var(--color-primary)] rounded-full flex items-center justify-center font-semibold flex-shrink-0">
@@ -532,8 +913,8 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                               <div className="flex-1">
                                 <div className="flex items-start justify-between mb-2">
                                   <div>
-                                    <p className="font-semibold text-gray-900">{review.name}</p>
-                                    <span className="text-sm text-gray-500">{review.time}</span>
+                                  <p className="font-semibold text-gray-900">{review.name}</p>
+                                  <span className="text-sm text-gray-500">{review.time}</span>
                                   </div>
                                   <div className="text-right">
                                     <div className="inline-flex items-center gap-2 bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 rounded-full px-4 py-1.5">
@@ -554,7 +935,8 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                               </div>
                             </div>
                           </div>
-                        ))}
+                          ))
+                        })()}
                       </div>
                     </div>
                   </div>
