@@ -181,6 +181,7 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
   const [selectedPackage, setSelectedPackage] = useState(1)
   const [activeTab, setActiveTab] = useState('overview')
   const [expandedThread, setExpandedThread] = useState<number | null>(null)
+  const [faqQuery, setFaqQuery] = useState('')
   const [comment, setComment] = useState('')
   const router = useRouter()
   
@@ -201,6 +202,15 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
       </div>
     )
   }
+
+  const normalizedFaqQuery = faqQuery.trim().toLowerCase()
+  const filteredFaqs = normalizedFaqQuery
+    ? service.faqs.filter(
+        (faq) =>
+          faq.question.toLowerCase().includes(normalizedFaqQuery) ||
+          faq.answer.toLowerCase().includes(normalizedFaqQuery)
+      )
+    : service.faqs
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -257,7 +267,7 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
             <div className="bg-white rounded-lg shadow-sm">
               <div className="border-b">
                 <div className="flex gap-6 px-6">
-                  {['Overview', 'Details', 'Learning and Discussion', 'FAQ', 'How to Order', 'Review'].map((tab) => (
+                  {['Overview', 'Learning and Discussion', 'FAQ', 'Consultant', 'Review'].map((tab) => (
                     <button
                       key={tab}
                       onClick={() => setActiveTab(tab.toLowerCase().replace(/\s+/g, '-'))}
@@ -299,70 +309,38 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                 {/* FAQ Tab */}
                 {activeTab === 'faq' && (
                   <div className="space-y-3">
-                    {service.faqs.map((faq, index) => (
-                      <div key={index} className="border rounded-lg">
-                        <button
-                          onClick={() => setExpandedFaq(expandedFaq === index ? null : index)}
-                          className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50"
-                        >
-                          <span className="font-medium">{faq.question}</span>
-                          {expandedFaq === index ? (
-                            <ChevronUp className="w-5 h-5 text-gray-500 flex-shrink-0" />
-                          ) : (
-                            <ChevronDown className="w-5 h-5 text-gray-500 flex-shrink-0" />
-                          )}
-                        </button>
-                        {expandedFaq === index && (
-                          <div className="px-4 pb-4 text-gray-600 leading-relaxed">
-                            {faq.answer}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* How to Order Tab */}
-                {activeTab === 'how-to-order' && (
-                  <div className="space-y-4">
-                    <div className="space-y-3">
-                      <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 bg-[var(--color-neutral)] rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-[var(--color-primary)] font-bold">1</span>
-                        </div>
-                        <div>
-                          <h4 className="font-semibold text-gray-900 mb-1">Select Your Package</h4>
-                          <p className="text-gray-600">Choose from Basic, Standard, or Premium packages based on your needs.</p>
-                        </div>
-                      </div>
-                      <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 bg-[var(--color-neutral)] rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-[var(--color-primary)] font-bold">2</span>
-                        </div>
-                        <div>
-                          <h4 className="font-semibold text-gray-900 mb-1">Book Your Service</h4>
-                          <p className="text-gray-600">Click &quot;Book Now&quot; and select your preferred date and time slot.</p>
-                        </div>
-                      </div>
-                      <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 bg-[var(--color-neutral)] rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-[var(--color-primary)] font-bold">3</span>
-                        </div>
-                        <div>
-                          <h4 className="font-semibold text-gray-900 mb-1">Confirm Your Details</h4>
-                          <p className="text-gray-600">Review your booking details and provide your address information.</p>
-                        </div>
-                      </div>
-                      <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 bg-[var(--color-neutral)] rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-[var(--color-primary)] font-bold">4</span>
-                        </div>
-                        <div>
-                          <h4 className="font-semibold text-gray-900 mb-1">Service Delivery</h4>
-                          <p className="text-gray-600">Our professional will arrive at your location at the scheduled time.</p>
-                        </div>
-                      </div>
+                    <div className="mb-2">
+                      <input
+                        value={faqQuery}
+                        onChange={(e) => setFaqQuery(e.target.value)}
+                        placeholder="Search FAQs"
+                        className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent"
+                      />
                     </div>
+                    {filteredFaqs.length === 0 ? (
+                      <p className="text-sm text-gray-500">No FAQs match your search.</p>
+                    ) : (
+                      filteredFaqs.map((faq, index) => (
+                        <div key={index} className="border rounded-lg">
+                          <button
+                            onClick={() => setExpandedFaq(expandedFaq === index ? null : index)}
+                            className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50"
+                          >
+                            <span className="font-medium">{faq.question}</span>
+                            {expandedFaq === index ? (
+                              <ChevronUp className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                            ) : (
+                              <ChevronDown className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                            )}
+                          </button>
+                          {expandedFaq === index && (
+                            <div className="px-4 pb-4 text-gray-600 leading-relaxed">
+                              {faq.answer}
+                            </div>
+                          )}
+                        </div>
+                      ))
+                    )}
                   </div>
                 )}
 
@@ -377,70 +355,6 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                       </div>
                       <div className="text-gray-600">
                         Based on {service.reviewCount} reviews
-                      </div>
-                    </div>
-
-                    {/* Service Provider Reviews (Top 3) */}
-                    <div>
-                      <h3 className="text-lg font-bold text-gray-900 mb-4">Service Provider (Top 3)</h3>
-                      <div className="space-y-4">
-                        {[
-                          {
-                            name: 'Ahmed Rahman',
-                            avatar: 'A',
-                            providerName: 'TechPro Services',
-                            rating: 5,
-                            review: 'Excellent service! The technician was professional, punctual, and very knowledgeable. He explained everything clearly and completed the work efficiently.',
-                            time: '2 days ago'
-                          },
-                          {
-                            name: 'Fatima Khan',
-                            avatar: 'F',
-                            providerName: 'Elite Home Solutions',
-                            rating: 5,
-                            review: 'Outstanding service provider! Very courteous and respectful. The technician arrived on time and did a thorough job. Highly recommend!',
-                            time: '5 days ago'
-                          },
-                          {
-                            name: 'Karim Uddin',
-                            avatar: 'K',
-                            providerName: 'QuickFix Experts',
-                            rating: 4,
-                            review: 'Great service overall. The provider was professional and the work quality was excellent. Minor delay in arrival but made up for it with quality work.',
-                            time: '1 week ago'
-                          }
-                        ].map((review, index) => (
-                          <div key={index} className="bg-white border border-gray-200 rounded-lg p-5 hover:shadow-md transition-shadow">
-                            <div className="flex items-start gap-4">
-                              <div className="w-12 h-12 bg-[var(--color-primary)]/10 text-[var(--color-primary)] rounded-full flex items-center justify-center font-semibold flex-shrink-0">
-                                {review.avatar}
-                              </div>
-                              <div className="flex-1">
-                                <div className="flex items-start justify-between mb-2">
-                                  <div>
-                                    <p className="font-semibold text-gray-900">{review.name}</p>
-                                    <span className="text-sm text-gray-500">{review.time}</span>
-                                  </div>
-                                  <div className="text-right">
-                                    <div className="inline-flex items-center gap-2 bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 rounded-full px-4 py-1.5">
-                                      {/* <p className="text-xs font-medium text-[var(--color-primary)]">Service Provider</p> */}
-                                      <p className="text-sm font-bold text-gray-900">{review.providerName}</p>
-                                    </div>
-                                  </div>
-                                </div>
-                                <div className="flex items-center gap-1 mb-3">
-                                  {[...Array(5)].map((_, i) => (
-                                    <Star
-                                      key={i}
-                                      className={`w-4 h-4 ${i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
-                                    />
-                                  ))}
-                                </div>
-                                <p className="text-gray-700 leading-relaxed">{review.review}</p>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
                       </div>
                     </div>
 
@@ -499,30 +413,146 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                   </div>
                 )}
 
-                {/* Details Tab */}
-                {activeTab === 'details' && (
-                  <div className="space-y-4">
+                {/* About Consultants Tab */}
+                {activeTab === 'consultant' && (
+                  <div className="space-y-8">
+                    {/* Why Choose Our Consultants */}
                     <div>
-                      <h3 className="font-semibold text-gray-900 mb-2">Service Category</h3>
-                      <p className="text-gray-700">{service.category}</p>
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900 mb-2">Service Name</h3>
-                      <p className="text-gray-700">{service.name}</p>
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900 mb-2">Rating</h3>
-                      <div className="flex items-center gap-2">
-                        <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                        <span className="text-gray-700">{service.rating} ({service.reviewCount} reviews)</span>
+                      <h3 className="text-xl font-bold text-gray-900 mb-4">Why Choose Our Consultants?</h3>
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        {[
+                          {
+                            title: 'Verified & Certified',
+                            description: 'All our consultants undergo thorough background checks and hold relevant certifications for their expertise.'
+                          },
+                          {
+                            title: 'Experienced Professionals',
+                            description: 'Our consultants have years of hands-on experience and are trained in the latest industry practices.'
+                          },
+                          {
+                            title: 'Customer-Focused',
+                            description: 'We prioritize your satisfaction and ensure our consultants provide excellent customer service.'
+                          },
+                          {
+                            title: 'Reliable & Punctual',
+                            description: 'Our consultants arrive on time and complete work efficiently without compromising on quality.'
+                          }
+                        ].map((feature, index) => (
+                          <div key={index} className="flex items-start gap-3">
+                            <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                            <div>
+                              <h4 className="font-semibold text-gray-900 mb-1">{feature.title}</h4>
+                              <p className="text-sm text-gray-600">{feature.description}</p>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900 mb-2">Available Packages</h3>
-                      <div className="space-y-2">
-                        {service.packages.map((pkg, index) => (
-                          <div key={index} className="text-gray-700">
-                            • {pkg.name} - ৳{pkg.price}
+
+                    {/* Consultant Selection Process */}
+                    <div className="border-t pt-8">
+                      <h3 className="text-xl font-bold text-gray-900 mb-4">How We Select Our Consultants</h3>
+                      <div className="bg-gradient-to-br from-[var(--color-neutral)] to-white rounded-lg p-6 border border-gray-200">
+                        <div className="space-y-4">
+                          <div className="flex items-start gap-4">
+                            <div className="flex-shrink-0 w-8 h-8 bg-[var(--color-primary)] text-white rounded-full flex items-center justify-center font-bold">
+                              1
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-gray-900 mb-1">Application & Screening</h4>
+                              <p className="text-sm text-gray-700">We review applications and verify qualifications, certifications, and work history.</p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-4">
+                            <div className="flex-shrink-0 w-8 h-8 bg-[var(--color-primary)] text-white rounded-full flex items-center justify-center font-bold">
+                              2
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-gray-900 mb-1">Skills Assessment</h4>
+                              <p className="text-sm text-gray-700">Candidates undergo practical tests and interviews to assess their technical skills and knowledge.</p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-4">
+                            <div className="flex-shrink-0 w-8 h-8 bg-[var(--color-primary)] text-white rounded-full flex items-center justify-center font-bold">
+                              3
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-gray-900 mb-1">Training & Certification</h4>
+                              <p className="text-sm text-gray-700">Selected consultants complete our comprehensive training program and certification process.</p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-4">
+                            <div className="flex-shrink-0 w-8 h-8 bg-[var(--color-primary)] text-white rounded-full flex items-center justify-center font-bold">
+                              4
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-gray-900 mb-1">Ongoing Monitoring</h4>
+                              <p className="text-sm text-gray-700">We continuously monitor performance and customer feedback to maintain our high standards.</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Service Provider Reviews (Top 3) */}
+                    <div className="border-t pt-8">
+                      <h3 className="text-lg font-bold text-gray-900 mb-4">Service Provider (Top 3)</h3>
+                      <div className="space-y-4">
+                        {[
+                          {
+                            name: 'Ahmed Rahman',
+                            avatar: 'A',
+                            providerName: 'TechPro Services',
+                            rating: 5,
+                            review: 'Excellent service! The technician was professional, punctual, and very knowledgeable. He explained everything clearly and completed the work efficiently.',
+                            time: '2 days ago'
+                          },
+                          {
+                            name: 'Fatima Khan',
+                            avatar: 'F',
+                            providerName: 'Elite Home Solutions',
+                            rating: 5,
+                            review: 'Outstanding service provider! Very courteous and respectful. The technician arrived on time and did a thorough job. Highly recommend!',
+                            time: '5 days ago'
+                          },
+                          {
+                            name: 'Karim Uddin',
+                            avatar: 'K',
+                            providerName: 'QuickFix Experts',
+                            rating: 4,
+                            review: 'Great service overall. The provider was professional and the work quality was excellent. Minor delay in arrival but made up for it with quality work.',
+                            time: '1 week ago'
+                          }
+                        ].map((review, index) => (
+                          <div key={index} className="bg-white border border-gray-200 rounded-lg p-5 hover:shadow-md transition-shadow">
+                            <div className="flex items-start gap-4">
+                              <div className="w-12 h-12 bg-[var(--color-primary)]/10 text-[var(--color-primary)] rounded-full flex items-center justify-center font-semibold flex-shrink-0">
+                                {review.avatar}
+                              </div>
+                              <div className="flex-1">
+                                <div className="flex items-start justify-between mb-2">
+                                  <div>
+                                    <p className="font-semibold text-gray-900">{review.name}</p>
+                                    <span className="text-sm text-gray-500">{review.time}</span>
+                                  </div>
+                                  <div className="text-right">
+                                    <div className="inline-flex items-center gap-2 bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 rounded-full px-4 py-1.5">
+                                      {/* <p className="text-xs font-medium text-[var(--color-primary)]">Service Provider</p> */}
+                                      <p className="text-sm font-bold text-gray-900">{review.providerName}</p>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-1 mb-3">
+                                  {[...Array(5)].map((_, i) => (
+                                    <Star
+                                      key={i}
+                                      className={`w-4 h-4 ${i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                                    />
+                                  ))}
+                                </div>
+                                <p className="text-gray-700 leading-relaxed">{review.review}</p>
+                              </div>
+                            </div>
                           </div>
                         ))}
                       </div>
