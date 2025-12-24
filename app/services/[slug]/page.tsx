@@ -275,7 +275,7 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
             <div className="bg-white rounded-lg shadow-sm">
               <div className="border-b">
                 <div className="flex gap-6 px-6">
-                  {['Overview', 'Learning and Discussion', 'FAQ', 'Consultant', 'Review'].map((tab) => (
+                  {['Overview', 'Learning and Discussion', 'FAQ', 'Consultants', 'Reviews'].map((tab) => (
                     <button
                       key={tab}
                       onClick={() => setActiveTab(tab.toLowerCase().replace(/\s+/g, '-'))}
@@ -363,9 +363,9 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                       </div>
                     </div>
 
-                    {/* Service Provider Authority */}
+                    {/* Service Authority */}
                     <div>
-                      <h3 className="text-lg font-bold text-gray-900 mb-3">Service Provider Authority</h3>
+                      <h3 className="text-lg font-bold text-gray-900 mb-3">Service Authority</h3>
                       <p className="text-gray-700 leading-relaxed">
                         Our service providers are licensed professionals with the necessary certifications and authority to perform {service.name.toLowerCase()} services. All consultants undergo thorough background checks and hold valid licenses from relevant regulatory bodies.
                       </p>
@@ -564,7 +564,7 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                 )}
 
                 {/* Review Tab */}
-                {activeTab === 'review' && (
+                {activeTab === 'reviews' && (
                   <div className="space-y-8">
                     {/* Overall Rating */}
                     <div className="flex items-center gap-4 mb-6">
@@ -713,7 +713,7 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                 )}
 
                 {/* About Consultants Tab */}
-                {activeTab === 'consultant' && (
+                {activeTab === 'consultants' && (
                   <div className="space-y-8">
                     {/* Why Choose Our Consultants */}
                     <div>
@@ -793,10 +793,10 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                       </div>
                     </div>
 
-                    {/* Service Provider Reviews */}
+                    {/* Consultant Reviews */}
                     <div className="border-t pt-8">
                       <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-bold text-gray-900">Service Provider Reviews</h3>
+                        <h3 className="text-lg font-bold text-gray-900">Consultant Reviews</h3>
                       </div>
                       
                       {/* Filter and Sort Controls */}
