@@ -251,20 +251,20 @@ export default function VendorDashboardPage() {
       <Navbar />
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8 max-w-7xl">
         {/* Vendor Challenge Promo Banner */}
         {isChallengeActive && (
-          <div className="mb-6 relative overflow-hidden bg-gradient-to-r from-[var(--color-primary)] via-pink-500 to-pink-600 rounded-xl shadow-2xl p-6 text-white border-2 border-white/20">
+          <div className="mb-4 sm:mb-6 relative overflow-hidden bg-gradient-to-r from-[var(--color-primary)] via-pink-500 to-pink-600 rounded-xl shadow-2xl p-4 sm:p-6 text-white border-2 border-white/20">
             {/* Decorative Background Graphics */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
               {/* Sparkle/Star Graphics */}
-              <svg className="absolute top-4 right-20 w-16 h-16 text-white/20 animate-pulse" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="hidden sm:block absolute top-4 right-20 w-16 h-16 text-white/20 animate-pulse" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
               </svg>
-              <svg className="absolute bottom-4 left-10 w-12 h-12 text-white/15 animate-pulse" style={{ animationDelay: '0.5s' }} fill="currentColor" viewBox="0 0 24 24">
+              <svg className="hidden sm:block absolute bottom-4 left-10 w-12 h-12 text-white/15 animate-pulse" style={{ animationDelay: '0.5s' }} fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
               </svg>
-              <svg className="absolute top-1/2 right-4 w-10 h-10 text-white/10 animate-pulse" style={{ animationDelay: '1s' }} fill="currentColor" viewBox="0 0 24 24">
+              <svg className="hidden sm:block absolute top-1/2 right-4 w-10 h-10 text-white/10 animate-pulse" style={{ animationDelay: '1s' }} fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
               </svg>
               
@@ -280,39 +280,39 @@ export default function VendorDashboardPage() {
               </div>
             </div>
 
-            <div className="relative flex items-center justify-between flex-wrap gap-4">
-              <div className="flex items-start gap-4 flex-1">
+            <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-start gap-3 sm:gap-4 flex-1 w-full">
                 {/* Enhanced Icon with Animation */}
-                <div className="relative">
-                  <div className="bg-white/25 rounded-full p-4 backdrop-blur-sm border-2 border-white/30 shadow-lg">
-                    <Gift className="w-10 h-10 animate-bounce" style={{ animationDuration: '2s' }} />
+                <div className="relative flex-shrink-0">
+                  <div className="bg-white/25 rounded-full p-3 sm:p-4 backdrop-blur-sm border-2 border-white/30 shadow-lg">
+                    <Gift className="w-6 h-6 sm:w-10 sm:h-10 animate-bounce" style={{ animationDuration: '2s' }} />
                   </div>
                   {/* Pulsing Ring Effect */}
                   <div className="absolute inset-0 bg-white/20 rounded-full animate-ping" style={{ animationDuration: '3s' }}></div>
                 </div>
                 
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="bg-white/20 rounded-lg p-1.5">
-                      <TrendingUp className="w-5 h-5" />
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
+                    <div className="bg-white/20 rounded-lg p-1 sm:p-1.5">
+                      <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" />
                     </div>
-                    <h3 className="text-2xl font-bold drop-shadow-lg">Weekly Challenge</h3>
+                    <h3 className="text-lg sm:text-2xl font-bold drop-shadow-lg">Weekly Challenge</h3>
                     <span className="bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-1 rounded-full animate-pulse">NEW</span>
                   </div>
                   
-                  <p className="text-white/95 mb-4 text-lg">
+                  <p className="text-white/95 mb-3 sm:mb-4 text-sm sm:text-lg">
                     Complete <span className="font-bold text-yellow-300 drop-shadow-md">{challengeTarget} services</span> by <span className="font-semibold">{challengeEndDate.toLocaleDateString()}</span> and earn <span className="font-bold text-yellow-300 drop-shadow-md">৳{challengeBonus} bonus</span>! 🎁
                   </p>
                   
                   {/* Enhanced Progress Bar */}
                   <div className="mb-3">
-                    <div className="flex items-center justify-between text-sm mb-2">
-                      <span className="font-semibold text-white">
+                    <div className="flex items-center justify-between text-xs sm:text-sm mb-2">
+                      <span className="font-semibold text-white truncate pr-2">
                         {completedServicesInPeriod} / {challengeTarget} services completed
                       </span>
-                      <span className="font-bold text-yellow-300 text-lg">{Math.round(challengeProgress)}%</span>
+                      <span className="font-bold text-yellow-300 text-base sm:text-lg flex-shrink-0">{Math.round(challengeProgress)}%</span>
                     </div>
-                    <div className="relative w-full bg-white/20 rounded-full h-4 overflow-hidden shadow-inner border border-white/30">
+                    <div className="relative w-full bg-white/20 rounded-full h-3 sm:h-4 overflow-hidden shadow-inner border border-white/30">
                       <div 
                         className="bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-300 h-full rounded-full transition-all duration-700 shadow-lg relative overflow-hidden"
                         style={{ width: `${challengeProgress}%` }}
@@ -321,31 +321,31 @@ export default function VendorDashboardPage() {
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-pulse"></div>
                         {/* Progress Indicator */}
                         {challengeProgress > 0 && (
-                          <div className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-1/2 w-6 h-6 bg-yellow-300 rounded-full border-2 border-white shadow-lg"></div>
+                          <div className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-1/2 w-4 h-4 sm:w-6 sm:h-6 bg-yellow-300 rounded-full border-2 border-white shadow-lg"></div>
                         )}
                       </div>
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-3 text-sm text-white/90">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-white/90">
                     {daysRemaining > 0 ? (
                       <>
-                        <div className="flex items-center gap-1.5 bg-white/15 px-3 py-1.5 rounded-full">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="flex items-center gap-1.5 bg-white/15 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full">
+                          <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
-                          <span className="font-medium">{daysRemaining} {daysRemaining === 1 ? 'day' : 'days'} remaining</span>
+                          <span className="font-medium whitespace-nowrap">{daysRemaining} {daysRemaining === 1 ? 'day' : 'days'} remaining</span>
                         </div>
-                        <div className="flex items-center gap-1.5 bg-white/15 px-3 py-1.5 rounded-full">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="flex items-center gap-1.5 bg-white/15 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full">
+                          <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
                           <span className="font-medium">{challengeTarget - completedServicesInPeriod} more services needed</span>
                         </div>
                       </>
                     ) : (
-                      <div className="flex items-center gap-1.5 bg-red-500/30 px-3 py-1.5 rounded-full border border-red-300/50">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div className="flex items-center gap-1.5 bg-red-500/30 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full border border-red-300/50">
+                        <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <span className="font-medium">Challenge ends today!</span>
@@ -357,25 +357,25 @@ export default function VendorDashboardPage() {
               
               {/* Enhanced Bonus Card */}
               {completedServicesInPeriod >= challengeTarget ? (
-                <div className="relative bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-xl px-8 py-6 text-center shadow-2xl border-2 border-yellow-300 min-w-[140px]">
-                  <div className="absolute -top-2 -right-2 w-8 h-8 bg-yellow-300 rounded-full flex items-center justify-center animate-bounce">
-                    <span className="text-xl">🎉</span>
+                <div className="relative bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-xl px-4 sm:px-8 py-4 sm:py-6 text-center shadow-2xl border-2 border-yellow-300 w-full sm:w-auto sm:min-w-[140px]">
+                  <div className="absolute -top-2 -right-2 w-6 h-6 sm:w-8 sm:h-8 bg-yellow-300 rounded-full flex items-center justify-center animate-bounce">
+                    <span className="text-base sm:text-xl">🎉</span>
                   </div>
-                  <p className="text-4xl font-bold mb-1">✓</p>
-                  <p className="text-sm font-bold text-yellow-900 mb-1">Complete!</p>
+                  <p className="text-3xl sm:text-4xl font-bold mb-1">✓</p>
+                  <p className="text-xs sm:text-sm font-bold text-yellow-900 mb-1">Complete!</p>
                   <p className="text-xs text-yellow-800">Bonus credited</p>
                 </div>
               ) : (
-                <div className="relative bg-gradient-to-br from-white/25 to-white/15 backdrop-blur-sm rounded-xl px-8 py-6 text-center shadow-2xl border-2 border-white/30 min-w-[140px]">
+                <div className="relative bg-gradient-to-br from-white/25 to-white/15 backdrop-blur-sm rounded-xl px-4 sm:px-8 py-4 sm:py-6 text-center shadow-2xl border-2 border-white/30 w-full sm:w-auto sm:min-w-[140px]">
                   {/* Decorative Elements */}
-                  <div className="absolute top-2 right-2 w-3 h-3 bg-yellow-300 rounded-full animate-ping"></div>
-                  <div className="absolute top-2 right-2 w-3 h-3 bg-yellow-300 rounded-full"></div>
+                  <div className="absolute top-2 right-2 w-2 h-2 sm:w-3 sm:h-3 bg-yellow-300 rounded-full animate-ping"></div>
+                  <div className="absolute top-2 right-2 w-2 h-2 sm:w-3 sm:h-3 bg-yellow-300 rounded-full"></div>
                   
                   <div className="relative">
-                    <p className="text-5xl font-bold mb-1 drop-shadow-lg">৳{challengeBonus}</p>
+                    <p className="text-3xl sm:text-5xl font-bold mb-1 drop-shadow-lg">৳{challengeBonus}</p>
                     <div className="flex items-center justify-center gap-1 mb-2">
-                      <Gift className="w-4 h-4 text-yellow-300" />
-                      <p className="text-sm font-bold">Bonus Reward</p>
+                      <Gift className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-300" />
+                      <p className="text-xs sm:text-sm font-bold">Bonus Reward</p>
                     </div>
                     <div className="w-full h-1 bg-white/20 rounded-full overflow-hidden">
                       <div className="h-full bg-yellow-300 rounded-full animate-pulse" style={{ width: '60%' }}></div>
@@ -387,17 +387,17 @@ export default function VendorDashboardPage() {
           </div>
         )}
 
-        <div className="grid lg:grid-cols-4 gap-8">
+        <div className="grid lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
           {/* Left Sidebar */}
           <aside className="lg:col-span-1">
             {/* Breadcrumb */}
-            <div className="mb-6">
-              <div className="flex items-center gap-2 text-sm text-gray-600">
+            <div className="mb-4 sm:mb-6">
+              <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
                 <Link href="/" className="hover:text-[var(--color-primary)]">
                   Home
                 </Link>
                 <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)]"></span>
-                <span className="text-gray-900">{getBreadcrumbLabel()}</span>
+                <span className="text-gray-900 truncate">{getBreadcrumbLabel()}</span>
               </div>
             </div>
 
@@ -410,13 +410,13 @@ export default function VendorDashboardPage() {
                     <li key={item.id}>
                       <button
                         onClick={() => setActiveTab(item.id)}
-                        className={`w-full text-left px-4 py-3 rounded-md transition-colors relative flex items-center gap-3 ${
+                        className={`w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 rounded-md transition-colors relative flex items-center gap-2 sm:gap-3 text-sm sm:text-base ${
                           activeTab === item.id
                             ? 'bg-[var(--color-neutral)] text-[var(--color-primary)] font-medium'
                             : 'text-gray-700 hover:bg-gray-50'
                         }`}
                       >
-                        <Icon className="w-5 h-5" />
+                        <Icon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
                         {item.label}
                         {activeTab === item.id && (
                           <div className="absolute right-0 top-0 bottom-0 w-0.5 bg-[var(--color-primary)]"></div>
@@ -433,22 +433,22 @@ export default function VendorDashboardPage() {
           <main className="lg:col-span-3">
             {/* All Orders Tab */}
             {activeTab === 'ongoing-services' && (
-              <div className="bg-white rounded-lg shadow-sm p-8">
-                <h1 className="text-3xl font-bold text-gray-900 mb-8">All Orders</h1>
+              <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 lg:p-8">
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-8">All Orders</h1>
 
                 {/* Search and Filter */}
-                <div className="mb-6 flex flex-col sm:flex-row gap-4">
+                <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row gap-3 sm:gap-4">
                   <div className="flex-1 relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
                     <input
                       type="text"
-                      placeholder="Search by service name, client name, or serial number..."
+                      placeholder="Search orders..."
                       value={searchQuery}
                       onChange={(e) => {
                         setSearchQuery(e.target.value)
                         setCurrentPage(1)
                       }}
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                      className="w-full pl-9 sm:pl-10 pr-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                     />
                   </div>
                   <select
@@ -457,7 +457,7 @@ export default function VendorDashboardPage() {
                       setStatusFilter(e.target.value as OrderStatus | 'All')
                       setCurrentPage(1)
                     }}
-                    className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                    className="px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                   >
                     <option value="All">All Status</option>
                     <option value="Submitted">Submitted</option>
@@ -509,15 +509,16 @@ export default function VendorDashboardPage() {
                         </div>
                       ) : (
                         <>
-                          <div className="overflow-x-auto">
+                          {/* Desktop Table View */}
+                          <div className="hidden md:block overflow-x-auto">
                             <table className="w-full">
                               <thead>
-                                <tr className="border-b border-gray-200">
-                                  <th className="text-left py-3 px-4 font-semibold text-gray-900">Serial</th>
-                                  <th className="text-left py-3 px-4 font-semibold text-gray-900">Service Name</th>
-                                  <th className="text-left py-3 px-4 font-semibold text-gray-900">Status</th>
-                                  <th className="text-left py-3 px-4 font-semibold text-gray-900">Contact Info</th>
-                                  <th className="text-center py-3 px-4 font-semibold text-gray-900">Actions</th>
+                                <tr className="border-b border-gray-200 bg-gray-50">
+                                  <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Serial</th>
+                                  <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Service Name</th>
+                                  <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Status</th>
+                                  <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Contact Info</th>
+                                  <th className="text-center py-3 px-4 font-semibold text-gray-900 text-sm">Actions</th>
                                 </tr>
                               </thead>
                               <tbody>
@@ -607,26 +608,112 @@ export default function VendorDashboardPage() {
                             </table>
                           </div>
 
+                          {/* Mobile Card View */}
+                          <div className="md:hidden divide-y divide-gray-200">
+                            {paginatedServices.map((service) => (
+                              <div key={service.id} className="p-4 hover:bg-gray-50">
+                                <div className="mb-3">
+                                  <div className="flex items-center justify-between mb-2">
+                                    <span className="font-semibold text-gray-900">{service.serialNumber}</span>
+                                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium border ${getStatusColor(service.status)}`}>
+                                      {service.status}
+                                    </span>
+                                  </div>
+                                  <p className="font-medium text-gray-900 mb-1">{service.serviceName}</p>
+                                  <p className="text-sm text-gray-500">{service.clientName}</p>
+                                </div>
+                                <div className="space-y-2 text-sm mb-3">
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-500 flex items-center gap-1">
+                                      <Phone className="w-4 h-4" />
+                                      Phone:
+                                    </span>
+                                    <span className="text-gray-900">{service.clientPhone}</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-500 flex items-center gap-1">
+                                      <FileText className="w-4 h-4" />
+                                      Email:
+                                    </span>
+                                    <span className="text-gray-900 truncate ml-2">{service.clientEmail}</span>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2 pt-3 border-t border-gray-200">
+                                  <button
+                                    className="flex-1 px-3 py-2 text-[var(--color-primary)] hover:bg-[var(--color-neutral)] rounded-lg transition-colors text-sm font-medium flex items-center justify-center gap-2"
+                                    title="View Details"
+                                  >
+                                    <Info className="w-4 h-4" />
+                                    Details
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      setSelectedOrderId(service.serialNumber)
+                                      setShowChat(true)
+                                      // Mark messages as read when opening chat
+                                      setOngoingServices(prev =>
+                                        prev.map(s =>
+                                          s.id === service.id ? { ...s, unreadMessages: 0 } : s
+                                        )
+                                      )
+                                    }}
+                                    className="relative flex-1 px-3 py-2 text-[var(--color-primary)] hover:bg-[var(--color-neutral)] rounded-lg transition-colors text-sm font-medium flex items-center justify-center gap-2"
+                                    title="Open Chat"
+                                  >
+                                    <MessageCircle className="w-4 h-4" />
+                                    Chat
+                                    {service.unreadMessages && service.unreadMessages > 0 && (
+                                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                                        {service.unreadMessages > 9 ? '9+' : service.unreadMessages}
+                                      </span>
+                                    )}
+                                  </button>
+                                  <select
+                                    value={service.status}
+                                    onChange={(e) => {
+                                      setOngoingServices(prev =>
+                                        prev.map(s =>
+                                          s.id === service.id
+                                            ? { ...s, status: e.target.value as OrderStatus }
+                                            : s
+                                        )
+                                      )
+                                    }}
+                                    className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                                  >
+                                    <option value="Submitted">Submitted</option>
+                                    <option value="Confirmed">Confirmed</option>
+                                    <option value="Assigned">Assigned</option>
+                                    <option value="In-Progress">In-Progress</option>
+                                    <option value="Review">Review</option>
+                                    <option value="Delivered">Delivered</option>
+                                    <option value="Closed">Closed</option>
+                                  </select>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+
                           {/* Pagination */}
                           {totalPages > 1 && (
-                            <div className="mt-6 flex items-center justify-between">
-                              <div className="text-sm text-gray-600">
+                            <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                              <div className="text-xs sm:text-sm text-gray-600 text-center sm:text-left">
                                 Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, filteredServices.length)} of {filteredServices.length} orders
                               </div>
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-1 sm:gap-2">
                                 <button
                                   onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                                   disabled={currentPage === 1}
                                   className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                  <ChevronLeft className="w-5 h-5" />
+                                  <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
                                 </button>
                                 <div className="flex items-center gap-1">
                                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                                     <button
                                       key={page}
                                       onClick={() => setCurrentPage(page)}
-                                      className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                                      className={`px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
                                         currentPage === page
                                           ? 'bg-[var(--color-primary)] text-white'
                                           : 'border border-gray-300 hover:bg-gray-50'
@@ -641,7 +728,7 @@ export default function VendorDashboardPage() {
                                   disabled={currentPage === totalPages}
                                   className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                  <ChevronRight className="w-5 h-5" />
+                                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
                                 </button>
                               </div>
                             </div>
@@ -656,11 +743,11 @@ export default function VendorDashboardPage() {
 
             {/* Payments Tab */}
             {activeTab === 'payments' && (
-              <div className="bg-white rounded-lg shadow-sm p-8">
-                <h1 className="text-3xl font-bold text-gray-900 mb-8">Payments</h1>
+              <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 lg:p-8">
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-8">Payments</h1>
 
                 {/* Summary Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6 mb-6 sm:mb-8">
                   <div className="bg-green-50 border border-green-200 rounded-lg p-6">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium text-gray-600">Total Earnings</span>
@@ -714,9 +801,9 @@ export default function VendorDashboardPage() {
                 </div>
 
                 {/* Filters and Sorting */}
-                <div className="mb-6 flex flex-col sm:flex-row gap-4 flex-wrap">
+                <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row gap-3 sm:gap-4 flex-wrap">
                   {/* Date Filter - First */}
-                  <div className="relative">
+                  <div className="relative w-full sm:w-auto">
                     <div
                       onClick={() => {
                         if (!showDatePicker) {
@@ -729,11 +816,11 @@ export default function VendorDashboardPage() {
                         }
                         setShowDatePicker(!showDatePicker)
                       }}
-                      className="relative cursor-pointer px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-white hover:border-gray-400 transition-colors min-w-[280px] flex items-center justify-between"
+                      className="relative cursor-pointer px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] bg-white hover:border-gray-400 transition-colors w-full sm:min-w-[280px] flex items-center justify-between"
                     >
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-5 h-5 text-gray-400" />
-                        <span className="text-gray-700">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 flex-shrink-0" />
+                        <span className="text-gray-700 text-xs sm:text-sm truncate">
                           {dateFrom && dateTo
                             ? `${new Date(dateFrom).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${new Date(dateTo).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
                             : dateFrom
@@ -751,7 +838,7 @@ export default function VendorDashboardPage() {
                           onClick={() => setShowDatePicker(false)}
                         />
                         <div 
-                          className="absolute top-full left-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-xl z-20 p-6 w-[350px]" 
+                          className="absolute top-full left-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-xl z-20 p-4 sm:p-6 w-[calc(100vw-2rem)] sm:w-[350px] max-w-[350px]" 
                           onClick={(e) => e.stopPropagation()}
                           onMouseLeave={() => setHoveredDate(null)}
                         >
@@ -901,7 +988,7 @@ export default function VendorDashboardPage() {
 
                               return days.map((day, idx) => {
                                 if (day === null) {
-                                  return <div key={idx} className="h-10" />
+                                  return <div key={idx} className="h-8 sm:h-10" />
                                 }
 
                                 const dateKey = getDateKey(day)
@@ -916,7 +1003,7 @@ export default function VendorDashboardPage() {
                                 const isLastInRow = idx % 7 === 6
 
                                 return (
-                                  <div key={idx} className="relative h-10 flex items-center justify-center">
+                                  <div key={idx} className="relative h-8 sm:h-10 flex items-center justify-center">
                                     {/* Range background - spans full width when in range */}
                                     {inRange && (
                                       <div className="absolute inset-y-0 left-0 right-0 bg-gray-100" />
@@ -946,14 +1033,14 @@ export default function VendorDashboardPage() {
                                         setHoveredDate(null)
                                       }}
                                       className={`
-                                        relative z-10 h-10 w-10 rounded-full text-sm font-medium transition-colors
+                                        relative z-10 h-8 w-8 sm:h-10 sm:w-10 rounded-full text-xs sm:text-sm font-medium transition-colors touch-manipulation
                                         ${isStart || isEnd || isHoveredEnd
                                           ? 'bg-gray-800 text-white'
                                           : inRange
                                           ? 'bg-transparent text-gray-900'
                                           : isToday
-                                          ? 'text-[var(--color-primary)] font-semibold hover:bg-gray-50'
-                                          : 'text-gray-900 hover:bg-gray-50'
+                                          ? 'text-[var(--color-primary)] font-semibold hover:bg-gray-50 active:bg-gray-100'
+                                          : 'text-gray-900 hover:bg-gray-50 active:bg-gray-100'
                                         }
                                       `}
                                     >
@@ -999,14 +1086,14 @@ export default function VendorDashboardPage() {
                   </div>
                   
                   {/* Order ID Search - Second */}
-                  <div className="flex-1 relative min-w-[200px]">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <div className="flex-1 relative w-full sm:min-w-[200px]">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
                     <input
                       type="text"
                       placeholder="Search by order ID..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                      className="w-full pl-9 sm:pl-10 pr-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                     />
                   </div>
                   
@@ -1014,7 +1101,7 @@ export default function VendorDashboardPage() {
                   <select
                     value={orderStatusFilter}
                     onChange={(e) => setOrderStatusFilter(e.target.value as OrderStatus | 'All')}
-                    className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                    className="w-full sm:w-auto px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                   >
                     <option value="All">All Order Status</option>
                     <option value="Submitted">Submitted</option>
@@ -1030,7 +1117,7 @@ export default function VendorDashboardPage() {
                   <select
                     value={paymentStatusFilter}
                     onChange={(e) => setPaymentStatusFilter(e.target.value as 'All' | 'pending' | 'processing' | 'ready' | 'collected')}
-                    className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                    className="w-full sm:w-auto px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                   >
                     <option value="All">All Payment Status</option>
                     <option value="pending">Pending</option>
@@ -1045,7 +1132,7 @@ export default function VendorDashboardPage() {
                       setSortBy(field as 'orderDate' | 'totalFee' | 'orderId')
                       setSortOrder(order as 'asc' | 'desc')
                     }}
-                    className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                    className="w-full sm:w-auto px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                   >
                     <option value="orderDate-desc">Sort: Date (Newest)</option>
                     <option value="orderDate-asc">Sort: Date (Oldest)</option>
@@ -1135,70 +1222,124 @@ export default function VendorDashboardPage() {
                   })
 
                   return (
-                    <div className="overflow-x-auto">
-                      <table className="w-full">
-                        <thead>
-                          <tr className="border-b border-gray-200">
-                            <th className="text-center py-3 px-4 font-semibold text-gray-900">Serial</th>
-                            <th className="text-left py-3 px-4 font-semibold text-gray-900">Order Date</th>
-                            <th className="text-left py-3 px-4 font-semibold text-gray-900">Order ID</th>
-                            <th className="text-left py-3 px-4 font-semibold text-gray-900">Service Name</th>
-                            <th className="text-left py-3 px-4 font-semibold text-gray-900">Order Status</th>
-                            <th className="text-right py-3 px-4 font-semibold text-gray-900">Total Fee</th>
-                            <th className="text-right py-3 px-4 font-semibold text-gray-900">Vendor Fee</th>
-                            <th className="text-center py-3 px-4 font-semibold text-gray-900">Payment Status</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {filteredPayments.map((payment, index) => (
-                            <tr key={payment.id} className="border-b border-gray-100 hover:bg-gray-50">
-                              <td className="py-4 px-4 text-center">
-                                <span className="text-gray-600 font-medium">{index + 1}</span>
+                    <>
+                      {/* Desktop Table View */}
+                      <div className="hidden md:block overflow-x-auto">
+                        <table className="w-full">
+                          <thead>
+                            <tr className="border-b border-gray-200 bg-gray-50">
+                              <th className="text-center py-3 px-4 font-semibold text-gray-900 text-sm">Serial</th>
+                              <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Order Date</th>
+                              <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Order ID</th>
+                              <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Service Name</th>
+                              <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Order Status</th>
+                              <th className="text-right py-3 px-4 font-semibold text-gray-900 text-sm">Total Fee</th>
+                              <th className="text-right py-3 px-4 font-semibold text-gray-900 text-sm">Vendor Fee</th>
+                              <th className="text-center py-3 px-4 font-semibold text-gray-900 text-sm">Payment Status</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {filteredPayments.map((payment, index) => (
+                              <tr key={payment.id} className="border-b border-gray-100 hover:bg-gray-50">
+                                <td className="py-4 px-4 text-center">
+                                  <span className="text-gray-600 font-medium">{index + 1}</span>
+                                </td>
+                                <td className="py-4 px-4">
+                                  <span className="text-sm text-gray-900">{new Date(payment.orderDate).toLocaleDateString()}</span>
+                                </td>
+                                <td className="py-4 px-4">
+                                  <span className="font-medium text-gray-900">{payment.orderId}</span>
+                                </td>
+                                <td className="py-4 px-4">
+                                  <span className="text-gray-900">{payment.serviceName}</span>
+                                </td>
+                                <td className="py-4 px-4">
+                                  <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getOrderStatusColor(payment.orderStatus)}`}>
+                                    {payment.orderStatus}
+                                  </span>
+                                </td>
+                                <td className="py-4 px-4 text-right">
+                                  <span className="font-semibold text-gray-900">৳{payment.totalFee.toLocaleString()}</span>
+                                </td>
+                                <td className="py-4 px-4 text-right">
+                                  <span className="font-semibold text-[var(--color-primary)]">৳{payment.vendorFee.toLocaleString()}</span>
+                                </td>
+                                <td className="py-4 px-4">
+                                  <div className="flex items-center justify-center">
+                                    {getPaymentStatusBadge(payment.status)}
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                          <tfoot>
+                            <tr className="bg-gray-50 font-semibold">
+                              <td colSpan={5} className="py-4 px-4 text-gray-900">
+                                Total ({filteredPayments.length} payments)
                               </td>
-                              <td className="py-4 px-4">
-                                <span className="text-sm text-gray-900">{new Date(payment.orderDate).toLocaleDateString()}</span>
+                              <td className="py-4 px-4 text-right text-gray-900">
+                                ৳{filteredPayments.reduce((sum, p) => sum + p.totalFee, 0).toLocaleString()}
                               </td>
-                              <td className="py-4 px-4">
-                                <span className="font-medium text-gray-900">{payment.orderId}</span>
+                              <td className="py-4 px-4 text-right text-[var(--color-primary)]">
+                                ৳{filteredPayments.reduce((sum, p) => sum + p.vendorFee, 0).toLocaleString()}
                               </td>
-                              <td className="py-4 px-4">
-                                <span className="text-gray-900">{payment.serviceName}</span>
-                              </td>
-                              <td className="py-4 px-4">
-                                <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getOrderStatusColor(payment.orderStatus)}`}>
-                                  {payment.orderStatus}
-                                </span>
-                              </td>
-                              <td className="py-4 px-4 text-right">
-                                <span className="font-semibold text-gray-900">৳{payment.totalFee.toLocaleString()}</span>
-                              </td>
-                              <td className="py-4 px-4 text-right">
-                                <span className="font-semibold text-[var(--color-primary)]">৳{payment.vendorFee.toLocaleString()}</span>
-                              </td>
-                              <td className="py-4 px-4">
-                                <div className="flex items-center justify-center">
+                              <td></td>
+                            </tr>
+                          </tfoot>
+                        </table>
+                      </div>
+
+                      {/* Mobile Card View */}
+                      <div className="md:hidden divide-y divide-gray-200">
+                        {filteredPayments.map((payment, index) => (
+                          <div key={payment.id} className="p-4 hover:bg-gray-50">
+                            <div className="mb-3">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-gray-600 font-medium">#{index + 1}</span>
+                                <div className="flex items-center gap-2">
+                                  <span className={`px-2.5 py-1 rounded-full text-xs font-medium border ${getOrderStatusColor(payment.orderStatus)}`}>
+                                    {payment.orderStatus}
+                                  </span>
                                   {getPaymentStatusBadge(payment.status)}
                                 </div>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                        <tfoot>
-                          <tr className="bg-gray-50 font-semibold">
-                            <td colSpan={5} className="py-4 px-4 text-gray-900">
-                              Total ({filteredPayments.length} payments)
-                            </td>
-                            <td className="py-4 px-4 text-right text-gray-900">
-                              ৳{filteredPayments.reduce((sum, p) => sum + p.totalFee, 0).toLocaleString()}
-                            </td>
-                            <td className="py-4 px-4 text-right text-[var(--color-primary)]">
-                              ৳{filteredPayments.reduce((sum, p) => sum + p.vendorFee, 0).toLocaleString()}
-                            </td>
-                            <td></td>
-                          </tr>
-                        </tfoot>
-                      </table>
-                    </div>
+                              </div>
+                              <p className="font-semibold text-gray-900 mb-1">{payment.orderId}</p>
+                              <p className="text-sm text-gray-600">{payment.serviceName}</p>
+                            </div>
+                            <div className="space-y-2 text-sm mb-3">
+                              <div className="flex justify-between">
+                                <span className="text-gray-500">Order Date:</span>
+                                <span className="text-gray-900">{new Date(payment.orderDate).toLocaleDateString()}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-500">Total Fee:</span>
+                                <span className="font-semibold text-gray-900">৳{payment.totalFee.toLocaleString()}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-500">Vendor Fee:</span>
+                                <span className="font-semibold text-[var(--color-primary)]">৳{payment.vendorFee.toLocaleString()}</span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                        {/* Mobile Summary */}
+                        <div className="p-4 bg-gray-50 border-t-2 border-gray-200">
+                          <div className="space-y-2 text-sm">
+                            <div className="flex justify-between font-semibold">
+                              <span className="text-gray-900">Total ({filteredPayments.length} payments):</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">Total Fees:</span>
+                              <span className="font-semibold text-gray-900">৳{filteredPayments.reduce((sum, p) => sum + p.totalFee, 0).toLocaleString()}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">Total Vendor Fees:</span>
+                              <span className="font-semibold text-[var(--color-primary)]">৳{filteredPayments.reduce((sum, p) => sum + p.vendorFee, 0).toLocaleString()}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </>
                   )
                 })()}
               </div>
@@ -1206,17 +1347,17 @@ export default function VendorDashboardPage() {
 
             {/* My Offers Tab */}
             {activeTab === 'my-offers' && (
-              <div className="bg-white rounded-lg shadow-sm p-8">
-                <div className="flex items-center justify-between mb-8">
-                  <h1 className="text-3xl font-bold text-gray-900">My Offers</h1>
-                  <button className="px-6 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:opacity-90 transition-colors font-medium flex items-center gap-2">
+              <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 lg:p-8">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
+                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">My Offers</h1>
+                  <button className="w-full sm:w-auto px-4 sm:px-6 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:opacity-90 transition-colors font-medium flex items-center justify-center gap-2 text-sm sm:text-base">
                     <Tag className="w-4 h-4" />
                     Create New Offer
                   </button>
                 </div>
 
                 {/* Summary Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
                   <div className="bg-green-50 border border-green-200 rounded-lg p-6">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium text-gray-600">Active Offers</span>
@@ -1276,7 +1417,7 @@ export default function VendorDashboardPage() {
                     return (
                       <div
                         key={offer.id}
-                        className={`border-2 rounded-lg p-6 transition-colors ${
+                        className={`border-2 rounded-lg p-4 sm:p-6 transition-colors ${
                           isActive
                             ? 'border-green-200 bg-green-50/30 hover:border-green-300'
                             : offer.status === 'expired' || isExpired
@@ -1284,18 +1425,18 @@ export default function VendorDashboardPage() {
                             : 'border-blue-200 bg-blue-50/30 hover:border-blue-300'
                         }`}
                       >
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-2">
-                              <h3 className="text-lg font-bold text-gray-900">{offer.title}</h3>
+                        <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
+                          <div className="flex-1 w-full">
+                            <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
+                              <h3 className="text-base sm:text-lg font-bold text-gray-900">{offer.title}</h3>
                               {getStatusBadge(offer.status)}
                             </div>
-                            <p className="text-sm text-gray-600 mb-3">{offer.description}</p>
+                            <p className="text-xs sm:text-sm text-gray-600 mb-3">{offer.description}</p>
                             
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3">
+                            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-3">
                               <div>
                                 <p className="text-xs text-gray-500 mb-1">Discount</p>
-                                <p className="text-sm font-semibold text-gray-900">
+                                <p className="text-xs sm:text-sm font-semibold text-gray-900">
                                   {offer.discountType === 'percentage' 
                                     ? `${offer.discountValue}% OFF` 
                                     : `৳${offer.discountValue} OFF`}
@@ -1303,17 +1444,17 @@ export default function VendorDashboardPage() {
                               </div>
                               <div>
                                 <p className="text-xs text-gray-500 mb-1">Category</p>
-                                <p className="text-sm font-medium text-gray-900">{offer.serviceCategory}</p>
+                                <p className="text-xs sm:text-sm font-medium text-gray-900 truncate">{offer.serviceCategory}</p>
                               </div>
                               <div>
                                 <p className="text-xs text-gray-500 mb-1">Valid Period</p>
-                                <p className="text-sm font-medium text-gray-900">
+                                <p className="text-xs sm:text-sm font-medium text-gray-900">
                                   {new Date(offer.validFrom).toLocaleDateString()} - {new Date(offer.validUntil).toLocaleDateString()}
                                 </p>
                               </div>
                               <div>
                                 <p className="text-xs text-gray-500 mb-1">Usage</p>
-                                <p className="text-sm font-medium text-gray-900">
+                                <p className="text-xs sm:text-sm font-medium text-gray-900">
                                   {offer.usageCount}{offer.maxUsage ? ` / ${offer.maxUsage}` : ''}
                                 </p>
                               </div>
@@ -1325,12 +1466,12 @@ export default function VendorDashboardPage() {
                               </p>
                             )}
                           </div>
-                          <div className="flex items-center gap-2 ml-4">
-                            <button className="px-4 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:opacity-90 transition-colors text-sm font-medium">
+                          <div className="flex items-center gap-2 w-full sm:w-auto sm:ml-4">
+                            <button className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:opacity-90 transition-colors text-xs sm:text-sm font-medium">
                               Edit
                             </button>
                             {isActive && (
-                              <button className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm font-medium">
+                              <button className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-xs sm:text-sm font-medium">
                                 Deactivate
                               </button>
                             )}
@@ -1355,14 +1496,14 @@ export default function VendorDashboardPage() {
 
       {/* Chat Popup */}
       {showChat && selectedOrderId && (
-        <div className="fixed bottom-4 right-4 w-96 h-[600px] bg-white rounded-lg shadow-2xl border border-gray-200 flex flex-col z-50">
+        <div className="fixed inset-0 sm:inset-auto sm:bottom-4 sm:right-4 sm:w-96 sm:h-[600px] bg-white sm:rounded-lg shadow-2xl border border-gray-200 flex flex-col z-50">
           {/* Chat Header */}
-          <div className="bg-[var(--color-primary)] text-white p-4 rounded-t-lg flex items-center justify-between">
-            <div className="flex-1">
-              <h3 className="font-semibold text-lg">
+          <div className="bg-[var(--color-primary)] text-white p-4 sm:rounded-t-lg flex items-center justify-between">
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-base sm:text-lg truncate">
                 {getSelectedOrderInfo()?.clientName || 'Client'}
               </h3>
-              <p className="text-sm text-white/80">
+              <p className="text-xs sm:text-sm text-white/80 truncate">
                 {selectedOrderId} • {getSelectedOrderInfo()?.serviceName}
               </p>
             </div>
@@ -1372,7 +1513,7 @@ export default function VendorDashboardPage() {
                 setSelectedOrderId(null)
                 setNewMessage('')
               }}
-              className="p-1 hover:bg-white/20 rounded transition-colors"
+              className="p-1 hover:bg-white/20 rounded transition-colors flex-shrink-0 ml-2"
             >
               <X className="w-5 h-5" />
             </button>
@@ -1386,15 +1527,15 @@ export default function VendorDashboardPage() {
                 className={`flex ${msg.sender === 'vendor' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[75%] rounded-lg px-4 py-2 ${
+                  className={`max-w-[85%] sm:max-w-[75%] rounded-lg px-3 sm:px-4 py-2 ${
                     msg.sender === 'vendor'
                       ? 'bg-[var(--color-primary)] text-white'
                       : 'bg-white text-gray-900 border border-gray-200'
                   }`}
                 >
-                  <p className="text-sm">{msg.message}</p>
+                  <p className="text-xs sm:text-sm break-words">{msg.message}</p>
                   <p
-                    className={`text-xs mt-1 ${
+                    className={`text-[10px] sm:text-xs mt-1 ${
                       msg.sender === 'vendor' ? 'text-white/70' : 'text-gray-500'
                     }`}
                   >
@@ -1406,7 +1547,7 @@ export default function VendorDashboardPage() {
           </div>
 
           {/* Message Input */}
-          <div className="border-t border-gray-200 p-4 bg-white">
+          <div className="border-t border-gray-200 p-3 sm:p-4 bg-white">
             <div className="flex gap-2">
               <input
                 type="text"
@@ -1418,14 +1559,14 @@ export default function VendorDashboardPage() {
                   }
                 }}
                 placeholder="Type a message..."
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                className="flex-1 px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
               />
               <button
                 onClick={handleSendMessage}
                 disabled={!newMessage.trim()}
-                className="bg-[var(--color-primary)] text-white px-4 py-2 rounded-lg hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-[var(--color-primary)] text-white px-3 sm:px-4 py-2 rounded-lg hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
               >
-                <Send className="w-5 h-5" />
+                <Send className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             </div>
           </div>

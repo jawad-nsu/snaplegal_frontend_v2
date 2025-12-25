@@ -465,22 +465,22 @@ export default function AllServicesPage() {
       <Navbar />
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
         {/* Page Title */}
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">All Services</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-8">All Services</h1>
 
-        <div className="flex gap-8">
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
           {/* Sidebar */}
-          <aside className="w-64 flex-shrink-0">
-            <div className="bg-white rounded-lg p-6 shadow-sm sticky top-8">
-              <h3 className="font-semibold text-gray-900 mb-4">Categories</h3>
+          <aside className="w-full lg:w-64 flex-shrink-0">
+            <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm lg:sticky lg:top-8">
+              <h3 className="font-semibold text-gray-900 mb-4 text-sm sm:text-base">Categories</h3>
               <nav className="space-y-1">
                 {serviceCategories.map((category) => (
                   <div key={category.id}>
                     <a
                       href={`#${category.id}`}
                       onClick={(e) => handleSidebarClick(e, category.id)}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${
+                      className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors text-sm sm:text-base ${
                         activeSection === category.id && (!category.subCategories || !category.subCategories.some(sub => activeSection === sub.id))
                           ? 'bg-[var(--color-neutral)] text-[var(--color-primary)] font-semibold'
                           : category.subCategories && category.subCategories.some(sub => activeSection === sub.id)
@@ -488,11 +488,11 @@ export default function AllServicesPage() {
                           : 'text-gray-700 hover:bg-[var(--color-neutral)] hover:text-[var(--color-primary)]'
                       }`}
                     >
-                      <span className="text-xl">{category.icon}</span>
+                      <span className="text-lg sm:text-xl">{category.icon}</span>
                       <span>{category.title}</span>
                     </a>
                     {category.subCategories && (
-                      <div className="ml-8 mt-1 space-y-1">
+                      <div className="ml-6 sm:ml-8 mt-1 space-y-1">
                         {category.subCategories.map((subCategory) => {
                           const isPrimary = subCategory.id === 'fridge-repair' || subCategory.id === 'microwave-repair'
                           return (
@@ -500,7 +500,7 @@ export default function AllServicesPage() {
                               key={subCategory.id}
                               href={`#${subCategory.id}`}
                               onClick={(e) => handleSidebarClick(e, subCategory.id)}
-                              className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${
+                              className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors text-sm sm:text-base ${
                                 activeSection === subCategory.id
                                   ? isPrimary
                                     ? 'bg-[var(--color-neutral)] text-[var(--color-primary)] font-semibold'
@@ -510,7 +510,7 @@ export default function AllServicesPage() {
                                   : 'text-gray-600 hover:bg-blue-50 hover:text-blue-600'
                               }`}
                             >
-                              {subCategory.icon && <span className="text-lg">{subCategory.icon}</span>}
+                              {subCategory.icon && <span className="text-base sm:text-lg">{subCategory.icon}</span>}
                               <span>{subCategory.title}</span>
                             </a>
                           )
@@ -524,17 +524,17 @@ export default function AllServicesPage() {
           </aside>
 
           {/* Service Categories */}
-          <div className="flex-1 space-y-12">
+          <div className="flex-1 space-y-8 sm:space-y-12">
             {serviceCategories.map((category) => (
-              <div key={category.id} className="space-y-12">
-                <section id={category.id} className="bg-white rounded-lg p-6 shadow-sm">
+              <div key={category.id} className="space-y-8 sm:space-y-12">
+                <section id={category.id} className="bg-white rounded-lg p-4 sm:p-6 shadow-sm">
                   {/* Category Title */}
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">
                     {category.title}
                   </h2>
 
                   {/* Featured Services Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
                     {category.featured.map((service, index) => {
                       const serviceWithDetails = service as typeof service & {
                         rating?: string
@@ -549,7 +549,7 @@ export default function AllServicesPage() {
                           className="group cursor-pointer rounded-2xl overflow-hidden bg-white shadow-md hover:shadow-2xl transition-all duration-300 border border-gray-100"
                           onClick={() => router.push(`/services/${service.slug}`)}
                         >
-                          <div className="relative h-56 overflow-hidden p-3">
+                          <div className="relative h-48 sm:h-56 overflow-hidden p-2 sm:p-3">
                             <div className="relative h-full w-full rounded-xl overflow-hidden">
                               <Image
                                 src={service.image || "/placeholder.svg"}
@@ -559,33 +559,33 @@ export default function AllServicesPage() {
                               />
                             </div>
                           </div>
-                          <div className="p-5">
-                            <div className="flex items-start justify-between mb-2">
-                              <h3 className="font-bold text-lg text-gray-900 leading-tight">{service.title}</h3>
+                          <div className="p-4 sm:p-5">
+                            <div className="flex items-start justify-between mb-2 gap-2">
+                              <h3 className="font-bold text-base sm:text-lg text-gray-900 leading-tight flex-1">{service.title}</h3>
                               {serviceWithDetails.rating && (
-                                <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg flex-shrink-0 ml-2">
-                                  <Star size={16} className="fill-yellow-400 text-yellow-400" />
-                                  <span className="font-semibold text-sm">{serviceWithDetails.rating}</span>
+                                <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg flex-shrink-0">
+                                  <Star size={14} className="fill-yellow-400 text-yellow-400 sm:w-4 sm:h-4" />
+                                  <span className="font-semibold text-xs sm:text-sm">{serviceWithDetails.rating}</span>
                                 </div>
                               )}
                             </div>
                             {serviceWithDetails.description && (
-                              <p className="text-sm text-gray-600 mb-4 line-clamp-2">{serviceWithDetails.description}</p>
+                              <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4 line-clamp-2">{serviceWithDetails.description}</p>
                             )}
-                            <div className="flex items-center justify-between mb-4">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-3 sm:mb-4">
                               {serviceWithDetails.deliveryTime && (
-                                <span className="text-sm text-gray-600">
-                                  <Clock size={16} className="inline mr-1" />
+                                <span className="text-xs sm:text-sm text-gray-600">
+                                  <Clock size={14} className="inline mr-1 sm:w-4 sm:h-4" />
                                   {serviceWithDetails.deliveryTime}
                                 </span>
                               )}
                               {serviceWithDetails.startingPrice && (
-                                <span className="text-sm font-semibold text-gray-900">Starting at {serviceWithDetails.startingPrice}</span>
+                                <span className="text-xs sm:text-sm font-semibold text-gray-900">Starting at {serviceWithDetails.startingPrice}</span>
                               )}
                             </div>
                             <button 
                               onClick={(e) => handleBookNow(e, service.title)}
-                              className="w-full mt-6 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
+                              className="w-full mt-4 sm:mt-6 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 sm:py-2.5 text-sm sm:text-base rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
                             >
                               Book Now
                             </button>
@@ -597,17 +597,17 @@ export default function AllServicesPage() {
 
                   {/* All Services List */}
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
                       All {category.title.toLowerCase()} services
                     </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                       {category.services.map((service, index) => (
                         <Link
                           key={index}
                           href={`/services/${service.slug}`}
-                          className="flex items-center gap-2 text-left text-gray-700 hover:text-[var(--color-primary)] transition-colors"
+                          className="flex items-center gap-2 text-left text-sm sm:text-base text-gray-700 hover:text-[var(--color-primary)] transition-colors"
                         >
-                          <span className="w-2 h-2 rounded-full bg-[var(--color-primary)]" />
+                          <span className="w-2 h-2 rounded-full bg-[var(--color-primary)] flex-shrink-0" />
                           <span>{service.title}</span>
                         </Link>
                       ))}
@@ -617,15 +617,15 @@ export default function AllServicesPage() {
 
                 {/* Sub-Categories */}
                 {category.subCategories && category.subCategories.map((subCategory) => (
-                  <section key={subCategory.id} id={subCategory.id} className="bg-white rounded-lg p-6 shadow-sm">
+                  <section key={subCategory.id} id={subCategory.id} className="bg-white rounded-lg p-4 sm:p-6 shadow-sm">
                     {/* Sub-Category Title */}
-                    <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">
                       {subCategory.title}
                     </h2>
 
                     {/* Featured Services Grid */}
                     {subCategory.featured && subCategory.featured.length > 0 && (
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
                         {subCategory.featured.map((service, index) => {
                           const serviceWithDetails = service as typeof service & {
                             rating?: string
@@ -640,7 +640,7 @@ export default function AllServicesPage() {
                               className="group cursor-pointer rounded-2xl overflow-hidden bg-white shadow-md hover:shadow-2xl transition-all duration-300 border border-gray-100"
                               onClick={() => router.push(`/services/${service.slug}`)}
                             >
-                              <div className="relative h-56 overflow-hidden p-3">
+                              <div className="relative h-48 sm:h-56 overflow-hidden p-2 sm:p-3">
                                 <div className="relative h-full w-full rounded-xl overflow-hidden">
                                   <Image
                                     src={service.image || "/placeholder.svg"}
@@ -650,33 +650,33 @@ export default function AllServicesPage() {
                                   />
                                 </div>
                               </div>
-                              <div className="p-5">
-                                <div className="flex items-start justify-between mb-2">
-                                  <h3 className="font-bold text-lg text-gray-900 leading-tight">{service.title}</h3>
+                              <div className="p-4 sm:p-5">
+                                <div className="flex items-start justify-between mb-2 gap-2">
+                                  <h3 className="font-bold text-base sm:text-lg text-gray-900 leading-tight flex-1">{service.title}</h3>
                                   {serviceWithDetails.rating && (
-                                    <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg flex-shrink-0 ml-2">
-                                      <Star size={16} className="fill-yellow-400 text-yellow-400" />
-                                      <span className="font-semibold text-sm">{serviceWithDetails.rating}</span>
+                                    <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg flex-shrink-0">
+                                      <Star size={14} className="fill-yellow-400 text-yellow-400 sm:w-4 sm:h-4" />
+                                      <span className="font-semibold text-xs sm:text-sm">{serviceWithDetails.rating}</span>
                                     </div>
                                   )}
                                 </div>
                                 {serviceWithDetails.description && (
-                                  <p className="text-sm text-gray-600 mb-4 line-clamp-2">{serviceWithDetails.description}</p>
+                                  <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4 line-clamp-2">{serviceWithDetails.description}</p>
                                 )}
-                                <div className="flex items-center justify-between mb-4">
+                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-3 sm:mb-4">
                                   {serviceWithDetails.deliveryTime && (
-                                    <span className="text-sm text-gray-600">
-                                      <Clock size={16} className="inline mr-1" />
+                                    <span className="text-xs sm:text-sm text-gray-600">
+                                      <Clock size={14} className="inline mr-1 sm:w-4 sm:h-4" />
                                       {serviceWithDetails.deliveryTime}
                                     </span>
                                   )}
                                   {serviceWithDetails.startingPrice && (
-                                    <span className="text-sm font-semibold text-gray-900">Starting at {serviceWithDetails.startingPrice}</span>
+                                    <span className="text-xs sm:text-sm font-semibold text-gray-900">Starting at {serviceWithDetails.startingPrice}</span>
                                   )}
                                 </div>
                                 <button 
                                   onClick={(e) => handleBookNow(e, service.title)}
-                                  className="w-full mt-6 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
+                                  className="w-full mt-4 sm:mt-6 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 sm:py-2.5 text-sm sm:text-base rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
                                 >
                                   Book Now
                                 </button>
@@ -690,23 +690,23 @@ export default function AllServicesPage() {
                     {/* All Services List */}
                     {subCategory.services && subCategory.services.length > 0 && (
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                        <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
                           All {subCategory.title.toLowerCase()} services
                         </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                           {subCategory.services.map((service, index) => {
                             const isPrimary = subCategory.id === 'fridge-repair' || subCategory.id === 'microwave-repair'
                             return (
                               <Link
                                 key={index}
                                 href={`/services/${service.slug}`}
-                                className={`flex items-center gap-2 text-left text-gray-700 transition-colors ${
+                                className={`flex items-center gap-2 text-left text-sm sm:text-base text-gray-700 transition-colors ${
                                   isPrimary
                                     ? 'hover:text-[var(--color-primary)]'
                                     : 'hover:text-blue-600'
                                 }`}
                               >
-                                <span className={`w-2 h-2 rounded-full ${
+                                <span className={`w-2 h-2 rounded-full flex-shrink-0 ${
                                   isPrimary
                                     ? 'bg-[var(--color-primary)]'
                                     : 'bg-blue-600'

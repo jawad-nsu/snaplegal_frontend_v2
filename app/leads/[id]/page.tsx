@@ -464,84 +464,86 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
     <div className="min-h-screen bg-gray-50">
       <Navbar />
 
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-        {/* Breadcrumb */}
-        <div className="mb-6">
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <Link href="/" className="hover:text-[var(--color-primary)]">
-              Home
-            </Link>
-            <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)]"></span>
-            <Link href="/leads" className="hover:text-[var(--color-primary)]">
-              Leads
-            </Link>
-            <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)]"></span>
-            <span className="text-gray-900">{lead.clientName}</span>
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-7xl">
+        {/* Top Bar with Breadcrumb and Actions */}
+        <div className="mb-4 sm:mb-6">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-gray-600 flex-wrap">
+              <Link href="/" className="hover:text-[var(--color-primary)]">
+                Home
+              </Link>
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)]"></span>
+              <Link href="/leads" className="hover:text-[var(--color-primary)]">
+                Leads
+              </Link>
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)]"></span>
+              <span className="text-gray-900 truncate">{lead.clientName}</span>
+            </div>
+            <div className="flex items-center gap-2 sm:gap-3">
+              <button
+                onClick={() => router.push(`/leads/${id}/edit`)}
+                className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-sm"
+              >
+                <Edit2 className="w-4 h-4" />
+                <span className="hidden sm:inline">Edit</span>
+              </button>
+              <button
+                onClick={() => router.push('/leads')}
+                className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-sm"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span className="hidden sm:inline">Back</span>
+              </button>
+            </div>
           </div>
         </div>
 
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <div className="flex items-center gap-4 mb-4">
-                <h1 className="text-3xl font-bold text-gray-900">{lead.clientName}</h1>
-                <span className={`px-4 py-1.5 rounded-full text-sm font-medium ${getStageColor(lead.stage, lead.closedReason)}`}>
+        <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mb-4 sm:mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-3 sm:mb-4">
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 truncate">{lead.clientName}</h1>
+                <span className={`inline-flex items-center px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap w-fit ${getStageColor(lead.stage, lead.closedReason)}`}>
                   {getStageDisplayText(lead.stage, lead.closedReason)}
                 </span>
               </div>
-              <div className="flex items-center gap-6 text-sm text-gray-600">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 text-xs sm:text-sm text-gray-600">
                 <div className="flex items-center gap-2">
-                  <UserCircle className="w-4 h-4" />
-                  <span>{lead.leadOwner}</span>
+                  <UserCircle className="w-4 h-4 flex-shrink-0" />
+                  <span className="truncate">{lead.leadOwner}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
+                  <Calendar className="w-4 h-4 flex-shrink-0" />
                   <span>Created: {new Date(lead.createdAt).toLocaleDateString()}</span>
                 </div>
               </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => router.push(`/leads/${id}/edit`)}
-                className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-              >
-                <Edit2 className="w-4 h-4" />
-                Edit
-              </button>
-              <button
-                onClick={() => router.push('/leads')}
-                className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Back
-              </button>
             </div>
           </div>
         </div>
 
         {/* Salesforce-style Path Component */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div className="flex items-center">
+        <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mb-4 sm:mb-6 overflow-x-auto">
+          <div className="flex items-center min-w-max sm:min-w-0">
             {leadStages.map((stage, index) => {
               const isCurrent = lead.stage === stage
               const isCompleted = index < currentStageIndex
               const stageColors = getPathStageColor(stage, isCurrent, isCompleted, lead.closedReason)
               
               return (
-                <div key={stage} className="flex items-center flex-1">
+                <div key={stage} className="flex items-center flex-1 min-w-[80px] sm:min-w-0">
                   <div className="flex items-center flex-1">
                     <button
                       onClick={() => handleStageChange(stage)}
-                      className="flex flex-col items-center flex-1 group cursor-pointer"
+                      className="flex flex-col items-center flex-1 group cursor-pointer w-full"
                     >
-                      <div className={`relative w-12 h-12 rounded-full ${stageColors.bg} ${stageColors.border} border-2 flex items-center justify-center transition-all ${
+                      <div className={`relative w-10 h-10 sm:w-12 sm:h-12 rounded-full ${stageColors.bg} ${stageColors.border} border-2 flex items-center justify-center transition-all ${
                         !isCurrent ? 'hover:scale-110 hover:shadow-lg' : ''
-                      } ${isCurrent ? 'ring-4 ring-blue-200 ring-opacity-50' : ''}`}>
+                      } ${isCurrent ? 'ring-2 sm:ring-4 ring-blue-200 ring-opacity-50' : ''}`}>
                         {isCompleted ? (
-                          <CheckCircle className="w-6 h-6 text-white" />
+                          <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                         ) : (
-                          <span className={`text-sm font-bold ${stageColors.text}`}>
+                          <span className={`text-xs sm:text-sm font-bold ${stageColors.text}`}>
                             {index + 1}
                           </span>
                         )}
@@ -549,7 +551,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
                           <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-blue-500"></div>
                         )}
                       </div>
-                      <span className={`mt-2 text-sm font-medium text-center ${
+                      <span className={`mt-2 text-xs sm:text-sm font-medium text-center leading-tight ${
                         isCurrent ? 'text-blue-600 font-semibold' :
                         isCompleted ? 'text-green-600' :
                         'text-gray-500'
@@ -562,7 +564,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
                     </button>
                   </div>
                   {index < leadStages.length - 1 && (
-                    <div className={`flex-1 h-1 mx-2 transition-colors ${
+                    <div className={`flex-1 h-1 mx-1 sm:mx-2 transition-colors min-w-[20px] sm:min-w-0 ${
                       isCompleted ? 'bg-green-500' :
                       index < currentStageIndex ? 'bg-green-500' :
                       index === currentStageIndex ? 'bg-blue-500' :
@@ -576,13 +578,13 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
           
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
+        <div className="grid lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             {/* Contact Information */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Contact Information</h2>
-              <div className="grid md:grid-cols-2 gap-4">
+            <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">Contact Information</h2>
+              <div className="grid md:grid-cols-2 gap-3 sm:gap-4">
                 {lead.mobile && (
                   <div className="flex items-start gap-3">
                     <Phone className="w-5 h-5 text-gray-400 mt-0.5" />
@@ -643,9 +645,9 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
             </div>
 
             {/* Lead Details */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Lead Details</h2>
-              <div className="space-y-4">
+            <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">Lead Details</h2>
+              <div className="space-y-3 sm:space-y-4">
                 {lead.profession && (
                   <div className="flex items-start gap-3">
                     <Briefcase className="w-5 h-5 text-gray-400 mt-0.5" />
@@ -687,16 +689,16 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Tasks Section */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-gray-900">Tasks</h2>
+            <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-2 mb-3 sm:mb-4">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900">Tasks</h2>
                 <div className="flex items-center gap-2">
                   <select
                     value={taskFilter}
                     onChange={(e) => setTaskFilter(e.target.value as TaskStatus | 'All')}
-                    className="px-2 py-1.5 border border-gray-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                    className="px-2 py-1.5 border border-gray-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] flex-1 sm:flex-none"
                   >
                     <option value="All">All</option>
                     <option value="Not Started">Not Started</option>
@@ -705,7 +707,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
                   </select>
                   <button
                     onClick={() => setShowTaskForm(!showTaskForm)}
-                    className="flex items-center gap-1 px-3 py-1.5 bg-[var(--color-primary)] text-white rounded-lg hover:opacity-90 transition-colors text-sm"
+                    className="flex items-center gap-1 px-3 py-1.5 bg-[var(--color-primary)] text-white rounded-lg hover:opacity-90 transition-colors text-sm whitespace-nowrap"
                   >
                     <Plus className="w-4 h-4" />
                     New
@@ -715,7 +717,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
 
               {/* New Task Form */}
               {showTaskForm && (
-                <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="mb-4 p-3 sm:p-4 bg-gray-50 rounded-lg border border-gray-200">
                   <h3 className="font-semibold text-gray-900 mb-3 text-sm">Create New Task</h3>
                   <div className="space-y-3">
                     <div>
@@ -774,7 +776,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
                   <p className="text-sm">No tasks found</p>
                 </div>
               ) : (
-                <div className="space-y-2 max-h-[600px] overflow-y-auto">
+                <div className="space-y-2 max-h-[400px] sm:max-h-[600px] overflow-y-auto -mx-1 px-1">
                   {filteredTasks.map((task) => {
                     const isOverdue = task.dueDate && task.status !== 'Completed' && new Date(task.dueDate) < new Date()
                     
@@ -884,7 +886,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
 
                             {/* 4. Create Follow up Task Section */}
                             {editingTaskId === task.id && (
-                              <div className="mt-3 ml-6 p-3 border-2 border-blue-300 rounded-lg bg-blue-50">
+                              <div className="mt-3 ml-6 p-3 sm:p-4 border-2 border-blue-300 rounded-lg bg-blue-50">
                                 <h4 className="text-xs font-semibold text-blue-900 mb-3">Create Follow up Task</h4>
                                 <div className="space-y-2">
                                   <div>
@@ -917,7 +919,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
                             )}
 
                           </div>
-                          <div className="flex items-center gap-1 flex-shrink-0">
+                          <div className="flex items-center gap-1 flex-shrink-0 ml-auto">
                             {task.status !== 'Completed' && (
                               <select
                                 value={task.status}
@@ -932,34 +934,35 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
                             )}
                             <button
                               onClick={() => handleDeleteTask(task.id)}
-                              className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
+                              className="p-1.5 sm:p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
                               title="Delete task"
                             >
-                              <Trash2 className="w-3 h-3" />
+                              <Trash2 className="w-3.5 h-3.5 sm:w-3 sm:h-3" />
                             </button>
                           </div>
                         </div>
                         {/* Action Buttons - Only show when editing, spans full width */}
                         {editingTaskId === task.id && (
-                          <div className="flex items-center justify-between gap-2 mt-3 pt-3 border-t border-gray-200">
+                          <div className="flex flex-wrap items-center justify-between gap-2 mt-3 pt-3 border-t border-gray-200">
                             <button
                               onClick={() => handleSaveAndCreateFollowUp(task.id)}
-                              className="flex items-center gap-1 px-2 py-1 bg-green-600 text-white rounded text-xs hover:opacity-90"
+                              className="flex items-center gap-1 px-2 py-1 bg-green-600 text-white rounded text-xs hover:opacity-90 flex-1 sm:flex-none min-w-[120px]"
                               title="Save notes and create Follow up task"
                             >
                               <Plus className="w-3 h-3" />
-                              Create Follow Up
+                              <span className="hidden sm:inline">Create Follow Up</span>
+                              <span className="sm:hidden">Follow Up</span>
                             </button>
                             <button
                               onClick={() => handleSaveDescription(task.id)}
-                              className="flex items-center gap-1 px-2 py-1 bg-[var(--color-primary)] text-white rounded text-xs hover:opacity-90"
+                              className="flex items-center gap-1 px-2 py-1 bg-[var(--color-primary)] text-white rounded text-xs hover:opacity-90 flex-1 sm:flex-none min-w-[80px]"
                             >
                               <Save className="w-3 h-3" />
                               Save
                             </button>
                             <button
                               onClick={handleCancelEditDescription}
-                              className="flex items-center gap-1 px-2 py-1 border border-gray-300 rounded text-xs text-gray-700 hover:bg-gray-50"
+                              className="flex items-center gap-1 px-2 py-1 border border-gray-300 rounded text-xs text-gray-700 hover:bg-gray-50 flex-1 sm:flex-none min-w-[80px]"
                             >
                               <X className="w-3 h-3" />
                               Cancel
@@ -974,9 +977,9 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
             </div>
 
             {/* Lead Information */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Lead Information</h2>
-              <div className="space-y-4">
+            <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">Lead Information</h2>
+              <div className="space-y-3 sm:space-y-4">
                 <div>
                   <p className="text-sm text-gray-500 mb-1">Stage</p>
                   <span className={`inline-block px-3 py-1.5 rounded-full text-sm font-medium ${getStageColor(lead.stage, lead.closedReason)}`}>
@@ -1011,8 +1014,8 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
             </div>
 
             {/* Quick Actions */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
+            <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">Quick Actions</h2>
               <div className="space-y-2">
                 {lead.mobile && (
                   <a
@@ -1058,9 +1061,9 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
 
       {/* Closed Reason Modal */}
       {showClosedReasonModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">Close Lead</h3>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl p-4 sm:p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">Close Lead</h3>
             {!selectedClosedReason ? (
               <>
                 <p className="text-sm text-gray-600 mb-6">Please select the reason for closing this lead:</p>

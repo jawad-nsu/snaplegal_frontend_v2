@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
-import { MapPin, Search, ShoppingCart, User, LayoutDashboard } from 'lucide-react'
+import { MapPin, Search, ShoppingCart, User, LayoutDashboard, Menu, X, Package, LogOut } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 
@@ -40,6 +40,8 @@ export default function Navbar() {
   })
 
   const [showProfileDropdown, setShowProfileDropdown] = useState(false)
+  const [showMobileMenu, setShowMobileMenu] = useState(false)
+  const mobileMenuRef = useRef<HTMLDivElement>(null)
 
   // Check if we're on sign in or sign up pages
   const isAuthPage = pathname === '/signin' || pathname === '/signup'
@@ -50,27 +52,67 @@ export default function Navbar() {
       if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target as Node)) {
         setShowProfileDropdown(false)
       }
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
+        setShowMobileMenu(false)
+      }
     }
 
-    if (showProfileDropdown) {
+    if (showProfileDropdown || showMobileMenu) {
       document.addEventListener('mousedown', handleClickOutside)
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [showProfileDropdown])
+  }, [showProfileDropdown, showMobileMenu])
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between gap-4">
+      <div className="container mx-auto px-4 py-3 sm:py-4">
+        {/* Mobile Layout */}
+        <div className="flex md:hidden items-center justify-between gap-3">
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-2 flex-shrink-0">
+            <span className="text-lg sm:text-xl font-bold text-gray-900">SnapLegal</span>
+          </Link>
+
+          {/* Search Bar - Mobile */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1 sm:gap-2 bg-white border border-gray-300 rounded-lg overflow-hidden focus-within:border-[var(--color-primary)] focus-within:ring-1 focus-within:ring-[var(--color-neutral)]">
+              <Input
+                placeholder="Search services..."
+                className="flex-1 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-sm py-2 h-9"
+              />
+              <Button 
+                className="bg-[var(--color-primary)] hover:opacity-90 text-white rounded-none border-0 px-2 sm:px-3 h-9"
+                onClick={() => {
+                  // Add search functionality here if needed
+                }}
+              >
+                <Search className="w-4 h-4 sm:w-5 sm:h-5" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Menu Icon */}
+          <button
+            onClick={() => setShowMobileMenu(!showMobileMenu)}
+            className="flex-shrink-0 p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            aria-label="Toggle menu"
+          >
+            {showMobileMenu ? (
+              <X className="w-6 h-6 text-gray-700" />
+            ) : (
+              <Menu className="w-6 h-6 text-gray-700" />
+            )}
+          </button>
+        </div>
+
+        {/* Desktop Layout */}
+        <div className="hidden md:flex items-center justify-between gap-4">
           {/* Left Section - Logo and Location */}
           <div className="flex items-center gap-4">
             <Link href="/" className="flex items-center gap-2">
-              {/* <div className="w-10 h-10 bg-gradient-to-br from-pink-500 via-purple-500 to-blue-500 rounded-lg flex items-center justify-center text-white font-bold text-sm">
-                SnapLegal
-              </div> */}
               <span className="text-xl font-bold text-gray-900">SnapLegal</span>
             </Link>
             
@@ -108,13 +150,6 @@ export default function Navbar() {
 
           {/* Right Section - Actions */}
           <div className="flex items-center gap-3">
-            {/* <Button 
-              variant="outline" 
-              className="border-pink-600 text-pink-600 hover:bg-pink-50 font-medium"
-            >
-              Snap Pay
-            </Button> */}
-            
             {/* Show Sign In/Sign Up button when not authenticated */}
             {!isAuthenticated && (
               <Button
@@ -240,6 +275,111 @@ export default function Navbar() {
           </div>
         </div>
       </div>
+
+      {/* Mobile Menu Dropdown */}
+      {showMobileMenu && (
+        <div 
+          ref={mobileMenuRef}
+          className="md:hidden border-t border-gray-200 bg-white shadow-lg"
+        >
+          <div className="container mx-auto px-4 py-4 space-y-1">
+            {/* Location */}
+            <button
+              onClick={() => {
+                setShowMobileMenu(false)
+                // Add location change functionality
+              }}
+              className="w-full flex items-center gap-3 px-4 py-3 text-left text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+            >
+              <MapPin className="w-5 h-5 text-[var(--color-primary)] flex-shrink-0" />
+              <span className="font-medium">Gulshan</span>
+            </button>
+
+            {/* All Services */}
+            <button
+              onClick={() => {
+                router.push('/all-services')
+                setShowMobileMenu(false)
+              }}
+              className="w-full flex items-center gap-3 px-4 py-3 text-left text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+            >
+              <LayoutDashboard className="w-5 h-5 text-[var(--color-primary)] flex-shrink-0" />
+              <span className="font-medium">All Services</span>
+            </button>
+
+            {/* Account / Sign In */}
+            {isAuthenticated ? (
+              <>
+                <button
+                  onClick={() => {
+                    router.push('/account')
+                    setShowMobileMenu(false)
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-left text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                >
+                  <User className="w-5 h-5 text-[var(--color-primary)] flex-shrink-0" />
+                  <span className="font-medium">Account</span>
+                </button>
+                {!isVendor && (
+                  <>
+                    <button
+                      onClick={() => {
+                        router.push('/account/service-orders')
+                        setShowMobileMenu(false)
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-left text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                    >
+                      <Package className="w-5 h-5 text-[var(--color-primary)] flex-shrink-0" />
+                      <span className="font-medium">Orders</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        router.push('/cart')
+                        setShowMobileMenu(false)
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-left text-gray-700 hover:bg-gray-50 rounded-lg transition-colors relative"
+                    >
+                      <ShoppingCart className="w-5 h-5 text-[var(--color-primary)] flex-shrink-0" />
+                      <span className="font-medium">Cart</span>
+                      <span className="ml-auto bg-[var(--color-primary)] text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                        2
+                      </span>
+                    </button>
+                  </>
+                )}
+                <div className="border-t border-gray-200 my-1"></div>
+                <button
+                  onClick={() => {
+                    // Clear authentication data
+                    localStorage.removeItem('authToken')
+                    localStorage.removeItem('user')
+                    setIsAuthenticated(false)
+                    setIsVendor(false)
+                    setShowMobileMenu(false)
+                    // Redirect to home page
+                    router.push('/')
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-left text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                >
+                  <LogOut className="w-5 h-5 text-red-600 flex-shrink-0" />
+                  <span className="font-medium">{isVendor ? 'Log Out' : 'Sign Out'}</span>
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => {
+                  router.push(pathname === '/signin' ? '/signup' : '/signin')
+                  setShowMobileMenu(false)
+                }}
+                className="w-full flex items-center gap-3 px-4 py-3 text-left text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+              >
+                <User className="w-5 h-5 text-[var(--color-primary)] flex-shrink-0" />
+                <span className="font-medium">{pathname === '/signin' ? 'Sign Up' : 'Sign In'}</span>
+              </button>
+            )}
+          </div>
+        </div>
+      )}
     </header>
   )
 }

@@ -163,19 +163,19 @@ export default function ConsultationPage({ params }: { params: Promise<{ slug: s
     return (
       <div className="min-h-screen bg-gray-50">
         <Navbar />
-        <div className="container mx-auto px-4 py-12">
+        <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12">
           <div className="max-w-md mx-auto">
-            <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle className="w-8 h-8 text-green-600" />
+            <div className="bg-white rounded-lg shadow-sm p-6 sm:p-8 text-center">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckCircle className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" />
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Consultation Request Submitted!</h2>
-              <p className="text-gray-600 mb-6">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Consultation Request Submitted!</h2>
+              <p className="text-sm sm:text-base text-gray-600 mb-6">
                 Your free consultation request has been received. We'll contact you soon to confirm the details.
               </p>
               <button
                 onClick={() => router.push(`/services/${slug}`)}
-                className="bg-[var(--color-primary)] text-white px-6 py-2 rounded-lg font-medium hover:opacity-90 transition-colors"
+                className="bg-[var(--color-primary)] text-white px-6 py-2 rounded-lg font-medium hover:opacity-90 transition-colors text-sm sm:text-base"
               >
                 Back to Service
               </button>
@@ -194,35 +194,36 @@ export default function ConsultationPage({ params }: { params: Promise<{ slug: s
       {/* Breadcrumb */}
       <div className="bg-white border-b">
         <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <Link href="/" className="hover:text-[var(--color-primary)]">Home</Link>
+          <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-gray-600 flex-wrap">
+            <Link href="/" className="hover:text-[var(--color-primary)] whitespace-nowrap">Home</Link>
             <span>/</span>
-            <Link href="/all-services" className="hover:text-[var(--color-primary)]">All Services</Link>
+            <Link href="/all-services" className="hover:text-[var(--color-primary)] whitespace-nowrap">All Services</Link>
             <span>/</span>
-            <Link href={`/services/${slug}`} className="hover:text-[var(--color-primary)]">Service Details</Link>
+            <Link href={`/services/${slug}`} className="hover:text-[var(--color-primary)] whitespace-nowrap truncate max-w-[120px] sm:max-w-none">Service Details</Link>
             <span>/</span>
-            <span className="text-gray-900">Free Consultation</span>
+            <span className="text-gray-900 whitespace-nowrap">Free Consultation</span>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <div className="max-w-2xl mx-auto">
           {/* Back Button */}
           <Link
             href={`/services/${slug}`}
-            className="inline-flex items-center gap-2 text-[var(--color-primary)] hover:opacity-80 mb-6"
+            className="inline-flex items-center gap-2 text-[var(--color-primary)] hover:opacity-80 mb-4 sm:mb-6 text-sm sm:text-base"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Back to Service Details</span>
+            <span className="hidden sm:inline">Back to Service Details</span>
+            <span className="sm:hidden">Back</span>
           </Link>
 
           {/* Form Card */}
-          <div className="bg-white rounded-lg shadow-sm p-8">
-            <div className="mb-6">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Book a Free Consultation</h1>
-              <p className="text-gray-600">
+          <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 md:p-8">
+            <div className="mb-4 sm:mb-6">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Book a Free Consultation</h1>
+              <p className="text-sm sm:text-base text-gray-600">
                 Fill in the details below to schedule your free consultation. Our team will contact you to confirm.
               </p>
             </div>
@@ -250,8 +251,8 @@ export default function ConsultationPage({ params }: { params: Promise<{ slug: s
                   }`}
                 >
                   <div className="flex items-center gap-2">
-                    <Calendar className="w-5 h-5 text-gray-400" />
-                    <span className="text-gray-700">
+                    <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 flex-shrink-0" />
+                    <span className="text-gray-700 text-sm sm:text-base truncate">
                       {formData.date
                         ? new Date(formData.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
                         : 'Select date'}
@@ -262,11 +263,11 @@ export default function ConsultationPage({ params }: { params: Promise<{ slug: s
                 {/* Calendar Date Picker Popup */}
                 {showDatePicker && (
                   <div 
-                    className="absolute top-full left-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-xl z-20 p-6 w-[350px]" 
+                    className="absolute top-full left-0 right-0 sm:right-auto mt-2 bg-white border border-gray-200 rounded-lg shadow-xl z-20 p-4 sm:p-6 w-full sm:w-[350px] max-w-[350px] mx-auto sm:mx-0" 
                     onClick={(e) => e.stopPropagation()}
                   >
                     {/* Calendar Header */}
-                    <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center justify-between mb-3 sm:mb-4">
                       <button
                         onClick={() => {
                           const newDate = new Date(calendarYear, calendarMonth - 1, 1)
@@ -275,9 +276,9 @@ export default function ConsultationPage({ params }: { params: Promise<{ slug: s
                         }}
                         className="p-1 hover:bg-gray-100 rounded"
                       >
-                        <ChevronLeft className="w-5 h-5 text-gray-600" />
+                        <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
                       </button>
-                      <h3 className="text-base font-semibold text-gray-900">
+                      <h3 className="text-sm sm:text-base font-semibold text-gray-900 text-center px-2">
                         {new Date(calendarYear, calendarMonth).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                       </h3>
                       <button
@@ -288,7 +289,7 @@ export default function ConsultationPage({ params }: { params: Promise<{ slug: s
                         }}
                         className="p-1 hover:bg-gray-100 rounded"
                       >
-                        <ChevronRight className="w-5 h-5 text-gray-600" />
+                        <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
                       </button>
                     </div>
 
@@ -305,7 +306,7 @@ export default function ConsultationPage({ params }: { params: Promise<{ slug: s
                     <div className="grid grid-cols-7 gap-1">
                       {getDaysInMonth().map((day, idx) => {
                         if (day === null) {
-                          return <div key={idx} className="h-10" />
+                          return <div key={idx} className="h-8 sm:h-10" />
                         }
 
                         const selected = isDateSelected(day)
@@ -318,7 +319,7 @@ export default function ConsultationPage({ params }: { params: Promise<{ slug: s
                             onClick={() => !past && handleDateSelect(day)}
                             disabled={past}
                             className={`
-                              relative z-10 h-10 w-10 rounded-full text-sm font-medium transition-colors
+                              relative z-10 h-8 w-8 sm:h-10 sm:w-10 rounded-full text-xs sm:text-sm font-medium transition-colors
                               ${selected
                                 ? 'bg-[var(--color-primary)] text-white'
                                 : past
@@ -336,19 +337,19 @@ export default function ConsultationPage({ params }: { params: Promise<{ slug: s
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex justify-end gap-2 mt-4 pt-4 border-t">
+                    <div className="flex justify-end gap-2 mt-3 sm:mt-4 pt-3 sm:pt-4 border-t">
                       <button
                         onClick={() => {
                           setFormData(prev => ({ ...prev, date: '' }))
                           setShowDatePicker(false)
                         }}
-                        className="px-4 py-2 text-sm text-gray-700 hover:text-gray-900"
+                        className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm text-gray-700 hover:text-gray-900"
                       >
                         Clear
                       </button>
                       <button
                         onClick={() => setShowDatePicker(false)}
-                        className="px-4 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:opacity-90 text-sm font-medium"
+                        className="px-3 sm:px-4 py-1.5 sm:py-2 bg-[var(--color-primary)] text-white rounded-lg hover:opacity-90 text-xs sm:text-sm font-medium"
                       >
                         Done
                       </button>
@@ -411,16 +412,16 @@ export default function ConsultationPage({ params }: { params: Promise<{ slug: s
               </div>
 
               {/* Submit Button */}
-              <div className="flex gap-4 pt-4">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
                 <button
                   type="submit"
-                  className="flex-1 bg-[var(--color-primary)] text-white py-3 rounded-lg font-medium hover:opacity-90 transition-colors"
+                  className="w-full sm:flex-1 bg-[var(--color-primary)] text-white py-3 rounded-lg font-medium hover:opacity-90 transition-colors text-sm sm:text-base"
                 >
-                  Submit Consultation Request
+                  Submit
                 </button>
                 <Link
                   href={`/services/${slug}`}
-                  className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-300 transition-colors text-center"
+                  className="w-full sm:flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-300 transition-colors text-center text-sm sm:text-base"
                 >
                   Cancel
                 </Link>
@@ -428,12 +429,12 @@ export default function ConsultationPage({ params }: { params: Promise<{ slug: s
             </form>
 
             {/* Info Box */}
-            <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <div className="flex items-start gap-3">
+            <div className="mt-4 sm:mt-6 bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
+              <div className="flex items-start gap-2 sm:gap-3">
                 <div className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                   <span className="text-blue-600 text-xs font-bold">i</span>
                 </div>
-                <div className="text-sm text-gray-700">
+                <div className="text-xs sm:text-sm text-gray-700">
                   <p className="font-medium text-gray-900 mb-1">What happens next?</p>
                   <ul className="list-disc list-inside space-y-1 text-gray-600">
                     <li>Our team will review your request within 24 hours</li>

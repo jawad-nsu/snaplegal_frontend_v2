@@ -188,6 +188,7 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
   const [serviceFilterStar, setServiceFilterStar] = useState<number | null>(null)
   const [serviceSortBy, setServiceSortBy] = useState<'rating' | 'date'>('rating')
   const [isInfoSourceExpanded, setIsInfoSourceExpanded] = useState(false)
+  const [isMobilePackageExpanded, setIsMobilePackageExpanded] = useState(false)
   const router = useRouter()
   
   const { slug } = use(params)
@@ -227,28 +228,28 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
 
       {/* Breadcrumb */}
       <div className="bg-white border-b">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <Link href="/" className="hover:text-[var(--color-primary)]">Home</Link>
+        <div className="container mx-auto px-4 py-2 sm:py-3">
+          <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-gray-600 overflow-x-auto">
+            <Link href="/" className="hover:text-[var(--color-primary)] whitespace-nowrap">Home</Link>
             <span>/</span>
-            <Link href="/all-services" className="hover:text-[var(--color-primary)]">All Services</Link>
+            <Link href="/all-services" className="hover:text-[var(--color-primary)] whitespace-nowrap">All Services</Link>
             <span>/</span>
-            <Link href="/all-services" className="hover:text-[var(--color-primary)]">{service.category}</Link>
+            <Link href="/all-services" className="hover:text-[var(--color-primary)] whitespace-nowrap">{service.category}</Link>
             <span>/</span>
-            <span className="text-gray-900">{service.name}</span>
+            <span className="text-gray-900 whitespace-nowrap">{service.name}</span>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8 pb-20 lg:pb-8">
-        <div className="grid lg:grid-cols-3 gap-8">
+      <div className="container mx-auto px-4 py-6 sm:py-8 pb-32 sm:pb-20 lg:pb-8">
+        <div className="grid lg:grid-cols-3 gap-6 sm:gap-8">
           {/* Left Content */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             {/* Service Header */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <div className="flex gap-6">
-                <div className="relative w-64 h-48 rounded-lg overflow-hidden flex-shrink-0">
+            <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
+                <div className="relative w-full sm:w-64 h-48 sm:h-48 rounded-lg overflow-hidden flex-shrink-0">
                   <Image
                     src={service.image || "/placeholder.svg"}
                     alt={service.name}
@@ -258,7 +259,7 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                 </div>
                 <div className="flex-1">
                   <div className="text-sm text-gray-600 mb-2">{service.category}</div>
-                  <h1 className="text-3xl font-bold mb-3">{service.name}</h1>
+                  <h1 className="text-2xl sm:text-3xl font-bold mb-3">{service.name}</h1>
                   <div className="flex items-center gap-4 mb-4">
                     <div className="flex items-center gap-1">
                       <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
@@ -266,7 +267,7 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                       <span className="text-gray-600 text-sm">({service.reviewCount} reviews)</span>
                     </div>
                   </div>
-                  <p className="text-gray-700 leading-relaxed">{service.description}</p>
+                  <p className="text-gray-700 leading-relaxed text-sm sm:text-base">{service.description}</p>
                 </div>
               </div>
             </div>
@@ -274,12 +275,12 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
             {/* Tabs */}
             <div className="bg-white rounded-lg shadow-sm">
               <div className="border-b">
-                <div className="flex gap-6 px-6">
+                <div className="flex flex-wrap gap-2 sm:gap-4 lg:gap-6 px-4 sm:px-6">
                   {['Overview', 'Learning and Discussion', 'FAQ', 'Consultants', 'Reviews'].map((tab) => (
                     <button
                       key={tab}
                       onClick={() => setActiveTab(tab.toLowerCase().replace(/\s+/g, '-'))}
-                      className={`py-4 px-1 font-medium transition-colors border-b-2 ${
+                      className={`py-3 sm:py-4 px-2 sm:px-1 font-medium transition-colors border-b-2 whitespace-nowrap ${
                         activeTab === tab.toLowerCase().replace(/\s+/g, '-')
                           ? 'text-[var(--color-primary)] border-[var(--color-primary)]'
                           : 'text-gray-600 border-transparent hover:text-gray-900'
@@ -292,7 +293,7 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
               </div>
 
               {/* Tab Content */}
-              <div className="p-6">
+              <div className="p-4 sm:p-6">
                 {/* Overview Tab */}
                 {activeTab === 'overview' && (
                   <div className="space-y-6">
@@ -567,12 +568,12 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                 {activeTab === 'reviews' && (
                   <div className="space-y-8">
                     {/* Overall Rating */}
-                    <div className="flex items-center gap-4 mb-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-6">
                       <div className="flex items-center gap-2">
                         <Star className="w-6 h-6 fill-yellow-400 text-yellow-400" />
                         <span className="text-2xl font-bold">{service.rating}</span>
                       </div>
-                      <div className="text-gray-600">
+                      <div className="text-gray-600 text-sm sm:text-base">
                         Based on {service.reviewCount} reviews
                       </div>
                     </div>
@@ -584,7 +585,7 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                       </div>
                       
                       {/* Filter and Sort Controls */}
-                      <div className="flex flex-wrap items-center gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
+                      <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-6 p-3 sm:p-4 bg-gray-50 rounded-lg">
                         <div className="flex items-center gap-2">
                           <Filter className="w-4 h-4 text-gray-600" />
                           <label className="text-sm font-medium text-gray-700">Filter by:</label>
@@ -800,7 +801,7 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                       </div>
                       
                       {/* Filter and Sort Controls */}
-                      <div className="flex flex-wrap items-center gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
+                      <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-6 p-3 sm:p-4 bg-gray-50 rounded-lg">
                         <div className="flex items-center gap-2">
                           <Filter className="w-4 h-4 text-gray-600" />
                           <label className="text-sm font-medium text-gray-700">Filter by:</label>
@@ -1178,7 +1179,7 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
           </div>
 
           {/* Right Sidebar - Booking Card */}
-          <div className="lg:col-span-1">
+          <div className="hidden lg:block lg:col-span-1">
             <div className="bg-white rounded-lg shadow-lg border border-gray-200 sticky top-24 flex flex-col max-h-[calc(100vh-8rem)]">
               {/* Scrollable Package Selection */}
               <div className="p-4 overflow-y-auto flex-1">
@@ -1274,29 +1275,116 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
         </div>
       </div>
 
-      {/* Mobile Floating Book Now Button */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50 lg:hidden">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center justify-between mb-2">
-            <div>
-              <p className="text-xs text-gray-600">{service.packages[selectedPackage].name}</p>
-              <p className="text-lg font-bold text-[var(--color-primary)]">
-                ৳{service.packages[selectedPackage].price}
-              </p>
+      {/* Mobile Floating Booking Widget - Airbnb Style */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-2xl z-50 lg:hidden">
+        {/* Package Selection Toggle */}
+        <div className="border-b border-gray-200">
+          <button
+            onClick={() => setIsMobilePackageExpanded(!isMobilePackageExpanded)}
+            className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors"
+          >
+            <div className="text-left">
+              <p className="text-xs text-gray-600 mb-0.5">Selected Package</p>
+              <p className="text-sm font-semibold text-gray-900">{service.packages[selectedPackage].name}</p>
+              <div className="flex items-center gap-2 mt-1">
+                <p className="text-lg font-bold text-[var(--color-primary)]">
+                  ৳{service.packages[selectedPackage].price}
+                </p>
+                {service.packages[selectedPackage].originalPrice && (
+                  <span className="text-xs text-gray-400 line-through">
+                    ৳{service.packages[selectedPackage].originalPrice}
+                  </span>
+                )}
+              </div>
             </div>
-            <button 
-              onClick={() => router.push('/cart')}
-              className="bg-[var(--color-primary)] text-white px-6 py-3 rounded-lg font-bold hover:opacity-90 transition-colors"
-            >
-              Book Now
-            </button>
+            {isMobilePackageExpanded ? (
+              <ChevronUp className="w-5 h-5 text-gray-500" />
+            ) : (
+              <ChevronDown className="w-5 h-5 text-gray-500" />
+            )}
+          </button>
+        </div>
+
+        {/* Expandable Package Selection */}
+        {isMobilePackageExpanded && (
+          <div className="max-h-[60vh] overflow-y-auto border-b border-gray-200 bg-gray-50">
+            <div className="p-4 space-y-3">
+              <h3 className="text-sm font-bold text-gray-900 mb-3">Choose Your Package</h3>
+              {service.packages.map((pkg, index) => (
+                <div
+                  key={index}
+                  onClick={() => {
+                    setSelectedPackage(index)
+                    setIsMobilePackageExpanded(false)
+                  }}
+                  className={`border-2 rounded-lg p-3 cursor-pointer transition-all bg-white ${
+                    selectedPackage === index
+                      ? 'border-[var(--color-primary)] bg-[var(--color-neutral)]'
+                      : 'border-gray-200 hover:border-[var(--color-primary)]/50'
+                  } ${pkg.popular ? 'relative' : ''}`}
+                >
+                  {pkg.popular && (
+                    <div className="absolute -top-2 left-3 bg-[var(--color-primary)] text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                      POPULAR
+                    </div>
+                  )}
+                  <div className="flex items-start justify-between mb-1">
+                    <div className="flex-1">
+                      <div className="font-semibold text-sm">{pkg.name}</div>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-base font-bold text-[var(--color-primary)]">৳{pkg.price}</span>
+                        {pkg.originalPrice && (
+                          <span className="text-xs text-gray-400 line-through">৳{pkg.originalPrice}</span>
+                        )}
+                      </div>
+                    </div>
+                    <div
+                      className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ml-2 ${
+                        selectedPackage === index
+                          ? 'border-[var(--color-primary)] bg-[var(--color-primary)]'
+                          : 'border-gray-300'
+                      }`}
+                    >
+                      {selectedPackage === index && (
+                        <div className="w-1.5 h-1.5 bg-white rounded-full" />
+                      )}
+                    </div>
+                  </div>
+                  <ul className="space-y-0.5 text-xs text-gray-600 mt-2">
+                    {pkg.features.slice(0, 3).map((feature, fIndex) => (
+                      <li key={fIndex} className="flex items-start gap-1">
+                        <CheckCircle className="w-3 h-3 text-green-500 flex-shrink-0 mt-0.5" />
+                        <span className="line-clamp-1">{feature}</span>
+                      </li>
+                    ))}
+                    {pkg.features.length > 3 && (
+                      <li className="text-xs text-gray-500 pl-4">+{pkg.features.length - 3} more</li>
+                    )}
+                  </ul>
+                </div>
+              ))}
+            </div>
           </div>
+        )}
+
+        {/* Action Buttons */}
+        <div className="p-4 space-y-2">
+          <button 
+            onClick={() => router.push('/cart')}
+            className="w-full bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary)]/90 text-white py-3.5 rounded-lg font-bold hover:opacity-90 transition-all shadow-md"
+          >
+            Book Now
+          </button>
           <button 
             onClick={() => router.push(`/services/${slug}/consultation`)}
-            className="w-full bg-white border-2 border-[var(--color-primary)] text-[var(--color-primary)] py-2.5 rounded-lg font-bold hover:bg-[var(--color-neutral)] transition-colors"
+            className="w-full bg-white border-2 border-[var(--color-primary)] text-[var(--color-primary)] py-3 rounded-lg font-bold hover:bg-[var(--color-neutral)] transition-colors"
           >
             Book a free consultation
           </button>
+          <div className="flex items-start gap-2 text-xs text-gray-600 bg-blue-50 p-2 rounded-lg mt-2">
+            <Info className="w-3 h-3 text-blue-600 flex-shrink-0 mt-0.5" />
+            <p className="leading-tight">Professional arrives at your doorstep. Payment after service completion.</p>
+          </div>
         </div>
       </div>
 

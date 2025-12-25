@@ -348,17 +348,28 @@ export default function VendorProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 overflow-x-hidden">
       {/* Header */}
       <Navbar />
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-        <div className="grid lg:grid-cols-4 gap-8">
+      <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8 max-w-7xl overflow-x-hidden">
+        {/* Breadcrumb - Mobile */}
+        <div className="mb-4 lg:hidden">
+          <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
+            <Link href="/" className="hover:text-[var(--color-primary)]">
+              Home
+            </Link>
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)]"></span>
+            <span className="text-gray-900 truncate">{getBreadcrumbLabel()}</span>
+          </div>
+        </div>
+
+        <div className="grid lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
           {/* Left Sidebar */}
           <aside className="lg:col-span-1">
-            {/* Breadcrumb */}
-            <div className="mb-6">
+            {/* Breadcrumb - Desktop */}
+            <div className="hidden lg:block mb-6">
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Link href="/" className="hover:text-[var(--color-primary)]">
                   Home
@@ -368,9 +379,35 @@ export default function VendorProfilePage() {
               </div>
             </div>
 
-            {/* Navigation Menu */}
+            {/* Navigation Menu - Mobile Horizontal Scroll */}
             <nav className="bg-white rounded-lg shadow-sm">
-              <ul className="space-y-1 p-2">
+              {/* Mobile: Horizontal scrollable wrapper */}
+              <div className="lg:hidden overflow-x-auto scrollbar-hide -mx-2 px-2">
+                <ul className="flex space-x-0.5 sm:space-x-1 p-2 min-w-max">
+                  {menuItems.map((item) => {
+                    const mobileLabel = item.label.replace(/^My /, '')
+                    return (
+                      <li key={item.id} className="flex-shrink-0">
+                        <button
+                          onClick={() => setActiveTab(item.id)}
+                          className={`text-left px-2 sm:px-2.5 py-2 sm:py-3 rounded-md transition-colors relative whitespace-nowrap text-xs sm:text-sm ${
+                            activeTab === item.id
+                              ? 'bg-gray-100 text-gray-900 font-medium'
+                              : 'text-gray-700 hover:bg-gray-50'
+                          }`}
+                        >
+                          {mobileLabel}
+                          {activeTab === item.id && (
+                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--color-primary)]"></div>
+                          )}
+                        </button>
+                      </li>
+                    )
+                  })}
+                </ul>
+              </div>
+              {/* Desktop: Original vertical layout */}
+              <ul className="hidden lg:block space-y-1 p-2">
                 {menuItems.map((item) => (
                   <li key={item.id}>
                     <button
@@ -396,46 +433,46 @@ export default function VendorProfilePage() {
           <main className="lg:col-span-3">
             {/* My Account Tab */}
             {activeTab === 'my-account' && (
-              <div className="bg-white rounded-lg shadow-sm p-8">
-                <h1 className="text-3xl font-bold text-gray-900 mb-8">Personal Info</h1>
+              <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 lg:p-8">
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 sm:mb-8">Personal Info</h1>
 
                 {/* Profile Picture */}
-                <div className="flex justify-center mb-8">
+                <div className="flex justify-center mb-6 sm:mb-8">
                   <div className="relative">
-                    <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center">
-                      <User className="w-16 h-16 text-gray-400" />
+                    <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gray-200 flex items-center justify-center">
+                      <User className="w-12 h-12 sm:w-16 sm:h-16 text-gray-400" />
                     </div>
-                    <button className="absolute bottom-0 right-0 w-8 h-8 bg-[var(--color-primary)] rounded-full flex items-center justify-center hover:opacity-90 transition-colors">
-                      <Edit2 className="w-4 h-4 text-white" />
+                    <button className="absolute bottom-0 right-0 w-7 h-7 sm:w-8 sm:h-8 bg-[var(--color-primary)] rounded-full flex items-center justify-center hover:opacity-90 transition-colors">
+                      <Edit2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
                     </button>
                   </div>
                 </div>
 
                 {/* Vendor Details */}
                 <div className="space-y-4 max-w-2xl mx-auto">
-                  <div className="flex items-center justify-between py-3 border-b">
-                    <span className="text-gray-600 font-medium">Name</span>
-                    <span className="text-gray-900 font-semibold">{vendorInfo.name}</span>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 border-b gap-2 sm:gap-0">
+                    <span className="text-gray-600 font-medium text-sm sm:text-base">Name</span>
+                    <span className="text-gray-900 font-semibold text-sm sm:text-base break-words">{vendorInfo.name}</span>
                   </div>
-                  <div className="flex items-center justify-between py-3 border-b">
-                    <span className="text-gray-600 font-medium">Phone</span>
-                    <span className="text-gray-900 font-semibold">{vendorInfo.phone}</span>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 border-b gap-2 sm:gap-0">
+                    <span className="text-gray-600 font-medium text-sm sm:text-base">Phone</span>
+                    <span className="text-gray-900 font-semibold text-sm sm:text-base break-words">{vendorInfo.phone}</span>
                   </div>
-                  <div className="flex items-center justify-between py-3 border-b">
-                    <span className="text-gray-600 font-medium">Email</span>
-                    <span className="text-gray-900 font-semibold">{vendorInfo.email}</span>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 border-b gap-2 sm:gap-0">
+                    <span className="text-gray-600 font-medium text-sm sm:text-base">Email</span>
+                    <span className="text-gray-900 font-semibold text-sm sm:text-base break-words">{vendorInfo.email}</span>
                   </div>
-                  <div className="flex items-center justify-between py-3 border-b">
-                    <span className="text-gray-600 font-medium">Business Name</span>
-                    <span className="text-gray-900 font-semibold">{vendorInfo.businessName}</span>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 border-b gap-2 sm:gap-0">
+                    <span className="text-gray-600 font-medium text-sm sm:text-base">Business Name</span>
+                    <span className="text-gray-900 font-semibold text-sm sm:text-base break-words">{vendorInfo.businessName}</span>
                   </div>
-                  <div className="flex items-center justify-between py-3 border-b">
-                    <span className="text-gray-600 font-medium">Business Type</span>
-                    <span className="text-gray-900 font-semibold">{vendorInfo.businessType}</span>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 border-b gap-2 sm:gap-0">
+                    <span className="text-gray-600 font-medium text-sm sm:text-base">Business Type</span>
+                    <span className="text-gray-900 font-semibold text-sm sm:text-base break-words">{vendorInfo.businessType}</span>
                   </div>
-                  <div className="flex items-center justify-between py-3 border-b">
-                    <span className="text-gray-600 font-medium">Registration Number</span>
-                    <span className="text-gray-900 font-semibold">{vendorInfo.registrationNumber}</span>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 border-b gap-2 sm:gap-0">
+                    <span className="text-gray-600 font-medium text-sm sm:text-base">Registration Number</span>
+                    <span className="text-gray-900 font-semibold text-sm sm:text-base break-words">{vendorInfo.registrationNumber}</span>
                   </div>
                 </div>
               </div>
@@ -443,63 +480,65 @@ export default function VendorProfilePage() {
 
             {/* My Documents Tab */}
             {activeTab === 'my-documents' && (
-              <div className="bg-white rounded-lg shadow-sm p-8">
-                <div className="flex items-center justify-between mb-8">
-                  <h1 className="text-3xl font-bold text-gray-900">My Documents</h1>
+              <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 lg:p-8">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 gap-4 sm:gap-0">
+                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">My Documents</h1>
                   <button
                     onClick={() => setShowUploadModal(true)}
-                    className="px-6 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:opacity-90 transition-colors font-medium flex items-center gap-2"
+                    className="px-4 sm:px-6 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:opacity-90 transition-colors font-medium flex items-center justify-center gap-2 text-sm sm:text-base"
                   >
                     <Upload className="w-4 h-4" />
-                    Upload Document
+                    <span className="whitespace-nowrap">Upload Document</span>
                   </button>
                 </div>
 
                 {/* Documents List */}
                 {documents.length === 0 ? (
-                  <div className="text-center py-12">
-                    <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                    <p className="text-gray-600">No documents uploaded yet</p>
+                  <div className="text-center py-8 sm:py-12">
+                    <FileText className="w-12 h-12 sm:w-16 sm:h-16 text-gray-300 mx-auto mb-4" />
+                    <p className="text-sm sm:text-base text-gray-600">No documents uploaded yet</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
                     {documents.map((doc) => (
                       <div
                         key={doc.id}
-                        className="border-2 border-gray-200 rounded-lg p-6 hover:border-[var(--color-primary)]/30 transition-colors"
+                        className="border-2 border-gray-200 rounded-lg p-4 sm:p-6 hover:border-[var(--color-primary)] transition-colors"
                       >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4 flex-1">
-                            <div className="w-12 h-12 bg-[var(--color-neutral)] rounded-lg flex items-center justify-center flex-shrink-0">
-                              <FileText className="w-6 h-6 text-[var(--color-primary)]" />
+                        <div className="flex items-start sm:items-center justify-between gap-3 sm:gap-0">
+                          <div className="flex items-start sm:items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[var(--color-neutral)] rounded-lg flex items-center justify-center flex-shrink-0">
+                              <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--color-primary)]" />
                             </div>
-                            <div className="flex-1">
+                            <div className="flex-1 min-w-0">
                               {editingDocId === doc.id ? (
-                                <div className="flex items-center gap-2">
+                                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                                   <input
                                     type="text"
                                     value={editName}
                                     onChange={(e) => setEditName(e.target.value)}
-                                    className="px-3 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                                    className="flex-1 px-3 py-1.5 sm:py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-sm sm:text-base"
                                     autoFocus
                                   />
-                                  <button
-                                    onClick={() => handleSaveEdit(doc.id)}
-                                    className="px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm"
-                                  >
-                                    Save
-                                  </button>
-                                  <button
-                                    onClick={handleCancelEdit}
-                                    className="px-3 py-1 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm"
-                                  >
-                                    Cancel
-                                  </button>
+                                  <div className="flex gap-2">
+                                    <button
+                                      onClick={() => handleSaveEdit(doc.id)}
+                                      className="px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm"
+                                    >
+                                      Save
+                                    </button>
+                                    <button
+                                      onClick={handleCancelEdit}
+                                      className="px-3 py-1.5 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm"
+                                    >
+                                      Cancel
+                                    </button>
+                                  </div>
                                 </div>
                               ) : (
                                 <>
-                                  <h3 className="text-lg font-bold text-gray-900 mb-1">{doc.name}</h3>
-                                  <p className="text-sm text-gray-600">{doc.fileName}</p>
+                                  <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1 truncate">{doc.name}</h3>
+                                  <p className="text-xs sm:text-sm text-gray-600 truncate">{doc.fileName}</p>
                                   <p className="text-xs text-gray-500 mt-1">Uploaded: {doc.uploadDate}</p>
                                   {doc.source === 'service-management' && (
                                     <p className="text-xs text-[var(--color-primary)] mt-1">From Service Management</p>
@@ -509,20 +548,20 @@ export default function VendorProfilePage() {
                             </div>
                           </div>
                           {editingDocId !== doc.id && (
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
                               <button
                                 onClick={() => handleStartEdit(doc)}
-                                className="p-2 text-gray-600 hover:text-[var(--color-primary)] transition-colors"
+                                className="p-1.5 sm:p-2 text-gray-600 hover:text-[var(--color-primary)] transition-colors"
                                 title="Rename"
                               >
-                                <Edit2 className="w-5 h-5" />
+                                <Edit2 className="w-4 h-4 sm:w-5 sm:h-5" />
                               </button>
                               <button
                                 onClick={() => handleDeleteDocument(doc.id)}
-                                className="p-2 text-gray-600 hover:text-red-600 transition-colors"
+                                className="p-1.5 sm:p-2 text-gray-600 hover:text-red-600 transition-colors"
                                 title="Delete"
                               >
-                                <Trash2 className="w-5 h-5" />
+                                <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
                               </button>
                             </div>
                           )}
@@ -536,32 +575,32 @@ export default function VendorProfilePage() {
 
             {/* My Address Tab */}
             {activeTab === 'my-addresses' && (
-              <div className="bg-white rounded-lg shadow-sm p-8">
-                <div className="flex items-center justify-between mb-8">
-                  <h1 className="text-3xl font-bold text-gray-900">Saved Addresses</h1>
+              <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 lg:p-8">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 gap-4 sm:gap-0">
+                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Saved Addresses</h1>
                   <button 
                     onClick={() => setShowAddressModal(true)}
-                    className="px-6 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:opacity-90 transition-colors font-medium"
+                    className="px-4 sm:px-6 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:opacity-90 transition-colors font-medium text-sm sm:text-base whitespace-nowrap"
                   >
                     Add New Address
                   </button>
                 </div>
 
                 {/* Address Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                   {addresses.map((address) => (
                     <div
                       key={address.id}
-                      className="border-2 border-gray-200 rounded-lg p-6 hover:border-[var(--color-primary)]/30 transition-colors cursor-pointer"
+                      className="border-2 border-gray-200 rounded-lg p-4 sm:p-6 hover:border-[var(--color-primary)] transition-colors cursor-pointer"
                     >
-                      <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 bg-[var(--color-neutral)] rounded-lg flex items-center justify-center flex-shrink-0">
-                          <Home className="w-6 h-6 text-[var(--color-primary)]" />
+                      <div className="flex items-start gap-3 sm:gap-4">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[var(--color-neutral)] rounded-lg flex items-center justify-center flex-shrink-0">
+                          <Home className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--color-primary)]" />
                         </div>
-                        <div className="flex-1">
-                          <h3 className="text-lg font-bold text-gray-900 mb-1">{address.type}</h3>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1">{address.type}</h3>
                           {address.location && (
-                            <p className="text-gray-600">{address.location}</p>
+                            <p className="text-sm sm:text-base text-gray-600 break-words">{address.location}</p>
                           )}
                         </div>
                       </div>
@@ -573,12 +612,12 @@ export default function VendorProfilePage() {
 
             {/* Service Management Tab */}
             {activeTab === 'service-management' && (
-              <div className="bg-white rounded-lg shadow-sm p-8">
-                <h1 className="text-3xl font-bold text-gray-900 mb-8">Service Management</h1>
+              <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 lg:p-8">
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 sm:mb-8">Service Management</h1>
 
                 {/* Tabs */}
-                <div className="border-b mb-6">
-                  <div className="flex gap-6">
+                <div className="border-b mb-4 sm:mb-6 overflow-x-auto scrollbar-hide -mx-4 sm:mx-0 px-4 sm:px-0">
+                  <div className="flex gap-4 sm:gap-6 min-w-max sm:min-w-0">
                     {[
                       { id: 'my-segments', label: 'My Segments' },
                       { id: 'all-segments', label: 'All Segments' },
@@ -587,7 +626,7 @@ export default function VendorProfilePage() {
                       <button
                         key={tab.id}
                         onClick={() => setMyServicesTab(tab.id)}
-                        className={`py-3 px-1 font-medium transition-colors border-b-2 ${
+                        className={`py-2 sm:py-3 px-1 font-medium transition-colors border-b-2 whitespace-nowrap text-sm sm:text-base ${
                           myServicesTab === tab.id
                             ? 'text-[var(--color-primary)] border-[var(--color-primary)]'
                             : 'text-gray-600 border-transparent hover:text-gray-900'
@@ -603,30 +642,30 @@ export default function VendorProfilePage() {
                 {myServicesTab === 'my-segments' && (
                   <div>
                     {approvedServices.length === 0 ? (
-                      <div className="text-center py-12">
-                        <CheckCircle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                        <p className="text-gray-600">No approved services yet. Services will appear here once approved by admin.</p>
+                      <div className="text-center py-8 sm:py-12">
+                        <CheckCircle className="w-12 h-12 sm:w-16 sm:h-16 text-gray-300 mx-auto mb-4" />
+                        <p className="text-sm sm:text-base text-gray-600">No approved services yet. Services will appear here once approved by admin.</p>
                       </div>
                     ) : (
-                      <div className="space-y-4">
+                      <div className="space-y-3 sm:space-y-4">
                         {approvedServices.map((service) => (
                           <div
                             key={service.id}
-                            className="border-2 border-green-200 rounded-lg p-6 bg-green-50/30 hover:border-green-300 transition-colors"
+                            className="border-2 border-green-200 rounded-lg p-4 sm:p-6 bg-green-50/30 hover:border-green-300 transition-colors"
                           >
-                            <div className="flex items-center justify-between">
-                              <div className="flex-1">
-                                <div className="flex items-center gap-3 mb-2">
-                                  <h3 className="text-lg font-bold text-gray-900">{service.name}</h3>
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
+                                  <h3 className="text-base sm:text-lg font-bold text-gray-900">{service.name}</h3>
                                   {getStatusBadge(service.status)}
                                 </div>
-                                <p className="text-sm text-gray-600 mb-1">Category: {service.category}</p>
+                                <p className="text-xs sm:text-sm text-gray-600 mb-1">Category: {service.category}</p>
                                 <p className="text-xs text-gray-500">
                                   Approved: {service.approvedDate}
                                 </p>
                               </div>
                               <div className="flex items-center gap-2">
-                                <button className="px-4 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:opacity-90 transition-colors text-sm font-medium">
+                                <button className="px-3 sm:px-4 py-1.5 sm:py-2 bg-[var(--color-primary)] text-white rounded-lg hover:opacity-90 transition-colors text-xs sm:text-sm font-medium whitespace-nowrap">
                                   Manage
                                 </button>
                               </div>
@@ -640,34 +679,34 @@ export default function VendorProfilePage() {
 
                 {/* All Segments Tab */}
                 {myServicesTab === 'all-segments' && (
-                  <div className="flex gap-8">
+                  <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8">
                     {/* Left Sidebar - Categories */}
-                    <aside className="w-64 flex-shrink-0">
-                      <div className="bg-white rounded-lg p-6 shadow-sm sticky top-8">
-                        <h3 className="font-semibold text-gray-900 mb-4">Categories</h3>
+                    <aside className="lg:w-64 flex-shrink-0">
+                      <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm lg:sticky lg:top-8">
+                        <h3 className="font-semibold text-gray-900 mb-3 sm:mb-4 text-sm sm:text-base">Categories</h3>
                         <nav className="space-y-1">
                           {serviceCategories.map((category) => (
                             <div key={category.id}>
                               <button
                                 onClick={() => setSelectedCategory(category.id)}
-                                className={`w-full text-left flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${
+                                className={`w-full text-left flex items-center gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-md transition-colors text-xs sm:text-sm ${
                                   selectedCategory === category.id
                                     ? 'bg-[var(--color-neutral)] text-[var(--color-primary)] font-semibold'
                                     : 'text-gray-700 hover:bg-[var(--color-neutral)] hover:text-[var(--color-primary)]'
                                 }`}
                               >
-                                <span className="text-xl">{category.icon}</span>
-                                <span>{category.title}</span>
+                                <span className="text-base sm:text-xl">{category.icon}</span>
+                                <span className="truncate">{category.title}</span>
                               </button>
                               {category.subCategories && (
-                                <div className="ml-8 mt-1 space-y-1">
+                                <div className="ml-6 sm:ml-8 mt-1 space-y-1">
                                   {category.subCategories.map((subCategory) => {
                                     const isPrimary = subCategory.id === 'fridge-repair' || subCategory.id === 'microwave-repair'
                                     return (
                                       <button
                                         key={subCategory.id}
                                         onClick={() => setSelectedCategory(subCategory.id)}
-                                        className={`w-full text-left flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${
+                                        className={`w-full text-left flex items-center gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-md transition-colors text-xs sm:text-sm ${
                                           selectedCategory === subCategory.id
                                             ? isPrimary
                                               ? 'bg-[var(--color-neutral)] text-[var(--color-primary)] font-semibold'
@@ -677,8 +716,8 @@ export default function VendorProfilePage() {
                                             : 'text-gray-600 hover:bg-blue-50 hover:text-blue-600'
                                         }`}
                                       >
-                                        {subCategory.icon && <span className="text-lg">{subCategory.icon}</span>}
-                                        <span>{subCategory.title}</span>
+                                        {subCategory.icon && <span className="text-sm sm:text-lg">{subCategory.icon}</span>}
+                                        <span className="truncate">{subCategory.title}</span>
                                       </button>
                                     )
                                   })}
@@ -691,51 +730,51 @@ export default function VendorProfilePage() {
                     </aside>
 
                     {/* Right Content - Services */}
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       {/* Submit Button */}
                       {selectedServices.length > 0 && (
-                        <div className="flex justify-end mb-6">
+                        <div className="flex justify-end mb-4 sm:mb-6">
                           <button
                             onClick={handleSubmitServices}
-                            className="bg-[var(--color-primary)] text-white px-6 py-2.5 rounded-lg hover:opacity-90 transition-all font-medium flex items-center gap-2"
+                            className="bg-[var(--color-primary)] text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg hover:opacity-90 transition-all font-medium flex items-center gap-2 text-sm sm:text-base"
                           >
-                            <CheckCircle className="w-5 h-5" />
-                            Submit {selectedServices.length} Service{selectedServices.length > 1 ? 's' : ''} for Review
+                            <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+                            <span className="whitespace-nowrap">Submit {selectedServices.length} Service{selectedServices.length > 1 ? 's' : ''} for Review</span>
                           </button>
                         </div>
                       )}
 
                       {/* Services List */}
-                      <div className="bg-white rounded-lg p-6 shadow-sm">
-                        <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                      <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm">
+                        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">
                           {serviceCategories.find(cat => cat.id === selectedCategory)?.title || 
                            serviceCategories.find(cat => cat.subCategories?.some(sub => sub.id === selectedCategory))?.subCategories?.find(sub => sub.id === selectedCategory)?.title ||
                            'Services'}
                         </h2>
-                        <div className="space-y-4">
+                        <div className="space-y-3 sm:space-y-4">
                           {getCurrentCategoryServices().map((service) => {
                             return (
                               <div
                                 key={service.slug}
-                                className={`border-2 rounded-lg p-4 bg-white transition-colors ${
+                                className={`border-2 rounded-lg p-3 sm:p-4 bg-white transition-colors ${
                                   selectedServices.includes(service.slug)
                                     ? 'border-[var(--color-primary)]/50'
                                     : 'border-gray-200 hover:border-[var(--color-primary)]/30'
                                 }`}
                               >
-                                <div className="flex items-center justify-between">
-                                  <div className="flex-1">
+                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
+                                  <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2">
-                                      <h3 className="text-base font-semibold text-gray-900">{service.title}</h3>
+                                      <h3 className="text-sm sm:text-base font-semibold text-gray-900 truncate">{service.title}</h3>
                                       {selectedServices.includes(service.slug) && (
-                                        <CheckCircle className="w-4 h-4 text-[var(--color-primary)]" />
+                                        <CheckCircle className="w-4 h-4 text-[var(--color-primary)] flex-shrink-0" />
                                       )}
                                     </div>
                                   </div>
                                   <div className="flex items-center gap-2">
                                     <button
                                       onClick={() => handleServiceToggle(service.slug)}
-                                      className={`px-4 py-2 rounded-lg transition-colors text-sm font-medium ${
+                                      className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg transition-colors text-xs sm:text-sm font-medium whitespace-nowrap ${
                                         selectedServices.includes(service.slug)
                                           ? 'bg-[var(--color-primary)] text-white hover:opacity-90'
                                           : 'bg-green-100 text-green-700 hover:bg-green-200'
@@ -758,44 +797,44 @@ export default function VendorProfilePage() {
                 {myServicesTab === 'requested-services' && (
                   <div>
                     {submittedServices.length === 0 ? (
-                      <div className="text-center py-12">
-                        <CheckCircle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                        <p className="text-gray-600">No requested services yet. Select services from &quot;All Segments&quot; to submit for review.</p>
+                      <div className="text-center py-8 sm:py-12">
+                        <CheckCircle className="w-12 h-12 sm:w-16 sm:h-16 text-gray-300 mx-auto mb-4" />
+                        <p className="text-sm sm:text-base text-gray-600">No requested services yet. Select services from &quot;All Segments&quot; to submit for review.</p>
                       </div>
                     ) : (
-                      <div className="space-y-4">
+                      <div className="space-y-3 sm:space-y-4">
                         {submittedServices.map((service) => (
                           <div
                             key={service.id}
-                            className="border-2 border-gray-200 rounded-lg p-6 hover:border-[var(--color-primary)]/30 transition-colors"
+                            className="border-2 border-gray-200 rounded-lg p-4 sm:p-6 hover:border-[var(--color-primary)]/30 transition-colors"
                           >
-                            <div className="flex items-center justify-between">
-                              <div className="flex-1">
-                                <div className="flex items-center gap-3 mb-2">
-                                  <h3 className="text-lg font-bold text-gray-900">{service.name}</h3>
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
+                                  <h3 className="text-base sm:text-lg font-bold text-gray-900">{service.name}</h3>
                                   {getStatusBadge(service.status)}
                                 </div>
-                                <p className="text-sm text-gray-600 mb-1">Category: {service.category}</p>
+                                <p className="text-xs sm:text-sm text-gray-600 mb-1">Category: {service.category}</p>
                                 <p className="text-xs text-gray-500">
                                   Submitted: {service.submittedDate}
                                   {service.reviewDate && ` • Under Review: ${service.reviewDate}`}
                                 </p>
                               </div>
-                              <div className="flex items-center gap-2">
+                              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                                 <button
                                   onClick={() => {
                                     if (confirm('Are you sure you want to withdraw this service request?')) {
                                       setSubmittedServices(prev => prev.filter(s => s.id !== service.id))
                                     }
                                   }}
-                                  className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm font-medium"
+                                  className="px-3 sm:px-4 py-1.5 sm:py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-xs sm:text-sm font-medium whitespace-nowrap"
                                 >
                                   Withdraw Request
                                 </button>
                                 {(service.status === 'submitted' || service.status === 'under-review') && (
                                   <button
                                     onClick={() => handleApproveService(service.id)}
-                                    className="px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors text-sm font-medium"
+                                    className="px-3 sm:px-4 py-1.5 sm:py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors text-xs sm:text-sm font-medium whitespace-nowrap"
                                   >
                                     Approve
                                   </button>
@@ -813,17 +852,17 @@ export default function VendorProfilePage() {
 
             {/* Upload Modal */}
             {showUploadModal && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+                <div className="bg-white rounded-lg p-4 sm:p-6 max-w-md w-full my-auto">
                   <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-bold text-gray-900">Upload Document</h2>
+                    <h2 className="text-lg sm:text-xl font-bold text-gray-900">Upload Document</h2>
                     <button
                       onClick={() => {
                         setShowUploadModal(false)
                         setNewDocName('')
                         setSelectedFile(null)
                       }}
-                      className="text-gray-500 hover:text-gray-700"
+                      className="text-gray-500 hover:text-gray-700 flex-shrink-0"
                     >
                       <X className="w-5 h-5" />
                     </button>
@@ -838,7 +877,7 @@ export default function VendorProfilePage() {
                         value={newDocName}
                         onChange={(e) => setNewDocName(e.target.value)}
                         placeholder="e.g., Business License, Tax Certificate"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                        className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-sm sm:text-base"
                       />
                     </div>
                     <div>
@@ -848,18 +887,18 @@ export default function VendorProfilePage() {
                       <input
                         type="file"
                         onChange={handleFileSelect}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                        className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-sm sm:text-base"
                         accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                       />
                       {selectedFile && (
-                        <p className="text-sm text-gray-600 mt-2">Selected: {selectedFile.name}</p>
+                        <p className="text-xs sm:text-sm text-gray-600 mt-2 break-words">Selected: {selectedFile.name}</p>
                       )}
                     </div>
-                    <div className="flex gap-3">
+                    <div className="flex flex-col sm:flex-row gap-3">
                       <button
                         onClick={handleUploadDocument}
                         disabled={!selectedFile || !newDocName}
-                        className="flex-1 bg-[var(--color-primary)] text-white py-2 rounded-lg hover:opacity-90 transition-colors font-medium disabled:bg-gray-300 disabled:cursor-not-allowed"
+                        className="flex-1 bg-[var(--color-primary)] text-white py-2.5 sm:py-2 rounded-lg hover:opacity-90 transition-colors font-medium disabled:bg-gray-300 disabled:cursor-not-allowed text-sm sm:text-base"
                       >
                         Upload
                       </button>
@@ -869,7 +908,7 @@ export default function VendorProfilePage() {
                           setNewDocName('')
                           setSelectedFile(null)
                         }}
-                        className="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                        className="flex-1 bg-gray-200 text-gray-700 py-2.5 sm:py-2 rounded-lg hover:bg-gray-300 transition-colors font-medium text-sm sm:text-base"
                       >
                         Cancel
                       </button>
@@ -881,17 +920,17 @@ export default function VendorProfilePage() {
 
             {/* Add Address Modal */}
             {showAddressModal && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+                <div className="bg-white rounded-lg p-4 sm:p-6 max-w-md w-full my-auto">
                   <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-bold text-gray-900">Add New Address</h2>
+                    <h2 className="text-lg sm:text-xl font-bold text-gray-900">Add New Address</h2>
                     <button
                       onClick={() => {
                         setShowAddressModal(false)
                         setAddressType('')
                         setAddressLocation('')
                       }}
-                      className="text-gray-500 hover:text-gray-700"
+                      className="text-gray-500 hover:text-gray-700 flex-shrink-0"
                     >
                       <X className="w-5 h-5" />
                     </button>
@@ -906,7 +945,7 @@ export default function VendorProfilePage() {
                         value={addressType}
                         onChange={(e) => setAddressType(e.target.value)}
                         placeholder="e.g., Business Address, Service Location"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                        className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] text-sm sm:text-base"
                       />
                     </div>
                     <div>
@@ -918,14 +957,14 @@ export default function VendorProfilePage() {
                         onChange={(e) => setAddressLocation(e.target.value)}
                         placeholder="Enter your full address"
                         rows={4}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] resize-none"
+                        className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] resize-none text-sm sm:text-base"
                       />
                     </div>
-                    <div className="flex gap-3">
+                    <div className="flex flex-col sm:flex-row gap-3">
                       <button
                         onClick={handleAddAddress}
                         disabled={!addressType}
-                        className="flex-1 bg-[var(--color-primary)] text-white py-2 rounded-lg hover:opacity-90 transition-colors font-medium disabled:bg-gray-300 disabled:cursor-not-allowed"
+                        className="flex-1 bg-[var(--color-primary)] text-white py-2.5 sm:py-2 rounded-lg hover:opacity-90 transition-colors font-medium disabled:bg-gray-300 disabled:cursor-not-allowed text-sm sm:text-base"
                       >
                         Add Address
                       </button>
@@ -935,7 +974,7 @@ export default function VendorProfilePage() {
                           setAddressType('')
                           setAddressLocation('')
                         }}
-                        className="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                        className="flex-1 bg-gray-200 text-gray-700 py-2.5 sm:py-2 rounded-lg hover:bg-gray-300 transition-colors font-medium text-sm sm:text-base"
                       >
                         Cancel
                       </button>

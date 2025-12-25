@@ -338,10 +338,10 @@ export default function LeadsPage() {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
 
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-7xl">
         {/* Header */}
-        <div className="mb-6">
-          <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
+        <div className="mb-4 sm:mb-6">
+          <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">
             <Link href="/" className="hover:text-[var(--color-primary)]">
               Home
             </Link>
@@ -349,21 +349,22 @@ export default function LeadsPage() {
             <span className="text-gray-900">Leads</span>
           </div>
 
-          <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold text-gray-900">Leads</h1>
-            <div className="flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Leads</h1>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
               <Link
                 href="/leads/upload"
-                className="flex items-center gap-2 border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+                className="flex items-center justify-center gap-2 border border-gray-300 text-gray-700 px-3 sm:px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors text-sm sm:text-base"
               >
-                <Upload className="w-5 h-5" />
-                Bulk Upload
+                <Upload className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="hidden sm:inline">Bulk Upload</span>
+                <span className="sm:hidden">Upload</span>
               </Link>
               <button
                 onClick={() => router.push('/leads/new')}
-                className="flex items-center gap-2 bg-[var(--color-primary)] text-white px-4 py-2 rounded-lg hover:opacity-90 transition-colors"
+                className="flex items-center justify-center gap-2 bg-[var(--color-primary)] text-white px-3 sm:px-4 py-2 rounded-lg hover:opacity-90 transition-colors text-sm sm:text-base"
               >
-                <Plus className="w-5 h-5" />
+                <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
                 New Lead
               </button>
             </div>
@@ -371,9 +372,9 @@ export default function LeadsPage() {
         </div>
 
         {/* Custom Views */}
-        <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">List Views</h2>
+        <div className="bg-white rounded-lg shadow-sm p-3 sm:p-4 mb-4 sm:mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-3 sm:mb-4">
+            <h2 className="text-base sm:text-lg font-semibold text-gray-900">List Views</h2>
             <button
               onClick={() => {
                 setShowCreateViewModal(true)
@@ -381,17 +382,18 @@ export default function LeadsPage() {
                 setTempFilters([])
                 setNewViewName('')
               }}
-              className="flex items-center gap-2 text-[var(--color-primary)] hover:opacity-80"
+              className="flex items-center gap-2 text-[var(--color-primary)] hover:opacity-80 text-sm sm:text-base self-start sm:self-auto"
             >
               <Plus className="w-4 h-4" />
-              Create New View
+              <span className="hidden sm:inline">Create New View</span>
+              <span className="sm:hidden">New View</span>
             </button>
           </div>
           <div className="flex flex-wrap gap-2">
             {customViews.map((view) => (
               <div
                 key={view.id}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg border cursor-pointer transition-colors ${
+                className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border cursor-pointer transition-colors text-sm sm:text-base ${
                   activeViewId === view.id
                     ? 'bg-[var(--color-primary)] text-white border-[var(--color-primary)]'
                     : 'bg-white text-gray-700 border-gray-300 hover:border-[var(--color-primary)]'
@@ -427,10 +429,10 @@ export default function LeadsPage() {
         </div>
 
         {/* Search and Filter Bar */}
-        <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-          <div className="flex items-center gap-4">
+        <div className="bg-white rounded-lg shadow-sm p-3 sm:p-4 mb-4 sm:mb-6">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
               <input
                 type="text"
                 placeholder="Search leads..."
@@ -439,21 +441,25 @@ export default function LeadsPage() {
                   setSearchQuery(e.target.value)
                   setCurrentPage(1)
                 }}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                className="w-full pl-9 sm:pl-10 pr-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
               />
             </div>
             <button
               onClick={() => setShowFilterPanel(!showFilterPanel)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
+              className={`flex items-center justify-center gap-2 px-3 sm:px-4 py-2 rounded-lg border transition-colors text-sm sm:text-base ${
                 showFilterPanel
                   ? 'bg-[var(--color-primary)] text-white border-[var(--color-primary)]'
                   : 'bg-white text-gray-700 border-gray-300 hover:border-[var(--color-primary)]'
               }`}
             >
-              <Filter className="w-5 h-5" />
+              <Filter className="w-4 h-4 sm:w-5 sm:h-5" />
               Filters
               {activeView.filters.length > 0 && (
-                <span className="bg-white text-[var(--color-primary)] px-2 py-0.5 rounded-full text-xs font-bold">
+                <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
+                  showFilterPanel
+                    ? 'bg-white text-[var(--color-primary)]'
+                    : 'bg-[var(--color-primary)] text-white'
+                }`}>
                   {activeView.filters.length}
                 </span>
               )}
@@ -462,13 +468,13 @@ export default function LeadsPage() {
 
           {/* Filter Panel */}
           {showFilterPanel && (
-            <div className="mt-4 pt-4 border-t border-gray-200">
+            <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-200">
               <div className="space-y-3">
                 {activeView.filters.length === 0 ? (
-                  <p className="text-gray-500 text-sm">No filters applied. Click &quot;Add Filter&quot; to create one.</p>
+                  <p className="text-gray-500 text-xs sm:text-sm">No filters applied. Click &quot;Add Filter&quot; to create one.</p>
                 ) : (
                   activeView.filters.map((filter, index) => (
-                    <div key={index} className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
+                    <div key={index} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-3 bg-gray-50 rounded-lg">
                       <select
                         value={filter.field}
                         onChange={(e) => {
@@ -476,7 +482,7 @@ export default function LeadsPage() {
                           updatedView.filters[index].field = e.target.value
                           setCustomViews(customViews.map(v => v.id === activeViewId ? updatedView : v))
                         }}
-                        className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                        className="px-3 py-1.5 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                       >
                         {fieldOptions.map(opt => (
                           <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -489,7 +495,7 @@ export default function LeadsPage() {
                           updatedView.filters[index].operator = e.target.value as FilterCondition['operator']
                           setCustomViews(customViews.map(v => v.id === activeViewId ? updatedView : v))
                         }}
-                        className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                        className="px-3 py-1.5 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                       >
                         {operatorOptions.map(opt => (
                           <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -505,7 +511,7 @@ export default function LeadsPage() {
                             setCustomViews(customViews.map(v => v.id === activeViewId ? updatedView : v))
                           }}
                           placeholder="Value"
-                          className="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                          className="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                         />
                       )}
                       <button
@@ -514,7 +520,7 @@ export default function LeadsPage() {
                           updatedView.filters = updatedView.filters.filter((_, i) => i !== index)
                           setCustomViews(customViews.map(v => v.id === activeViewId ? updatedView : v))
                         }}
-                        className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg"
+                        className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg self-start sm:self-auto"
                       >
                         <X className="w-4 h-4" />
                       </button>
@@ -527,7 +533,7 @@ export default function LeadsPage() {
                     updatedView.filters.push({ field: 'clientName', operator: 'contains', value: '' })
                     setCustomViews(customViews.map(v => v.id === activeViewId ? updatedView : v))
                   }}
-                  className="text-[var(--color-primary)] hover:opacity-80 text-sm font-medium"
+                  className="text-[var(--color-primary)] hover:opacity-80 text-xs sm:text-sm font-medium"
                 >
                   + Add Filter
                 </button>
@@ -539,24 +545,25 @@ export default function LeadsPage() {
         {/* Table */}
         <div className="bg-white rounded-lg shadow-sm overflow-hidden">
           {filteredLeads.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-600">No leads found matching your criteria.</p>
+            <div className="text-center py-8 sm:py-12 px-4">
+              <p className="text-sm sm:text-base text-gray-600">No leads found matching your criteria.</p>
             </div>
           ) : (
             <>
-              <div className="overflow-x-auto">
+              {/* Desktop Table View */}
+              <div className="hidden md:block overflow-x-auto">
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-gray-200 bg-gray-50">
-                      <th className="text-left py-3 px-4 font-semibold text-gray-900">Client Name</th>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-900">WhatsApp</th>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-900">Mobile</th>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-900">Email</th>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-900">Profession</th>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-900">Desired Service</th>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-900">Stage</th>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-900">Lead Source</th>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-900">Lead Owner</th>
+                      <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Client Name</th>
+                      <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">WhatsApp</th>
+                      <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Mobile</th>
+                      <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Email</th>
+                      <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Profession</th>
+                      <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Desired Service</th>
+                      <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Stage</th>
+                      <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Lead Source</th>
+                      <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Lead Owner</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -565,7 +572,7 @@ export default function LeadsPage() {
                         <td className="py-4 px-4">
                           <Link
                             href={`/leads/${lead.id}`}
-                            className="font-medium text-blue-600 hover:text-blue-800 underline"
+                            className="font-medium text-blue-600 hover:text-blue-800 underline text-sm"
                           >
                             {lead.clientName}
                           </Link>
@@ -599,26 +606,96 @@ export default function LeadsPage() {
                 </table>
               </div>
 
+              {/* Mobile Card View */}
+              <div className="md:hidden divide-y divide-gray-200">
+                {paginatedLeads.map((lead) => (
+                  <div key={lead.id} className="p-4 hover:bg-gray-50">
+                    <div className="mb-3">
+                      <Link
+                        href={`/leads/${lead.id}`}
+                        className="font-semibold text-blue-600 hover:text-blue-800 underline text-base block mb-2"
+                      >
+                        {lead.clientName}
+                      </Link>
+                      <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-medium ${
+                        lead.stage === 'Closed' && lead.closedReason === 'Won' ? 'bg-green-100 text-green-700' :
+                        (lead.stage === 'Closed' && (lead.closedReason === 'Lost' || lead.closedReason === 'Lost (Unqualified)')) ? 'bg-red-100 text-red-700' :
+                        lead.stage === 'Closed' ? 'bg-gray-100 text-gray-700' :
+                        lead.stage === 'Proposal' ? 'bg-orange-100 text-orange-700' :
+                        lead.stage === 'Qualified' ? 'bg-purple-100 text-purple-700' :
+                        lead.stage === 'New' ? 'bg-blue-100 text-blue-700' :
+                        'bg-gray-100 text-gray-700'
+                      }`}>
+                        {lead.stage === 'Closed' && lead.closedReason === 'Won' ? 'Closed Won' : 
+                         lead.stage === 'Closed' && lead.closedReason === 'Lost' ? 'Closed Lost' :
+                         lead.stage === 'Closed' && lead.closedReason === 'Lost (Unqualified)' ? 'Closed Lost (Unqualified)' :
+                         lead.stage === 'Closed' ? 'Closed' : lead.stage}
+                      </span>
+                    </div>
+                    <div className="space-y-2 text-sm">
+                      {lead.whatsapp && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">WhatsApp:</span>
+                          <span className="text-gray-900">{lead.whatsapp}</span>
+                        </div>
+                      )}
+                      {lead.mobile && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Mobile:</span>
+                          <span className="text-gray-900">{lead.mobile}</span>
+                        </div>
+                      )}
+                      {lead.email && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Email:</span>
+                          <span className="text-gray-900 truncate ml-2">{lead.email}</span>
+                        </div>
+                      )}
+                      {lead.profession && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Profession:</span>
+                          <span className="text-gray-900">{lead.profession}</span>
+                        </div>
+                      )}
+                      {lead.desiredService && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Service:</span>
+                          <span className="text-gray-900">{lead.desiredService}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Source:</span>
+                        <span className="text-gray-900">{lead.leadSource}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Owner:</span>
+                        <span className="text-gray-900">{lead.leadOwner}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="px-4 py-4 border-t border-gray-200 flex items-center justify-between">
-                  <div className="text-sm text-gray-600">
+                <div className="px-3 sm:px-4 py-3 sm:py-4 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0">
+                  <div className="text-xs sm:text-sm text-gray-600 text-center sm:text-left">
                     Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, filteredLeads.length)} of {filteredLeads.length} leads
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 sm:gap-2">
                     <button
                       onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                       disabled={currentPage === 1}
-                      className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="p-1.5 sm:p-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <ChevronLeft className="w-5 h-5" />
+                      <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
                     </button>
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-0.5 sm:gap-1">
                       {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                         <button
                           key={page}
                           onClick={() => setCurrentPage(page)}
-                          className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                          className={`px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
                             currentPage === page
                               ? 'bg-[var(--color-primary)] text-white'
                               : 'border border-gray-300 hover:bg-gray-50'
@@ -631,9 +708,9 @@ export default function LeadsPage() {
                     <button
                       onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                       disabled={currentPage === totalPages}
-                      className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="p-1.5 sm:p-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <ChevronRight className="w-5 h-5" />
+                      <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
                     </button>
                   </div>
                 </div>
@@ -645,10 +722,10 @@ export default function LeadsPage() {
 
       {/* Create/Edit View Modal */}
       {showCreateViewModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl mx-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4">
+          <div className="bg-white rounded-lg shadow-xl p-4 sm:p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-gray-900">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900">
                 {editingViewId ? 'Edit List View' : 'Create New List View'}
               </h2>
               <button
@@ -658,9 +735,9 @@ export default function LeadsPage() {
                   setTempFilters([])
                   setNewViewName('')
                 }}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 hover:text-gray-600 flex-shrink-0"
               >
-                <X className="w-6 h-6" />
+                <X className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
             </div>
 
@@ -671,7 +748,7 @@ export default function LeadsPage() {
                 value={newViewName}
                 onChange={(e) => setNewViewName(e.target.value)}
                 placeholder="Enter view name"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                 disabled={!!editingViewId && customViews.find(v => v.id === editingViewId)?.isDefault}
               />
             </div>
@@ -680,14 +757,14 @@ export default function LeadsPage() {
               <label className="block text-sm font-medium text-gray-700 mb-2">Filters</label>
               <div className="space-y-2">
                 {tempFilters.length === 0 ? (
-                  <p className="text-gray-500 text-sm">No filters. Click &quot;Add Filter&quot; to create one.</p>
+                  <p className="text-gray-500 text-xs sm:text-sm">No filters. Click &quot;Add Filter&quot; to create one.</p>
                 ) : (
                   tempFilters.map((filter, index) => (
-                    <div key={index} className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
+                    <div key={index} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-3 bg-gray-50 rounded-lg">
                       <select
                         value={filter.field}
                         onChange={(e) => handleUpdateFilter(index, { field: e.target.value })}
-                        className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                        className="px-3 py-1.5 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                       >
                         {fieldOptions.map(opt => (
                           <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -696,7 +773,7 @@ export default function LeadsPage() {
                       <select
                         value={filter.operator}
                         onChange={(e) => handleUpdateFilter(index, { operator: e.target.value as FilterCondition['operator'] })}
-                        className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                        className="px-3 py-1.5 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                       >
                         {operatorOptions.map(opt => (
                           <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -708,12 +785,12 @@ export default function LeadsPage() {
                           value={filter.value}
                           onChange={(e) => handleUpdateFilter(index, { value: e.target.value })}
                           placeholder="Value"
-                          className="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                          className="flex-1 px-3 py-1.5 border border-gray-300 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                         />
                       )}
                       <button
                         onClick={() => handleRemoveFilter(index)}
-                        className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg"
+                        className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg self-start sm:self-auto"
                       >
                         <X className="w-4 h-4" />
                       </button>
@@ -722,14 +799,14 @@ export default function LeadsPage() {
                 )}
                 <button
                   onClick={handleAddFilter}
-                  className="text-[var(--color-primary)] hover:opacity-80 text-sm font-medium"
+                  className="text-[var(--color-primary)] hover:opacity-80 text-xs sm:text-sm font-medium"
                 >
                   + Add Filter
                 </button>
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-3">
+            <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-3">
               <button
                 onClick={() => {
                   setShowCreateViewModal(false)
@@ -737,14 +814,14 @@ export default function LeadsPage() {
                   setTempFilters([])
                   setNewViewName('')
                 }}
-                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 text-sm sm:text-base"
               >
                 Cancel
               </button>
               <button
                 onClick={editingViewId ? handleUpdateView : handleSaveView}
                 disabled={!newViewName.trim() || (!!editingViewId && customViews.find(v => v.id === editingViewId)?.isDefault)}
-                className="px-4 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
               >
                 {editingViewId ? 'Update View' : 'Save View'}
               </button>

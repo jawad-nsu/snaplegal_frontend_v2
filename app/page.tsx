@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { useRef } from 'react'
 import Link from 'next/link'
 import { Search, MapPin, ChevronRight, Star, Clock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -11,6 +12,7 @@ import Footer from '@/components/footer'
 
 export default function HomePage() {
   const router = useRouter()
+  const categoriesScrollRef = useRef<HTMLDivElement>(null)
   
   // Helper function to convert service title to slug
   const getServiceSlug = (title: string): string => {
@@ -31,6 +33,16 @@ export default function HomePage() {
     e.stopPropagation() // Prevent card onClick from firing
     const slug = getServiceSlug(serviceTitle)
     router.push(`/services/${slug}`)
+  }
+
+  const handleScrollCategories = () => {
+    if (categoriesScrollRef.current) {
+      const scrollAmount = 200 // Scroll by 200px
+      categoriesScrollRef.current.scrollBy({
+        left: scrollAmount,
+        behavior: 'smooth'
+      })
+    }
   }
 
   const categories = [
@@ -146,13 +158,13 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <section
-        className="relative w-full h-[300px] md:h-[500px] bg-cover bg-center bg-no-repeat"
+        className="relative w-full h-[400px] sm:h-[450px] md:h-[500px] lg:h-[550px] bg-cover bg-center bg-no-repeat"
           style={{
             backgroundImage: "url('/hero_banner.png')",
           }}
       >
         <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-black/20" />
-        <div className="relative container mx-auto px-4 h-full flex flex-col justify-center items-center text-center">
+        <div className="relative container mx-auto px-4 sm:px-6 md:px-8 h-full flex flex-col justify-center items-center text-center">
           {/* <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">
             Your Personal Consultant - in a Snap.
           </h1>
@@ -187,24 +199,32 @@ export default function HomePage() {
       </section>
 
       {/* Service Categories */}
-      <section className="relative -mt-16 pb-8">
-        <div className="container mx-auto px-4 flex justify-center">
-          <div className="bg-white rounded-lg border-2 border-gray-200 shadow-lg px-8 py-6 inline-block">
-            <div className="flex items-center gap-8">
+      <section className="relative -mt-8 sm:-mt-12 md:-mt-16 pb-6 sm:pb-8">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex justify-center">
+          <div className="bg-white rounded-lg border-2 border-gray-200 shadow-lg px-4 sm:px-6 md:px-8 py-4 sm:py-5 md:py-6 w-full md:w-auto md:inline-block overflow-hidden relative">
+            <div 
+              ref={categoriesScrollRef}
+              className="flex items-center gap-4 sm:gap-6 md:gap-8 overflow-x-auto md:overflow-x-visible scrollbar-hide md:scrollbar-hide pb-2 md:pb-0 pr-12 md:pr-0"
+            >
               {categories.map((category, index) => (
                 <button
                   key={index}
-                  className="flex flex-col items-center gap-2 min-w-[100px] hover:opacity-75 transition-opacity cursor-pointer"
+                  className="flex flex-col items-center gap-1 sm:gap-2 min-w-[80px] sm:min-w-[90px] md:min-w-[100px] flex-shrink-0 hover:opacity-75 transition-opacity cursor-pointer"
                   onClick={() => router.push('/all-services')}
                 >
-                  <div className="text-4xl">{category.icon}</div>
-                  <span className="text-xs text-center font-medium">{category.name}</span>
+                  <div className="text-3xl sm:text-3xl md:text-4xl">{category.icon}</div>
+                  <span className="text-[10px] sm:text-xs text-center font-medium leading-tight md:leading-normal">{category.name}</span>
                 </button>
               ))}
-              <button className="flex items-center justify-center min-w-[50px]">
-                <ChevronRight className="text-[var(--color-primary)]" size={32} />
-              </button>
             </div>
+            {/* Arrow button - visible on mobile/tablet only */}
+            <button 
+              onClick={handleScrollCategories}
+              className="md:hidden absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-white rounded-full shadow-md hover:shadow-lg hover:bg-gray-50 transition-all z-10 border border-gray-200"
+              aria-label="Scroll to next categories"
+            >
+              <ChevronRight className="text-[var(--color-primary)] w-5 h-5 sm:w-6 sm:h-6" />
+            </button>
           </div>
         </div>
       </section>
@@ -228,15 +248,16 @@ export default function HomePage() {
       {/* For Your Home */}
       <section className="container mx-auto px-4 py-12">
         <h2 className="text-2xl font-bold mb-6">Legal Services</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {homeServices.map((service, index) => (
             <div
               key={index}
-              className="group cursor-pointer rounded-2xl overflow-hidden bg-white shadow-md hover:shadow-2xl transition-all duration-300 border border-gray-100"
+              className="group cursor-pointer rounded-xl md:rounded-2xl overflow-hidden bg-white shadow-sm md:shadow-md hover:shadow-md md:hover:shadow-2xl transition-all duration-300 border border-gray-100"
               onClick={() => router.push('/all-services')}
             >
-              <div className="relative h-56 overflow-hidden p-3">
-                <div className="relative h-full w-full rounded-xl overflow-hidden">
+              {/* Mobile: Simple design */}
+              <div className="md:hidden">
+                <div className="relative h-32 sm:h-40 overflow-hidden">
                   <Image
                     src={service.image || "/placeholder.svg"}
                     alt={service.title}
@@ -244,29 +265,45 @@ export default function HomePage() {
                     className="object-cover group-hover:scale-110 transition-transform duration-300"
                   />
                 </div>
+                <div className="p-3 sm:p-4 text-center">
+                  <h3 className="text-sm sm:text-base font-medium text-gray-900 leading-tight">{service.title}</h3>
+                </div>
               </div>
-              <div className="p-5">
-                <div className="flex items-start justify-between mb-2">
-                  <h3 className="font-bold text-lg text-gray-900 leading-tight">{service.title}</h3>
-                  <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg flex-shrink-0 ml-2">
-                    <Star size={16} className="fill-yellow-400 text-yellow-400" />
-                    <span className="font-semibold text-sm">{service.rating}</span>
+              {/* Desktop: Full design */}
+              <div className="hidden md:block">
+                <div className="relative h-56 overflow-hidden p-3">
+                  <div className="relative h-full w-full rounded-xl overflow-hidden">
+                    <Image
+                      src={service.image || "/placeholder.svg"}
+                      alt={service.title}
+                      fill
+                      className="object-cover group-hover:scale-110 transition-transform duration-300"
+                    />
                   </div>
                 </div>
-                <p className="text-sm text-gray-600 mb-4 line-clamp-2">{service.description}</p>
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm text-gray-600">
-                    <Clock size={16} className="inline mr-1" />
-                    {service.deliveryTime}
-                  </span>
-                  <span className="text-sm font-semibold text-gray-900">Starting at {service.startingPrice}</span>
+                <div className="p-5">
+                  <div className="flex items-start justify-between mb-2">
+                    <h3 className="font-bold text-lg text-gray-900 leading-tight">{service.title}</h3>
+                    <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg flex-shrink-0 ml-2">
+                      <Star size={16} className="fill-yellow-400 text-yellow-400" />
+                      <span className="font-semibold text-sm">{service.rating}</span>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-4 line-clamp-2">{service.description}</p>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-sm text-gray-600">
+                      <Clock size={16} className="inline mr-1" />
+                      {service.deliveryTime}
+                    </span>
+                    <span className="text-sm font-semibold text-gray-900">Starting at {service.startingPrice}</span>
+                  </div>
+                  <button 
+                    onClick={(e) => handleBookNow(e, service.title)}
+                    className="w-full mt-6 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
+                  >
+                    Book Now
+                  </button>
                 </div>
-                <button 
-                  onClick={(e) => handleBookNow(e, service.title)}
-                  className="w-full mt-6 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
-                >
-                  Book Now
-                </button>
               </div>
             </div>
           ))}
@@ -281,15 +318,16 @@ export default function HomePage() {
             View All <ChevronRight size={20} />
           </button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {recommended.map((service, index) => (
             <div
               key={index}
-              className="group cursor-pointer rounded-2xl overflow-hidden bg-white shadow-md hover:shadow-2xl transition-all duration-300 border border-gray-100"
+              className="group cursor-pointer rounded-xl md:rounded-2xl overflow-hidden bg-white shadow-sm md:shadow-md hover:shadow-md md:hover:shadow-2xl transition-all duration-300 border border-gray-100"
               onClick={() => router.push('/all-services')}
             >
-              <div className="relative h-56 overflow-hidden p-3">
-                <div className="relative h-full w-full rounded-xl overflow-hidden">
+              {/* Mobile: Simple design */}
+              <div className="md:hidden">
+                <div className="relative h-32 sm:h-40 overflow-hidden">
                   <Image
                     src={service.image || "/placeholder.svg"}
                     alt={service.title}
@@ -297,29 +335,45 @@ export default function HomePage() {
                     className="object-cover group-hover:scale-110 transition-transform duration-300"
                   />
                 </div>
+                <div className="p-3 sm:p-4 text-center">
+                  <h3 className="text-sm sm:text-base font-medium text-gray-900 leading-tight">{service.title}</h3>
+                </div>
               </div>
-              <div className="p-5">
-                <div className="flex items-start justify-between mb-2">
-                  <h3 className="font-bold text-lg text-gray-900 leading-tight">{service.title}</h3>
-                  <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg flex-shrink-0 ml-2">
-                    <Star size={16} className="fill-yellow-400 text-yellow-400" />
-                    <span className="font-semibold text-sm">{service.rating}</span>
+              {/* Desktop: Full design */}
+              <div className="hidden md:block">
+                <div className="relative h-56 overflow-hidden p-3">
+                  <div className="relative h-full w-full rounded-xl overflow-hidden">
+                    <Image
+                      src={service.image || "/placeholder.svg"}
+                      alt={service.title}
+                      fill
+                      className="object-cover group-hover:scale-110 transition-transform duration-300"
+                    />
                   </div>
                 </div>
-                <p className="text-sm text-gray-600 mb-4 line-clamp-2">{service.description}</p>
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm text-gray-600">
-                    <Clock size={16} className="inline mr-1" />
-                    {service.deliveryTime}
-                  </span>
-                  <span className="text-sm font-semibold text-gray-900">Starting at {service.startingPrice}</span>
+                <div className="p-5">
+                  <div className="flex items-start justify-between mb-2">
+                    <h3 className="font-bold text-lg text-gray-900 leading-tight">{service.title}</h3>
+                    <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg flex-shrink-0 ml-2">
+                      <Star size={16} className="fill-yellow-400 text-yellow-400" />
+                      <span className="font-semibold text-sm">{service.rating}</span>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-4 line-clamp-2">{service.description}</p>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-sm text-gray-600">
+                      <Clock size={16} className="inline mr-1" />
+                      {service.deliveryTime}
+                    </span>
+                    <span className="text-sm font-semibold text-gray-900">Starting at {service.startingPrice}</span>
+                  </div>
+                  <button 
+                    onClick={(e) => handleBookNow(e, service.title)}
+                    className="w-full mt-6 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
+                  >
+                    Book Now
+                  </button>
                 </div>
-                <button 
-                  onClick={(e) => handleBookNow(e, service.title)}
-                  className="w-full mt-6 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
-                >
-                  Book Now
-                </button>
               </div>
             </div>
           ))}
@@ -334,15 +388,16 @@ export default function HomePage() {
             View All <ChevronRight size={20} />
           </button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {trending.map((service, index) => (
             <div
               key={index}
-              className="group cursor-pointer rounded-2xl overflow-hidden bg-white shadow-md hover:shadow-2xl transition-all duration-300 border border-gray-100"
+              className="group cursor-pointer rounded-xl md:rounded-2xl overflow-hidden bg-white shadow-sm md:shadow-md hover:shadow-md md:hover:shadow-2xl transition-all duration-300 border border-gray-100"
               onClick={() => router.push('/all-services')}
             >
-              <div className="relative h-56 overflow-hidden p-3">
-                <div className="relative h-full w-full rounded-xl overflow-hidden">
+              {/* Mobile: Simple design */}
+              <div className="md:hidden">
+                <div className="relative h-32 sm:h-40 overflow-hidden">
                   <Image
                     src={service.image || "/placeholder.svg"}
                     alt={service.title}
@@ -350,29 +405,45 @@ export default function HomePage() {
                     className="object-cover group-hover:scale-110 transition-transform duration-300"
                   />
                 </div>
+                <div className="p-3 sm:p-4 text-center">
+                  <h3 className="text-sm sm:text-base font-medium text-gray-900 leading-tight">{service.title}</h3>
+                </div>
               </div>
-              <div className="p-5">
-                <div className="flex items-start justify-between mb-2">
-                  <h3 className="font-bold text-lg text-gray-900 leading-tight">{service.title}</h3>
-                  <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg flex-shrink-0 ml-2">
-                    <Star size={16} className="fill-yellow-400 text-yellow-400" />
-                    <span className="font-semibold text-sm">{service.rating}</span>
+              {/* Desktop: Full design */}
+              <div className="hidden md:block">
+                <div className="relative h-56 overflow-hidden p-3">
+                  <div className="relative h-full w-full rounded-xl overflow-hidden">
+                    <Image
+                      src={service.image || "/placeholder.svg"}
+                      alt={service.title}
+                      fill
+                      className="object-cover group-hover:scale-110 transition-transform duration-300"
+                    />
                   </div>
                 </div>
-                <p className="text-sm text-gray-600 mb-4 line-clamp-2">{service.description}</p>
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm text-gray-600">
-                    <Clock size={16} className="inline mr-1" />
-                    {service.deliveryTime}
-                  </span>
-                  <span className="text-sm font-semibold text-gray-900">Starting at {service.startingPrice}</span>
+                <div className="p-5">
+                  <div className="flex items-start justify-between mb-2">
+                    <h3 className="font-bold text-lg text-gray-900 leading-tight">{service.title}</h3>
+                    <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg flex-shrink-0 ml-2">
+                      <Star size={16} className="fill-yellow-400 text-yellow-400" />
+                      <span className="font-semibold text-sm">{service.rating}</span>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-4 line-clamp-2">{service.description}</p>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-sm text-gray-600">
+                      <Clock size={16} className="inline mr-1" />
+                      {service.deliveryTime}
+                    </span>
+                    <span className="text-sm font-semibold text-gray-900">Starting at {service.startingPrice}</span>
+                  </div>
+                  <button 
+                    onClick={(e) => handleBookNow(e, service.title)}
+                    className="w-full mt-6 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
+                  >
+                    Book Now
+                  </button>
                 </div>
-                <button 
-                  onClick={(e) => handleBookNow(e, service.title)}
-                  className="w-full mt-6 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
-                >
-                  Book Now
-                </button>
               </div>
             </div>
           ))}

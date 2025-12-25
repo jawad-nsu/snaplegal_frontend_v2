@@ -23,12 +23,18 @@ import {
   CheckCircle,
   XCircle as XCircleIcon,
   Send,
-  ShoppingCart
+  ShoppingCart,
+  UserCircle,
+  Upload,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import Image from 'next/image'
 import Navbar from '@/components/navbar'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 // Types
 interface User {
@@ -153,10 +159,42 @@ interface Order {
   }>
 }
 
-type TabType = 'users' | 'vendors' | 'categories' | 'subcategories' | 'services' | 'service-requests' | 'chats' | 'orders'
+type LeadStage = 'New' | 'Qualified' | 'Proposal' | 'Closed'
+type ClosedReason = 'Won' | 'Lost' | 'Lost (Unqualified)'
+type LeadSource = 'Website' | 'Referral' | 'Social Media' | 'Advertisement' | 'Cold Call' | 'Other'
+type LeadSubSource = 'Facebook Ads' | 'Google Ads' | 'LinkedIn' | 'Instagram' | 'Word of Mouth' | 'Email Campaign' | 'Other'
+
+interface Lead {
+  id: string
+  clientName: string
+  whatsapp?: string
+  mobile?: string
+  facebook?: string
+  email?: string
+  profession?: string
+  street?: string
+  city?: string
+  thana?: string
+  district?: string
+  country?: string
+  postalCode?: string
+  desiredService?: string
+  initialDiscussion?: string
+  stage: LeadStage
+  closedReason?: ClosedReason
+  closedReasonText?: string
+  leadSource: LeadSource
+  leadSubSource?: LeadSubSource
+  leadOwner: string
+  comment?: string
+  createdAt: string
+}
+
+type TabType = 'leads' | 'users' | 'vendors' | 'categories' | 'subcategories' | 'services' | 'service-requests' | 'chats' | 'orders'
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<TabType>('users')
+  const router = useRouter()
+  const [activeTab, setActiveTab] = useState<TabType>('leads')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<User | Vendor | ServiceCategory | SubCategory | Service | null>(null)
 
@@ -432,6 +470,127 @@ export default function AdminDashboard() {
   const [selectedOrderForAssignment, setSelectedOrderForAssignment] = useState<Order | null>(null)
   const [selectedVendorId, setSelectedVendorId] = useState<string>('')
 
+  // Leads data
+  const [leads, setLeads] = useState<Lead[]>([
+    {
+      id: '1',
+      clientName: 'Ahmed Rahman',
+      whatsapp: '+8801712345678',
+      mobile: '+8801712345678',
+      facebook: 'ahmed.rahman',
+      email: 'ahmed@example.com',
+      profession: 'Business Owner',
+      street: 'House 45, Road 12',
+      city: 'Gulshan',
+      thana: 'Gulshan',
+      district: 'Dhaka',
+      country: 'Bangladesh',
+      postalCode: '1212',
+      desiredService: 'AC Servicing',
+      initialDiscussion: 'Interested in monthly AC maintenance',
+      stage: 'Proposal',
+      leadSource: 'Website',
+      leadSubSource: 'Google Ads',
+      leadOwner: 'John Doe',
+      comment: 'Follow up next week',
+      createdAt: '2024-01-15',
+    },
+    {
+      id: '2',
+      clientName: 'Fatima Khan',
+      whatsapp: '+8801723456789',
+      mobile: '+8801723456789',
+      email: 'fatima@example.com',
+      profession: 'Teacher',
+      street: 'Road 27, House 8',
+      city: 'Dhanmondi',
+      thana: 'Dhanmondi',
+      district: 'Dhaka',
+      country: 'Bangladesh',
+      postalCode: '1205',
+      desiredService: 'Home Cleaning',
+      initialDiscussion: 'Needs deep cleaning service',
+      stage: 'New',
+      leadSource: 'Social Media',
+      leadSubSource: 'Facebook Ads',
+      leadOwner: 'Jane Smith',
+      comment: 'Very interested',
+      createdAt: '2024-01-16',
+    },
+    {
+      id: '3',
+      clientName: 'Karim Uddin',
+      mobile: '+8801734567890',
+      email: 'karim@example.com',
+      profession: 'Engineer',
+      street: 'Road 11, House 23',
+      city: 'Banani',
+      thana: 'Banani',
+      district: 'Dhaka',
+      country: 'Bangladesh',
+      postalCode: '1213',
+      desiredService: 'Plumbing Services',
+      initialDiscussion: 'Urgent plumbing issue',
+      stage: 'New',
+      leadSource: 'Referral',
+      leadSubSource: 'Word of Mouth',
+      leadOwner: 'John Doe',
+      createdAt: '2024-01-17',
+    },
+    {
+      id: '4',
+      clientName: 'Sadia Rahman',
+      whatsapp: '+8801745678901',
+      mobile: '+8801745678901',
+      email: 'sadia@example.com',
+      profession: 'Doctor',
+      street: 'Sector 7, Road 15',
+      city: 'Uttara',
+      thana: 'Uttara',
+      district: 'Dhaka',
+      country: 'Bangladesh',
+      postalCode: '1230',
+      desiredService: 'Beauty & Wellness',
+      initialDiscussion: 'Looking for spa services',
+      stage: 'Qualified',
+      leadSource: 'Website',
+      leadSubSource: 'Instagram',
+      leadOwner: 'Jane Smith',
+      comment: 'Price negotiation in progress',
+      createdAt: '2024-01-18',
+    },
+    {
+      id: '5',
+      clientName: 'Hasan Ali',
+      mobile: '+8801756789012',
+      email: 'hasan@example.com',
+      profession: 'Student',
+      street: 'Block C, Road 5',
+      city: 'Mirpur',
+      thana: 'Mirpur',
+      district: 'Dhaka',
+      country: 'Bangladesh',
+      postalCode: '1216',
+      desiredService: 'Electrical Services',
+      initialDiscussion: 'Need electrical repair',
+      stage: 'Closed',
+      closedReason: 'Won',
+      leadSource: 'Advertisement',
+      leadSubSource: 'Email Campaign',
+      leadOwner: 'John Doe',
+      comment: 'Converted to customer',
+      createdAt: '2024-01-19',
+    },
+  ])
+
+  // Leads filters
+  const [leadSearch, setLeadSearch] = useState('')
+  const [leadStageFilter, setLeadStageFilter] = useState<string>('all')
+  const [leadSourceFilter, setLeadSourceFilter] = useState<string>('all')
+  const [leadOwnerFilter, setLeadOwnerFilter] = useState<string>('all')
+  const [leadCurrentPage, setLeadCurrentPage] = useState(1)
+  const [leadItemsPerPage] = useState(10)
+
   const handleAssignVendor = (order: Order) => {
     setSelectedOrderForAssignment(order)
     setSelectedVendorId(order.vendorId || '')
@@ -571,6 +730,278 @@ export default function AdminDashboard() {
     setUserStatusFilter('all')
   }
 
+  const renderLeadsTab = () => (
+    <div className="space-y-4">
+      {/* Filters */}
+      <div className="bg-white rounded-lg shadow-sm p-3 sm:p-4 border border-gray-200">
+        <div className="flex items-center gap-2 mb-3 sm:mb-4">
+          <Filter size={18} className="sm:w-5 sm:h-5 text-gray-500" />
+          <h3 className="font-semibold text-sm sm:text-base text-gray-700">Filters</h3>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
+          <div>
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Search</label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
+              <Input
+                value={leadSearch}
+                onChange={(e) => {
+                  setLeadSearch(e.target.value)
+                  setLeadCurrentPage(1)
+                }}
+                placeholder="Search leads..."
+                className="pl-9 sm:pl-10 text-sm sm:text-base"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Stage</label>
+            <select
+              value={leadStageFilter}
+              onChange={(e) => {
+                setLeadStageFilter(e.target.value)
+                setLeadCurrentPage(1)
+              }}
+              className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md"
+            >
+              <option value="all">All Stages</option>
+              <option value="New">New</option>
+              <option value="Qualified">Qualified</option>
+              <option value="Proposal">Proposal</option>
+              <option value="Closed">Closed</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Lead Source</label>
+            <select
+              value={leadSourceFilter}
+              onChange={(e) => {
+                setLeadSourceFilter(e.target.value)
+                setLeadCurrentPage(1)
+              }}
+              className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md"
+            >
+              <option value="all">All Sources</option>
+              <option value="Website">Website</option>
+              <option value="Referral">Referral</option>
+              <option value="Social Media">Social Media</option>
+              <option value="Advertisement">Advertisement</option>
+              <option value="Cold Call">Cold Call</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Lead Owner</label>
+            <select
+              value={leadOwnerFilter}
+              onChange={(e) => {
+                setLeadOwnerFilter(e.target.value)
+                setLeadCurrentPage(1)
+              }}
+              className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md"
+            >
+              <option value="all">All Owners</option>
+              {uniqueLeadOwners.map(owner => (
+                <option key={owner} value={owner}>{owner}</option>
+              ))}
+            </select>
+          </div>
+          <div className="flex items-end">
+            {(leadSearch || leadStageFilter !== 'all' || leadSourceFilter !== 'all' || leadOwnerFilter !== 'all') && (
+              <Button
+                variant="outline"
+                onClick={clearLeadFilters}
+                className="w-full text-sm sm:text-base"
+              >
+                <XCircle size={16} className="mr-2" />
+                Clear Filters
+              </Button>
+            )}
+          </div>
+        </div>
+        <div className="mt-2 text-xs sm:text-sm text-gray-500">
+          Showing {filteredLeads.length} of {leads.length} leads
+        </div>
+      </div>
+
+      {/* Actions Bar */}
+      <div className="bg-white rounded-lg shadow-sm p-3 sm:p-4 border border-gray-200">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+          <Link
+            href="/leads/upload"
+            className="flex items-center justify-center gap-2 border border-gray-300 text-gray-700 px-3 sm:px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors text-sm sm:text-base"
+          >
+            <Upload size={16} className="sm:w-5 sm:h-5" />
+            <span className="hidden sm:inline">Bulk Upload</span>
+            <span className="sm:hidden">Upload</span>
+          </Link>
+          <Link
+            href="/leads/new"
+            className="flex items-center justify-center gap-2 bg-[var(--color-primary)] text-white px-3 sm:px-4 py-2 rounded-lg hover:opacity-90 transition-colors text-sm sm:text-base"
+          >
+            <Plus size={16} className="sm:w-5 sm:h-5" />
+            New Lead
+          </Link>
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+        {paginatedLeads.length === 0 ? (
+          <div className="text-center py-8 sm:py-12 px-4">
+            <p className="text-sm sm:text-base text-gray-600">No leads found matching the filters</p>
+          </div>
+        ) : (
+          <>
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-200 bg-gray-50">
+                    <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Client Name</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">WhatsApp</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Mobile</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Email</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Profession</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Desired Service</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Stage</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Lead Source</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Lead Owner</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedLeads.map((lead) => (
+                    <tr key={lead.id} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="py-4 px-4">
+                        <Link
+                          href={`/leads/${lead.id}`}
+                          className="font-medium text-blue-600 hover:text-blue-800 underline text-sm"
+                        >
+                          {lead.clientName}
+                        </Link>
+                      </td>
+                      <td className="py-4 px-4 text-sm text-gray-700">{getFieldValue(lead, 'whatsapp')}</td>
+                      <td className="py-4 px-4 text-sm text-gray-700">{getFieldValue(lead, 'mobile')}</td>
+                      <td className="py-4 px-4 text-sm text-gray-700">{getFieldValue(lead, 'email')}</td>
+                      <td className="py-4 px-4 text-sm text-gray-700">{getFieldValue(lead, 'profession')}</td>
+                      <td className="py-4 px-4 text-sm text-gray-700">{getFieldValue(lead, 'desiredService')}</td>
+                      <td className="py-4 px-4">
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${getLeadStageColor(lead.stage, lead.closedReason)}`}>
+                          {getLeadStageDisplayText(lead.stage, lead.closedReason)}
+                        </span>
+                      </td>
+                      <td className="py-4 px-4 text-sm text-gray-700">{lead.leadSource}</td>
+                      <td className="py-4 px-4 text-sm text-gray-700">{lead.leadOwner}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden divide-y divide-gray-200">
+              {paginatedLeads.map((lead) => (
+                <div key={lead.id} className="p-4 hover:bg-gray-50">
+                  <div className="mb-3">
+                    <Link
+                      href={`/leads/${lead.id}`}
+                      className="font-semibold text-blue-600 hover:text-blue-800 underline text-base block mb-2"
+                    >
+                      {lead.clientName}
+                    </Link>
+                    <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-medium ${getLeadStageColor(lead.stage, lead.closedReason)}`}>
+                      {getLeadStageDisplayText(lead.stage, lead.closedReason)}
+                    </span>
+                  </div>
+                  <div className="space-y-2 text-sm">
+                    {lead.whatsapp && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">WhatsApp:</span>
+                        <span className="text-gray-900">{lead.whatsapp}</span>
+                      </div>
+                    )}
+                    {lead.mobile && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Mobile:</span>
+                        <span className="text-gray-900">{lead.mobile}</span>
+                      </div>
+                    )}
+                    {lead.email && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Email:</span>
+                        <span className="text-gray-900 truncate ml-2">{lead.email}</span>
+                      </div>
+                    )}
+                    {lead.profession && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Profession:</span>
+                        <span className="text-gray-900">{lead.profession}</span>
+                      </div>
+                    )}
+                    {lead.desiredService && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Service:</span>
+                        <span className="text-gray-900">{lead.desiredService}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Source:</span>
+                      <span className="text-gray-900">{lead.leadSource}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Owner:</span>
+                      <span className="text-gray-900">{lead.leadOwner}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Pagination */}
+            {leadTotalPages > 1 && (
+              <div className="px-3 sm:px-4 py-3 sm:py-4 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0">
+                <div className="text-xs sm:text-sm text-gray-600 text-center sm:text-left">
+                  Showing {(leadCurrentPage - 1) * leadItemsPerPage + 1} to {Math.min(leadCurrentPage * leadItemsPerPage, filteredLeads.length)} of {filteredLeads.length} leads
+                </div>
+                <div className="flex items-center gap-1 sm:gap-2">
+                  <button
+                    onClick={() => setLeadCurrentPage(prev => Math.max(1, prev - 1))}
+                    disabled={leadCurrentPage === 1}
+                    className="p-1.5 sm:p-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+                  </button>
+                  <div className="flex items-center gap-0.5 sm:gap-1">
+                    {Array.from({ length: leadTotalPages }, (_, i) => i + 1).map((page) => (
+                      <button
+                        key={page}
+                        onClick={() => setLeadCurrentPage(page)}
+                        className={`px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
+                          leadCurrentPage === page
+                            ? 'bg-[var(--color-primary)] text-white'
+                            : 'border border-gray-300 hover:bg-gray-50'
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    onClick={() => setLeadCurrentPage(prev => Math.min(leadTotalPages, prev + 1))}
+                    disabled={leadCurrentPage === leadTotalPages}
+                    className="p-1.5 sm:p-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  )
+
   const renderUsersTab = () => (
     <div className="space-y-4">
       {/* Filters */}
@@ -624,49 +1055,53 @@ export default function AdminDashboard() {
 
       {/* Table */}
       <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {filteredUsers.length === 0 ? (
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[640px]">
+            <thead className="bg-gray-50">
               <tr>
-                <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
-                  No users found matching the filters
-                </td>
+                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
-            ) : (
-              filteredUsers.map((user) => (
-                <tr key={user.id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{user.name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.email}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.phone}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${user.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                      {user.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.createdAt}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button onClick={() => handleEdit(user)} className="text-indigo-600 hover:text-indigo-900 mr-3">
-                      <Edit size={16} />
-                    </button>
-                    <button onClick={() => handleDelete(user.id)} className="text-red-600 hover:text-red-900">
-                      <Trash2 size={16} />
-                    </button>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {filteredUsers.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-3 md:px-6 py-8 text-center text-gray-500">
+                    No users found matching the filters
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : (
+                filteredUsers.map((user) => (
+                  <tr key={user.id}>
+                    <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{user.name}</td>
+                    <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.email}</td>
+                    <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.phone}</td>
+                    <td className="px-3 md:px-6 py-4 whitespace-nowrap">
+                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${user.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                        {user.status}
+                      </span>
+                    </td>
+                    <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.createdAt}</td>
+                    <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <div className="flex items-center gap-2">
+                        <button onClick={() => handleEdit(user)} className="text-indigo-600 hover:text-indigo-900">
+                          <Edit size={16} />
+                        </button>
+                        <button onClick={() => handleDelete(user.id)} className="text-red-600 hover:text-red-900">
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   )
@@ -773,68 +1208,72 @@ export default function AdminDashboard() {
 
       {/* Table */}
       <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">District</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categories</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {filteredVendors.length === 0 ? (
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[800px]">
+            <thead className="bg-gray-50">
               <tr>
-                <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
-                  No vendors found matching the filters
-                </td>
+                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">District</th>
+                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categories</th>
+                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
-            ) : (
-              filteredVendors.map((vendor) => (
-                <tr key={vendor.id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{vendor.name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{vendor.email}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{vendor.phone}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{vendor.district}</td>
-                  <td className="px-6 py-4 text-sm text-gray-500">
-                    <div className="flex flex-wrap gap-1">
-                      {vendor.serviceCategories.map((cat, idx) => (
-                        <span key={idx} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">{cat}</span>
-                      ))}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      vendor.status === 'active' ? 'bg-green-100 text-green-800' : 
-                      vendor.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
-                      'bg-red-100 text-red-800'
-                    }`}>
-                      {vendor.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button onClick={() => handleEdit(vendor)} className="text-indigo-600 hover:text-indigo-900 mr-3">
-                      <Edit size={16} />
-                    </button>
-                    <button onClick={() => handleDelete(vendor.id)} className="text-red-600 hover:text-red-900">
-                      <Trash2 size={16} />
-                    </button>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {filteredVendors.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-3 md:px-6 py-8 text-center text-gray-500">
+                    No vendors found matching the filters
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : (
+                filteredVendors.map((vendor) => (
+                  <tr key={vendor.id}>
+                    <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{vendor.name}</td>
+                    <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-500">{vendor.email}</td>
+                    <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-500">{vendor.phone}</td>
+                    <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-500">{vendor.district}</td>
+                    <td className="px-3 md:px-6 py-4 text-sm text-gray-500">
+                      <div className="flex flex-wrap gap-1">
+                        {vendor.serviceCategories.map((cat, idx) => (
+                          <span key={idx} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">{cat}</span>
+                        ))}
+                      </div>
+                    </td>
+                    <td className="px-3 md:px-6 py-4 whitespace-nowrap">
+                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        vendor.status === 'active' ? 'bg-green-100 text-green-800' : 
+                        vendor.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {vendor.status}
+                      </span>
+                    </td>
+                    <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <div className="flex items-center gap-2">
+                        <button onClick={() => handleEdit(vendor)} className="text-indigo-600 hover:text-indigo-900">
+                          <Edit size={16} />
+                        </button>
+                        <button onClick={() => handleDelete(vendor.id)} className="text-red-600 hover:text-red-900">
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   )
 
   const renderCategoriesTab = () => (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {categories.map((category) => (
           <div key={category.id} className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
             <div className="flex items-center justify-between mb-4">
@@ -860,7 +1299,7 @@ export default function AdminDashboard() {
 
   const renderSubCategoriesTab = () => (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {subCategories.map((subCategory) => {
           const category = categories.find(c => c.id === subCategory.categoryId)
           return (
@@ -966,8 +1405,8 @@ export default function AdminDashboard() {
             </div>
           ) : (
             filteredServiceRequests.map((request) => (
-              <div key={request.id} className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-                <div className="flex items-start justify-between mb-4">
+              <div key={request.id} className="bg-white rounded-lg shadow-sm p-4 md:p-6 border border-gray-200">
+                <div className="flex flex-col sm:flex-row items-start justify-between gap-4 mb-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <h3 className="text-lg font-semibold text-gray-900">{request.serviceName}</h3>
@@ -994,10 +1433,10 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                   {request.status === 'submitted' && (
-                    <div className="flex gap-2 ml-4">
+                    <div className="flex flex-col sm:flex-row gap-2 mt-4 sm:mt-0 sm:ml-4">
                       <Button
                         onClick={() => handleApproveServiceRequest(request.id)}
-                        className="bg-green-600 hover:bg-green-700 text-white"
+                        className="bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto"
                       >
                         <CheckCircle size={16} className="mr-2" />
                         Approve
@@ -1005,7 +1444,7 @@ export default function AdminDashboard() {
                       <Button
                         onClick={() => setShowRejectModal(request.id)}
                         variant="outline"
-                        className="border-red-600 text-red-600 hover:bg-red-50"
+                        className="border-red-600 text-red-600 hover:bg-red-50 w-full sm:w-auto"
                       >
                         <XCircleIcon size={16} className="mr-2" />
                         Reject
@@ -1013,10 +1452,10 @@ export default function AdminDashboard() {
                     </div>
                   )}
                   {request.status === 'under-review' && (
-                    <div className="flex gap-2 ml-4">
+                    <div className="flex flex-col sm:flex-row gap-2 mt-4 sm:mt-0 sm:ml-4">
                       <Button
                         onClick={() => handleApproveServiceRequest(request.id)}
-                        className="bg-green-600 hover:bg-green-700 text-white"
+                        className="bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto"
                       >
                         <CheckCircle size={16} className="mr-2" />
                         Approve
@@ -1024,7 +1463,7 @@ export default function AdminDashboard() {
                       <Button
                         onClick={() => setShowRejectModal(request.id)}
                         variant="outline"
-                        className="border-red-600 text-red-600 hover:bg-red-50"
+                        className="border-red-600 text-red-600 hover:bg-red-50 w-full sm:w-auto"
                       >
                         <XCircleIcon size={16} className="mr-2" />
                         Reject
@@ -1039,15 +1478,15 @@ export default function AdminDashboard() {
 
         {/* Reject Modal */}
         {showRejectModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
-              <div className="flex items-center justify-between p-6 border-b">
-                <h2 className="text-xl font-bold">Reject Service Request</h2>
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between p-4 md:p-6 border-b">
+                <h2 className="text-lg md:text-xl font-bold">Reject Service Request</h2>
                 <button onClick={() => setShowRejectModal(null)} className="text-gray-400 hover:text-gray-600">
                   <X size={24} />
                 </button>
               </div>
-              <div className="p-6">
+              <div className="p-4 md:p-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">Rejection Reason</label>
                 <textarea
                   value={rejectionReason[showRejectModal] || ''}
@@ -1057,8 +1496,8 @@ export default function AdminDashboard() {
                   placeholder="Enter the reason for rejection..."
                 />
               </div>
-              <div className="flex justify-end gap-3 p-6 border-t">
-                <Button variant="outline" onClick={() => setShowRejectModal(null)}>Cancel</Button>
+              <div className="flex flex-col sm:flex-row justify-end gap-3 p-4 md:p-6 border-t">
+                <Button variant="outline" onClick={() => setShowRejectModal(null)} className="w-full sm:w-auto">Cancel</Button>
                 <Button
                   onClick={() => {
                     if (rejectionReason[showRejectModal]) {
@@ -1067,7 +1506,7 @@ export default function AdminDashboard() {
                       setRejectionReason({ ...rejectionReason, [showRejectModal]: '' })
                     }
                   }}
-                  className="bg-red-600 hover:bg-red-700 text-white"
+                  className="bg-red-600 hover:bg-red-700 text-white w-full sm:w-auto"
                   disabled={!rejectionReason[showRejectModal]}
                 >
                   Reject
@@ -1115,6 +1554,74 @@ export default function AdminDashboard() {
     setOrderDateFrom('')
     setOrderDateTo('')
   }
+
+  // Filter leads
+  const filteredLeads = leads.filter(lead => {
+    const matchesSearch = leadSearch === '' ||
+      lead.clientName.toLowerCase().includes(leadSearch.toLowerCase()) ||
+      lead.email?.toLowerCase().includes(leadSearch.toLowerCase()) ||
+      lead.mobile?.includes(leadSearch) ||
+      lead.whatsapp?.includes(leadSearch) ||
+      lead.desiredService?.toLowerCase().includes(leadSearch.toLowerCase()) ||
+      lead.leadOwner.toLowerCase().includes(leadSearch.toLowerCase())
+    const matchesStage = leadStageFilter === 'all' || lead.stage === leadStageFilter
+    const matchesSource = leadSourceFilter === 'all' || lead.leadSource === leadSourceFilter
+    const matchesOwner = leadOwnerFilter === 'all' || lead.leadOwner === leadOwnerFilter
+    return matchesSearch && matchesStage && matchesSource && matchesOwner
+  })
+
+  const leadTotalPages = Math.ceil(filteredLeads.length / leadItemsPerPage)
+  const paginatedLeads = filteredLeads.slice(
+    (leadCurrentPage - 1) * leadItemsPerPage,
+    leadCurrentPage * leadItemsPerPage
+  )
+
+  const clearLeadFilters = () => {
+    setLeadSearch('')
+    setLeadStageFilter('all')
+    setLeadSourceFilter('all')
+    setLeadOwnerFilter('all')
+    setLeadCurrentPage(1)
+  }
+
+  const getLeadStageColor = (stage: LeadStage, closedReason?: ClosedReason) => {
+    if (stage === 'Closed') {
+      if (closedReason === 'Won') {
+        return 'bg-green-100 text-green-700'
+      } else if (closedReason === 'Lost' || closedReason === 'Lost (Unqualified)') {
+        return 'bg-red-100 text-red-700'
+      }
+      return 'bg-gray-100 text-gray-700'
+    }
+    const colors = {
+      'New': 'bg-blue-100 text-blue-700',
+      'Qualified': 'bg-purple-100 text-purple-700',
+      'Proposal': 'bg-orange-100 text-orange-700',
+    }
+    return colors[stage]
+  }
+
+  const getLeadStageDisplayText = (stage: LeadStage, closedReason?: ClosedReason) => {
+    if (stage === 'Closed') {
+      if (closedReason === 'Won') {
+        return 'Closed Won'
+      } else if (closedReason === 'Lost') {
+        return 'Closed Lost'
+      } else if (closedReason === 'Lost (Unqualified)') {
+        return 'Closed Lost (Unqualified)'
+      }
+      return 'Closed'
+    }
+    return stage
+  }
+
+  const getFieldValue = (lead: Lead, field: string) => {
+    const value = lead[field as keyof Lead]
+    if (value === undefined || value === null) return '-'
+    return String(value)
+  }
+
+  const uniqueLeadOwners = Array.from(new Set(leads.map(l => l.leadOwner))).sort()
 
   const renderOrdersTab = () => (
     <div className="space-y-4">
@@ -1203,40 +1710,40 @@ export default function AdminDashboard() {
       {/* Orders Table */}
       <div className="bg-white rounded-lg shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[1000px]">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order #</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vendor</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order #</th>
+                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service</th>
+                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vendor</th>
+                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
+                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment</th>
+                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredOrders.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="px-6 py-8 text-center text-gray-500">
+                  <td colSpan={9} className="px-3 md:px-6 py-8 text-center text-gray-500">
                     No orders found matching the filters
                   </td>
                 </tr>
               ) : (
                 filteredOrders.map((order) => (
                   <tr key={order.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{order.orderNumber}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{order.serviceName}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{order.vendorName}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{order.orderNumber}</td>
+                    <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">{order.serviceName}</td>
+                    <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-500">{order.vendorName}</td>
+                    <td className="px-3 md:px-6 py-4 whitespace-nowrap">
                       <div className="text-sm">
                         <div className="font-medium text-gray-900">{order.clientName}</div>
                         <div className="text-gray-500">{order.clientPhone}</div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 md:px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                         order.status === 'Delivered' ? 'bg-green-100 text-green-800' :
                         order.status === 'Closed' ? 'bg-gray-100 text-gray-800' :
@@ -1248,7 +1755,7 @@ export default function AdminDashboard() {
                         {order.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 md:px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                         order.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' :
                         order.paymentStatus === 'refunded' ? 'bg-red-100 text-red-800' :
@@ -1257,15 +1764,15 @@ export default function AdminDashboard() {
                         {order.paymentStatus}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">৳{order.total.toLocaleString()}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">৳{order.total.toLocaleString()}</td>
+                    <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       <div>{order.orderDate}</div>
                       {order.scheduledDate && (
                         <div className="text-xs text-gray-400">Scheduled: {order.scheduledDate}</div>
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex items-center gap-2">
+                    <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
                         <button
                           onClick={() => {
                             // View order details - could open a modal or navigate
@@ -1296,10 +1803,10 @@ export default function AdminDashboard() {
 
       {/* Assign Vendor Modal */}
       {showAssignVendorModal && selectedOrderForAssignment && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
-            <div className="flex items-center justify-between p-6 border-b">
-              <h2 className="text-xl font-bold">Assign Order to Vendor</h2>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-4 md:p-6 border-b">
+              <h2 className="text-lg md:text-xl font-bold">Assign Order to Vendor</h2>
               <button onClick={() => {
                 setShowAssignVendorModal(false)
                 setSelectedOrderForAssignment(null)
@@ -1308,7 +1815,7 @@ export default function AdminDashboard() {
                 <X size={24} />
               </button>
             </div>
-            <div className="p-6 space-y-4">
+            <div className="p-4 md:p-6 space-y-4">
               <div>
                 <p className="text-sm text-gray-600 mb-2">
                   <span className="font-medium">Order:</span> {selectedOrderForAssignment.orderNumber}
@@ -1341,17 +1848,17 @@ export default function AdminDashboard() {
                 </p>
               </div>
             </div>
-            <div className="flex justify-end gap-3 p-6 border-t">
+            <div className="flex flex-col sm:flex-row justify-end gap-3 p-4 md:p-6 border-t">
               <Button variant="outline" onClick={() => {
                 setShowAssignVendorModal(false)
                 setSelectedOrderForAssignment(null)
                 setSelectedVendorId('')
-              }}>
+              }} className="w-full sm:w-auto">
                 Cancel
               </Button>
               <Button
                 onClick={handleConfirmAssignment}
-                className="bg-[var(--color-primary)] hover:opacity-90"
+                className="bg-[var(--color-primary)] hover:opacity-90 w-full sm:w-auto"
                 disabled={!selectedVendorId}
               >
                 <CheckCircle size={16} className="mr-2" />
@@ -1394,9 +1901,9 @@ export default function AdminDashboard() {
     }
 
     return (
-      <div className="flex gap-4 h-[600px]">
+      <div className="flex flex-col md:flex-row gap-4 h-[600px]">
         {/* Chat List */}
-        <div className="w-1/3 border-r border-gray-200 flex flex-col">
+        <div className={`${selectedChatOrderId ? 'hidden md:flex' : 'flex'} w-full md:w-1/3 border-r border-gray-200 flex-col`}>
           <div className="p-4 border-b border-gray-200">
             <div className="relative mb-4">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
@@ -1447,9 +1954,19 @@ export default function AdminDashboard() {
           {selectedChat ? (
             <>
               <div className="p-4 border-b border-gray-200 bg-gray-50">
-                <h3 className="font-semibold text-gray-900">{selectedChat.serviceName}</h3>
-                <p className="text-sm text-gray-600">Order: {selectedChat.orderId}</p>
-                <p className="text-xs text-gray-500">{selectedChat.vendorName} ↔ {selectedChat.clientName}</p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-semibold text-gray-900">{selectedChat.serviceName}</h3>
+                    <p className="text-sm text-gray-600">Order: {selectedChat.orderId}</p>
+                    <p className="text-xs text-gray-500">{selectedChat.vendorName} ↔ {selectedChat.clientName}</p>
+                  </div>
+                  <button
+                    onClick={() => setSelectedChatOrderId(null)}
+                    className="md:hidden text-gray-500 hover:text-gray-700"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
               </div>
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {selectedChat.messages.map((message) => (
@@ -1457,7 +1974,7 @@ export default function AdminDashboard() {
                     key={message.id}
                     className={`flex ${message.sender === 'admin' ? 'justify-end' : 'justify-start'}`}
                   >
-                    <div className={`max-w-[70%] rounded-lg p-3 ${
+                    <div className={`max-w-[85%] md:max-w-[70%] rounded-lg p-3 ${
                       message.sender === 'admin' 
                         ? 'bg-[var(--color-primary)] text-white' 
                         : message.sender === 'vendor'
@@ -1508,7 +2025,7 @@ export default function AdminDashboard() {
 
   const renderServicesTab = () => (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         {services.map((service) => {
           const category = categories.find(c => c.id === service.categoryId)
           const subCategory = service.subCategoryId ? subCategories.find(s => s.id === service.subCategoryId) : null
@@ -1566,17 +2083,17 @@ export default function AdminDashboard() {
     if (!isModalOpen) return null
 
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-          <div className="flex items-center justify-between p-6 border-b">
-            <h2 className="text-xl font-bold">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="flex items-center justify-between p-4 md:p-6 border-b sticky top-0 bg-white z-10">
+            <h2 className="text-lg md:text-xl font-bold">
               {editingItem ? 'Edit' : 'Add New'} {activeTab === 'users' ? 'User' : activeTab === 'vendors' ? 'Vendor' : activeTab === 'categories' ? 'Category' : activeTab === 'subcategories' ? 'Sub-Category' : 'Service'}
             </h2>
             <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
               <X size={24} />
             </button>
           </div>
-          <div className="p-6 space-y-4">
+          <div className="p-4 md:p-6 space-y-4">
             {activeTab === 'users' && (
               <>
                 <div>
@@ -1741,9 +2258,9 @@ export default function AdminDashboard() {
               </>
             )}
           </div>
-          <div className="flex justify-end gap-3 p-6 border-t">
-            <Button variant="outline" onClick={() => setIsModalOpen(false)}>Cancel</Button>
-            <Button onClick={handleSave} className="bg-[var(--color-primary)] hover:opacity-90">
+          <div className="flex flex-col sm:flex-row justify-end gap-3 p-4 md:p-6 border-t sticky bottom-0 bg-white">
+            <Button variant="outline" onClick={() => setIsModalOpen(false)} className="w-full sm:w-auto">Cancel</Button>
+            <Button onClick={handleSave} className="bg-[var(--color-primary)] hover:opacity-90 w-full sm:w-auto">
               <Save size={16} className="mr-2" />
               Save
             </Button>
@@ -1756,94 +2273,104 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Dashboard</h1>
-          <p className="text-gray-600">Manage users, vendors, categories, and services</p>
+      <div className="container mx-auto px-3 md:px-4 py-4 md:py-8">
+        <div className="mb-4 md:mb-6">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Admin Dashboard</h1>
+          <p className="text-sm md:text-base text-gray-600">Manage users, vendors, categories, and services</p>
         </div>
 
         {/* Tabs */}
         <div className="bg-white rounded-lg shadow-sm mb-6">
-          <div className="flex border-b border-gray-200">
+          <div className="flex border-b border-gray-200 overflow-x-auto scrollbar-hide">
+            <button
+              onClick={() => setActiveTab('leads')}
+              className={`px-4 md:px-6 py-3 md:py-4 font-medium text-xs md:text-sm flex items-center gap-1 md:gap-2 border-b-2 transition-colors whitespace-nowrap ${
+                activeTab === 'leads' ? 'border-[var(--color-primary)] text-[var(--color-primary)]' : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <UserCircle size={18} className="md:w-5 md:h-5" />
+              <span className="hidden sm:inline">Leads</span>
+            </button>
             <button
               onClick={() => setActiveTab('users')}
-              className={`px-6 py-4 font-medium text-sm flex items-center gap-2 border-b-2 transition-colors ${
+              className={`px-4 md:px-6 py-3 md:py-4 font-medium text-xs md:text-sm flex items-center gap-1 md:gap-2 border-b-2 transition-colors whitespace-nowrap ${
                 activeTab === 'users' ? 'border-[var(--color-primary)] text-[var(--color-primary)]' : 'border-transparent text-gray-500 hover:text-gray-700'
               }`}
             >
-              <Users size={20} />
-              Users
+              <Users size={18} className="md:w-5 md:h-5" />
+              <span className="hidden sm:inline">Users</span>
             </button>
             <button
               onClick={() => setActiveTab('vendors')}
-              className={`px-6 py-4 font-medium text-sm flex items-center gap-2 border-b-2 transition-colors ${
+              className={`px-4 md:px-6 py-3 md:py-4 font-medium text-xs md:text-sm flex items-center gap-1 md:gap-2 border-b-2 transition-colors whitespace-nowrap ${
                 activeTab === 'vendors' ? 'border-[var(--color-primary)] text-[var(--color-primary)]' : 'border-transparent text-gray-500 hover:text-gray-700'
               }`}
             >
-              <Store size={20} />
-              Vendors
+              <Store size={18} className="md:w-5 md:h-5" />
+              <span className="hidden sm:inline">Vendors</span>
             </button>
             <button
               onClick={() => setActiveTab('categories')}
-              className={`px-6 py-4 font-medium text-sm flex items-center gap-2 border-b-2 transition-colors ${
+              className={`px-4 md:px-6 py-3 md:py-4 font-medium text-xs md:text-sm flex items-center gap-1 md:gap-2 border-b-2 transition-colors whitespace-nowrap ${
                 activeTab === 'categories' ? 'border-[var(--color-primary)] text-[var(--color-primary)]' : 'border-transparent text-gray-500 hover:text-gray-700'
               }`}
             >
-              <FolderTree size={20} />
-              Categories
+              <FolderTree size={18} className="md:w-5 md:h-5" />
+              <span className="hidden sm:inline">Categories</span>
             </button>
             <button
               onClick={() => setActiveTab('subcategories')}
-              className={`px-6 py-4 font-medium text-sm flex items-center gap-2 border-b-2 transition-colors ${
+              className={`px-4 md:px-6 py-3 md:py-4 font-medium text-xs md:text-sm flex items-center gap-1 md:gap-2 border-b-2 transition-colors whitespace-nowrap ${
                 activeTab === 'subcategories' ? 'border-[var(--color-primary)] text-[var(--color-primary)]' : 'border-transparent text-gray-500 hover:text-gray-700'
               }`}
             >
-              <FolderOpen size={20} />
-              Sub-Categories
+              <FolderOpen size={18} className="md:w-5 md:h-5" />
+              <span className="hidden sm:inline">Sub-Categories</span>
             </button>
             <button
               onClick={() => setActiveTab('services')}
-              className={`px-6 py-4 font-medium text-sm flex items-center gap-2 border-b-2 transition-colors ${
+              className={`px-4 md:px-6 py-3 md:py-4 font-medium text-xs md:text-sm flex items-center gap-1 md:gap-2 border-b-2 transition-colors whitespace-nowrap ${
                 activeTab === 'services' ? 'border-[var(--color-primary)] text-[var(--color-primary)]' : 'border-transparent text-gray-500 hover:text-gray-700'
               }`}
             >
-              <Briefcase size={20} />
-              Services
+              <Briefcase size={18} className="md:w-5 md:h-5" />
+              <span className="hidden sm:inline">Services</span>
             </button>
             <button
               onClick={() => setActiveTab('service-requests')}
-              className={`px-6 py-4 font-medium text-sm flex items-center gap-2 border-b-2 transition-colors ${
+              className={`px-4 md:px-6 py-3 md:py-4 font-medium text-xs md:text-sm flex items-center gap-1 md:gap-2 border-b-2 transition-colors whitespace-nowrap ${
                 activeTab === 'service-requests' ? 'border-[var(--color-primary)] text-[var(--color-primary)]' : 'border-transparent text-gray-500 hover:text-gray-700'
               }`}
             >
-              <FileText size={20} />
-              Service Requests
+              <FileText size={18} className="md:w-5 md:h-5" />
+              <span className="hidden sm:inline">Service Requests</span>
             </button>
             <button
               onClick={() => setActiveTab('chats')}
-              className={`px-6 py-4 font-medium text-sm flex items-center gap-2 border-b-2 transition-colors ${
+              className={`px-4 md:px-6 py-3 md:py-4 font-medium text-xs md:text-sm flex items-center gap-1 md:gap-2 border-b-2 transition-colors whitespace-nowrap ${
                 activeTab === 'chats' ? 'border-[var(--color-primary)] text-[var(--color-primary)]' : 'border-transparent text-gray-500 hover:text-gray-700'
               }`}
             >
-              <MessageCircle size={20} />
-              Chats
+              <MessageCircle size={18} className="md:w-5 md:h-5" />
+              <span className="hidden sm:inline">Chats</span>
             </button>
             <button
               onClick={() => setActiveTab('orders')}
-              className={`px-6 py-4 font-medium text-sm flex items-center gap-2 border-b-2 transition-colors ${
+              className={`px-4 md:px-6 py-3 md:py-4 font-medium text-xs md:text-sm flex items-center gap-1 md:gap-2 border-b-2 transition-colors whitespace-nowrap ${
                 activeTab === 'orders' ? 'border-[var(--color-primary)] text-[var(--color-primary)]' : 'border-transparent text-gray-500 hover:text-gray-700'
               }`}
             >
-              <ShoppingCart size={20} />
-              Orders
+              <ShoppingCart size={18} className="md:w-5 md:h-5" />
+              <span className="hidden sm:inline">Orders</span>
             </button>
           </div>
         </div>
 
         {/* Content */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold text-gray-900">
+        <div className="bg-white rounded-lg shadow-sm p-4 md:p-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+            <h2 className="text-lg md:text-xl font-semibold text-gray-900">
+              {activeTab === 'leads' && 'All Leads'}
               {activeTab === 'users' && 'All Users'}
               {activeTab === 'vendors' && 'All Vendors'}
               {activeTab === 'categories' && 'Service Categories'}
@@ -1853,14 +2380,15 @@ export default function AdminDashboard() {
               {activeTab === 'chats' && 'Vendor-Client Chats'}
               {activeTab === 'orders' && 'All Orders'}
             </h2>
-            {(activeTab !== 'service-requests' && activeTab !== 'chats' && activeTab !== 'orders') && (
-              <Button onClick={handleAdd} className="bg-[var(--color-primary)] hover:opacity-90">
+            {(activeTab !== 'leads' && activeTab !== 'service-requests' && activeTab !== 'chats' && activeTab !== 'orders') && (
+              <Button onClick={handleAdd} className="bg-[var(--color-primary)] hover:opacity-90 w-full sm:w-auto">
                 <Plus size={16} className="mr-2" />
                 Add New
               </Button>
             )}
           </div>
 
+          {activeTab === 'leads' && renderLeadsTab()}
           {activeTab === 'users' && renderUsersTab()}
           {activeTab === 'vendors' && renderVendorsTab()}
           {activeTab === 'categories' && renderCategoriesTab()}

@@ -123,32 +123,32 @@ export default function NewLeadPage() {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
 
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8 max-w-4xl">
         {/* Breadcrumb */}
-        <div className="mb-6">
-          <div className="flex items-center gap-2 text-sm text-gray-600">
+        <div className="mb-4 sm:mb-6">
+          <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-gray-600 flex-wrap">
             <Link href="/" className="hover:text-[var(--color-primary)]">
               Home
             </Link>
-            <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)]"></span>
+            <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-[var(--color-primary)]"></span>
             <Link href="/leads" className="hover:text-[var(--color-primary)]">
               Leads
             </Link>
-            <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)]"></span>
+            <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-[var(--color-primary)]"></span>
             <span className="text-gray-900">New Lead</span>
           </div>
         </div>
 
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Create New Lead</h1>
-              <p className="text-gray-600 mt-1">Fill in the information below to create a new lead</p>
+        <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mb-4 sm:mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex-1">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Create New Lead</h1>
+              <p className="text-sm sm:text-base text-gray-600 mt-1">Fill in the information below to create a new lead</p>
             </div>
             <Link
               href="/leads"
-              className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+              className="flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors w-full sm:w-auto"
             >
               <ArrowLeft className="w-4 h-4" />
               Cancel
@@ -157,10 +157,10 @@ export default function NewLeadPage() {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm p-4 sm:p-6 space-y-6">
           {/* Client Information Section */}
           <div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Client Information</h2>
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">Client Information</h2>
             <div className="grid md:grid-cols-2 gap-4">
               <div>
                 <label htmlFor="clientName" className="block text-sm font-medium text-gray-700 mb-2">
@@ -294,7 +294,7 @@ export default function NewLeadPage() {
 
           {/* Contact Information Section */}
           <div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Contact Information</h2>
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">Contact Information</h2>
             <div className="grid md:grid-cols-2 gap-4">
               <div>
                 <label htmlFor="mobile" className="block text-sm font-medium text-gray-700 mb-2">
@@ -365,7 +365,7 @@ export default function NewLeadPage() {
 
           {/* Lead Details Section */}
           <div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Lead Details</h2>
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">Lead Details</h2>
             <div className="grid md:grid-cols-2 gap-4">
               <div>
                 <label htmlFor="desiredService" className="block text-sm font-medium text-gray-700 mb-2">
@@ -457,7 +457,7 @@ export default function NewLeadPage() {
 
           {/* Discussion & Comments Section */}
           <div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Discussion & Comments</h2>
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">Discussion & Comments</h2>
             <div className="space-y-4">
               <div>
                 <label htmlFor="initialDiscussion" className="block text-sm font-medium text-gray-700 mb-2">
@@ -492,17 +492,17 @@ export default function NewLeadPage() {
           </div>
 
           {/* Form Actions */}
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-200">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-4 border-t border-gray-200">
             <Link
               href="/leads"
-              className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+              className="flex items-center justify-center px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors w-full sm:w-auto"
             >
               Cancel
             </Link>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex items-center gap-2 px-6 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center justify-center gap-2 px-6 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
             >
               <Save className="w-4 h-4" />
               {isSubmitting ? 'Creating...' : 'Create Lead'}

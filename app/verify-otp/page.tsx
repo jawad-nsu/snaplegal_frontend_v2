@@ -192,16 +192,16 @@ function VerifyOTPContent() {
     return (
       <div className="min-h-screen bg-gray-50">
         <Navbar />
-        <div className="container mx-auto px-4 py-12">
+        <div className="container mx-auto px-4 py-6 sm:py-12">
           <div className="max-w-md mx-auto">
-            <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 md:p-8 text-center">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Verification Successful!</h2>
-              <p className="text-gray-600 mb-6">Your account has been verified. Redirecting...</p>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Verification Successful!</h2>
+              <p className="text-sm sm:text-base text-gray-600 mb-6">Your account has been verified. Redirecting...</p>
             </div>
           </div>
         </div>
@@ -221,12 +221,12 @@ function VerifyOTPContent() {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 py-6 sm:py-8 md:py-12">
         <div className="max-w-md mx-auto">
-          <div className="bg-white rounded-lg shadow-sm p-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Verify Your Account</h1>
-            <p className="text-gray-600 mb-6">
-              We've sent a 6-digit OTP to your {
+          <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 md:p-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Verify Your Account</h1>
+            <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">
+              We&apos;ve sent a 6-digit OTP to your {
                 verificationMethod === 'phone' ? 'phone' : 
                 verificationMethod === 'whatsapp' ? 'WhatsApp' : 
                 'email'
@@ -234,15 +234,15 @@ function VerifyOTPContent() {
             </p>
 
             {/* Contact Info Display */}
-            <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-              <p className="text-sm text-gray-600 mb-1">OTP sent to:</p>
-              <p className="text-lg font-semibold text-gray-900">{maskedContact}</p>
-              <div className="mt-4 space-y-2">
+            <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-gray-50 rounded-lg">
+              <p className="text-xs sm:text-sm text-gray-600 mb-1">OTP sent to:</p>
+              <p className="text-base sm:text-lg font-semibold text-gray-900 break-all">{maskedContact}</p>
+              <div className="mt-3 sm:mt-4 space-y-2">
                 {userData.phone && verificationMethod !== 'phone' && (
                   <button
                     type="button"
                     onClick={() => handleChangeMethod('phone')}
-                    className="w-full text-left px-4 py-2 text-sm text-[var(--color-primary)] hover:bg-gray-100 rounded-lg transition-colors border border-gray-200"
+                    className="w-full text-left px-3 sm:px-4 py-2.5 sm:py-2 text-xs sm:text-sm text-[var(--color-primary)] hover:bg-gray-100 active:bg-gray-200 rounded-lg transition-colors border border-gray-200 touch-manipulation"
                   >
                     Verify via Phone instead
                   </button>
@@ -251,7 +251,7 @@ function VerifyOTPContent() {
                   <button
                     type="button"
                     onClick={() => handleChangeMethod('email')}
-                    className="w-full text-left px-4 py-2 text-sm text-[var(--color-primary)] hover:bg-gray-100 rounded-lg transition-colors border border-gray-200"
+                    className="w-full text-left px-3 sm:px-4 py-2.5 sm:py-2 text-xs sm:text-sm text-[var(--color-primary)] hover:bg-gray-100 active:bg-gray-200 rounded-lg transition-colors border border-gray-200 touch-manipulation"
                   >
                     Verify via Email instead
                   </button>
@@ -260,7 +260,7 @@ function VerifyOTPContent() {
                   <button
                     type="button"
                     onClick={() => handleChangeMethod('whatsapp')}
-                    className="w-full text-left px-4 py-2 text-sm text-[var(--color-primary)] hover:bg-gray-100 rounded-lg transition-colors border border-gray-200"
+                    className="w-full text-left px-3 sm:px-4 py-2.5 sm:py-2 text-xs sm:text-sm text-[var(--color-primary)] hover:bg-gray-100 active:bg-gray-200 rounded-lg transition-colors border border-gray-200 touch-manipulation"
                   >
                     Verify via WhatsApp instead
                   </button>
@@ -269,11 +269,11 @@ function VerifyOTPContent() {
             </div>
 
             {/* OTP Input */}
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-3">
+            <div className="mb-4 sm:mb-6">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2 sm:mb-3">
                 Enter OTP
               </label>
-              <div className="flex gap-2 justify-center">
+              <div className="flex gap-1.5 sm:gap-2 justify-center">
                 {otp.map((digit, index) => (
                   <input
                     key={index}
@@ -286,27 +286,27 @@ function VerifyOTPContent() {
                     value={digit}
                     onChange={(e) => handleOtpChange(index, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(index, e)}
-                    className="w-12 h-14 text-center text-2xl font-semibold border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
+                    className="w-10 h-12 sm:w-12 sm:h-14 text-center text-xl sm:text-2xl font-semibold border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] touch-manipulation"
                   />
                 ))}
               </div>
               {error && (
-                <p className="mt-2 text-sm text-red-600 text-center">{error}</p>
+                <p className="mt-2 text-xs sm:text-sm text-red-600 text-center">{error}</p>
               )}
             </div>
 
             {/* Resend OTP */}
-            <div className="mb-6 text-center">
+            <div className="mb-4 sm:mb-6 text-center">
               {canResend ? (
                 <button
                   type="button"
                   onClick={handleResendOtp}
-                  className="text-sm text-[var(--color-primary)] hover:opacity-80 font-medium"
+                  className="text-xs sm:text-sm text-[var(--color-primary)] hover:opacity-80 active:opacity-70 font-medium touch-manipulation py-2"
                 >
                   Resend OTP
                 </button>
               ) : (
-                <p className="text-sm text-gray-600">
+                <p className="text-xs sm:text-sm text-gray-600">
                   Resend OTP in {resendTimer}s
                 </p>
               )}
@@ -317,26 +317,26 @@ function VerifyOTPContent() {
               type="button"
               onClick={handleVerify}
               disabled={isLoading || otp.join('').length !== 6}
-              className="w-full bg-[var(--color-primary)] text-white py-3 rounded-lg font-medium hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-[var(--color-primary)] text-white py-3.5 sm:py-3 rounded-lg text-sm sm:text-base font-medium hover:opacity-90 active:opacity-80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
             >
               {isLoading ? 'Verifying...' : 'Verify OTP'}
             </button>
 
             {/* Back to Signup */}
-            <div className="mt-6 text-center">
-              <p className="text-sm text-gray-600">
-                Didn't receive the OTP?{' '}
+            <div className="mt-4 sm:mt-6 text-center">
+              <p className="text-xs sm:text-sm text-gray-600">
+                Didn&apos;t receive the OTP?{' '}
                 <button
                   type="button"
                   onClick={handleResendOtp}
                   disabled={!canResend}
-                  className="text-[var(--color-primary)] hover:opacity-80 font-medium disabled:opacity-50"
+                  className="text-[var(--color-primary)] hover:opacity-80 active:opacity-70 font-medium disabled:opacity-50 touch-manipulation"
                 >
                   Resend
                 </button>
               </p>
-              <p className="mt-4 text-sm">
-                <Link href="/signup" className="text-[var(--color-primary)] hover:opacity-80">
+              <p className="mt-3 sm:mt-4 text-xs sm:text-sm">
+                <Link href="/signup" className="text-[var(--color-primary)] hover:opacity-80 active:opacity-70">
                   Back to Sign Up
                 </Link>
               </p>
