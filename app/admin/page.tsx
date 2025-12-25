@@ -1005,30 +1005,30 @@ export default function AdminDashboard() {
   const renderUsersTab = () => (
     <div className="space-y-4">
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
-        <div className="flex items-center gap-2 mb-4">
-          <Filter size={20} className="text-gray-500" />
-          <h3 className="font-semibold text-gray-700">Filters</h3>
+      <div className="bg-white rounded-lg shadow-sm p-3 sm:p-4 border border-gray-200">
+        <div className="flex items-center gap-2 mb-3 sm:mb-4">
+          <Filter size={18} className="sm:w-5 sm:h-5 text-gray-500" />
+          <h3 className="font-semibold text-sm sm:text-base text-gray-700">Filters</h3>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Search</label>
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Search</label>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
               <Input
                 value={userSearch}
                 onChange={(e) => setUserSearch(e.target.value)}
                 placeholder="Search by name, email, or phone..."
-                className="pl-10"
+                className="pl-9 sm:pl-10 text-sm sm:text-base"
               />
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Status</label>
             <select
               value={userStatusFilter}
               onChange={(e) => setUserStatusFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md"
             >
               <option value="all">All Status</option>
               <option value="active">Active</option>
@@ -1040,7 +1040,7 @@ export default function AdminDashboard() {
               <Button
                 variant="outline"
                 onClick={clearUserFilters}
-                className="w-full"
+                className="w-full text-sm sm:text-base"
               >
                 <XCircle size={16} className="mr-2" />
                 Clear Filters
@@ -1048,60 +1048,105 @@ export default function AdminDashboard() {
             )}
           </div>
         </div>
-        <div className="mt-2 text-sm text-gray-500">
+        <div className="mt-2 text-xs sm:text-sm text-gray-500">
           Showing {filteredUsers.length} of {users.length} users
         </div>
       </div>
 
       {/* Table */}
       <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[640px]">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
-                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
-                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredUsers.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-3 md:px-6 py-8 text-center text-gray-500">
-                    No users found matching the filters
-                  </td>
-                </tr>
-              ) : (
-                filteredUsers.map((user) => (
-                  <tr key={user.id}>
-                    <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{user.name}</td>
-                    <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.email}</td>
-                    <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.phone}</td>
-                    <td className="px-3 md:px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${user.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                        {user.status}
-                      </span>
-                    </td>
-                    <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.createdAt}</td>
-                    <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex items-center gap-2">
-                        <button onClick={() => handleEdit(user)} className="text-indigo-600 hover:text-indigo-900">
-                          <Edit size={16} />
-                        </button>
-                        <button onClick={() => handleDelete(user.id)} className="text-red-600 hover:text-red-900">
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </td>
+        {filteredUsers.length === 0 ? (
+          <div className="text-center py-8 sm:py-12 px-4">
+            <p className="text-sm sm:text-base text-gray-600">No users found matching the filters</p>
+          </div>
+        ) : (
+          <>
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-200 bg-gray-50">
+                    <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Name</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Email</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Phone</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Status</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Created</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Actions</th>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                </thead>
+                <tbody>
+                  {filteredUsers.map((user) => (
+                    <tr key={user.id} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="py-4 px-4 text-sm font-medium text-gray-900">{user.name}</td>
+                      <td className="py-4 px-4 text-sm text-gray-500">{user.email}</td>
+                      <td className="py-4 px-4 text-sm text-gray-500">{user.phone}</td>
+                      <td className="py-4 px-4">
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${user.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                          {user.status}
+                        </span>
+                      </td>
+                      <td className="py-4 px-4 text-sm text-gray-500">{user.createdAt}</td>
+                      <td className="py-4 px-4 text-sm font-medium">
+                        <div className="flex items-center gap-2">
+                          <button onClick={() => handleEdit(user)} className="text-indigo-600 hover:text-indigo-900">
+                            <Edit size={16} />
+                          </button>
+                          <button onClick={() => handleDelete(user.id)} className="text-red-600 hover:text-red-900">
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden divide-y divide-gray-200">
+              {filteredUsers.map((user) => (
+                <div key={user.id} className="p-4 hover:bg-gray-50">
+                  <div className="mb-3">
+                    <h3 className="font-semibold text-base text-gray-900 mb-2">{user.name}</h3>
+                    <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-medium ${user.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                      {user.status}
+                    </span>
+                  </div>
+                  <div className="space-y-2 text-sm mb-3">
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Email:</span>
+                      <span className="text-gray-900 truncate ml-2">{user.email}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Phone:</span>
+                      <span className="text-gray-900">{user.phone}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Created:</span>
+                      <span className="text-gray-900">{user.createdAt}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 pt-2 border-t border-gray-100">
+                    <button 
+                      onClick={() => handleEdit(user)} 
+                      className="flex items-center gap-1.5 text-indigo-600 hover:text-indigo-900 text-sm font-medium"
+                    >
+                      <Edit size={16} />
+                      Edit
+                    </button>
+                    <button 
+                      onClick={() => handleDelete(user.id)} 
+                      className="flex items-center gap-1.5 text-red-600 hover:text-red-900 text-sm font-medium"
+                    >
+                      <Trash2 size={16} />
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </div>
   )
@@ -1132,30 +1177,30 @@ export default function AdminDashboard() {
   const renderVendorsTab = () => (
     <div className="space-y-4">
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
-        <div className="flex items-center gap-2 mb-4">
-          <Filter size={20} className="text-gray-500" />
-          <h3 className="font-semibold text-gray-700">Filters</h3>
+      <div className="bg-white rounded-lg shadow-sm p-3 sm:p-4 border border-gray-200">
+        <div className="flex items-center gap-2 mb-3 sm:mb-4">
+          <Filter size={18} className="sm:w-5 sm:h-5 text-gray-500" />
+          <h3 className="font-semibold text-sm sm:text-base text-gray-700">Filters</h3>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Search</label>
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Search</label>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
               <Input
                 value={vendorSearch}
                 onChange={(e) => setVendorSearch(e.target.value)}
                 placeholder="Search by name, email, phone, or district..."
-                className="pl-10"
+                className="pl-9 sm:pl-10 text-sm sm:text-base"
               />
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Status</label>
             <select
               value={vendorStatusFilter}
               onChange={(e) => setVendorStatusFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md"
             >
               <option value="all">All Status</option>
               <option value="active">Active</option>
@@ -1164,11 +1209,11 @@ export default function AdminDashboard() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">District</label>
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">District</label>
             <select
               value={vendorDistrictFilter}
               onChange={(e) => setVendorDistrictFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md"
             >
               <option value="all">All Districts</option>
               {uniqueDistricts.map(district => (
@@ -1177,11 +1222,11 @@ export default function AdminDashboard() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Service Category</label>
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Service Category</label>
             <select
               value={vendorCategoryFilter}
               onChange={(e) => setVendorCategoryFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md"
             >
               <option value="all">All Categories</option>
               {categories.map(cat => (
@@ -1190,14 +1235,15 @@ export default function AdminDashboard() {
             </select>
           </div>
         </div>
-        <div className="mt-4 flex items-center justify-between">
-          <div className="text-sm text-gray-500">
+        <div className="mt-3 sm:mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
+          <div className="text-xs sm:text-sm text-gray-500">
             Showing {filteredVendors.length} of {vendors.length} vendors
           </div>
           {(vendorSearch || vendorStatusFilter !== 'all' || vendorDistrictFilter !== 'all' || vendorCategoryFilter !== 'all') && (
             <Button
               variant="outline"
               onClick={clearVendorFilters}
+              className="w-full sm:w-auto text-sm sm:text-base"
             >
               <XCircle size={16} className="mr-2" />
               Clear Filters
@@ -1208,65 +1254,124 @@ export default function AdminDashboard() {
 
       {/* Table */}
       <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[800px]">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
-                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">District</th>
-                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categories</th>
-                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredVendors.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="px-3 md:px-6 py-8 text-center text-gray-500">
-                    No vendors found matching the filters
-                  </td>
-                </tr>
-              ) : (
-                filteredVendors.map((vendor) => (
-                  <tr key={vendor.id}>
-                    <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{vendor.name}</td>
-                    <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-500">{vendor.email}</td>
-                    <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-500">{vendor.phone}</td>
-                    <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-500">{vendor.district}</td>
-                    <td className="px-3 md:px-6 py-4 text-sm text-gray-500">
-                      <div className="flex flex-wrap gap-1">
-                        {vendor.serviceCategories.map((cat, idx) => (
-                          <span key={idx} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">{cat}</span>
-                        ))}
-                      </div>
-                    </td>
-                    <td className="px-3 md:px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        vendor.status === 'active' ? 'bg-green-100 text-green-800' : 
-                        vendor.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
-                        'bg-red-100 text-red-800'
-                      }`}>
-                        {vendor.status}
-                      </span>
-                    </td>
-                    <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex items-center gap-2">
-                        <button onClick={() => handleEdit(vendor)} className="text-indigo-600 hover:text-indigo-900">
-                          <Edit size={16} />
-                        </button>
-                        <button onClick={() => handleDelete(vendor.id)} className="text-red-600 hover:text-red-900">
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </td>
+        {filteredVendors.length === 0 ? (
+          <div className="text-center py-8 sm:py-12 px-4">
+            <p className="text-sm sm:text-base text-gray-600">No vendors found matching the filters</p>
+          </div>
+        ) : (
+          <>
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-200 bg-gray-50">
+                    <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Name</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Email</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Phone</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">District</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Categories</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Status</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Actions</th>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                </thead>
+                <tbody>
+                  {filteredVendors.map((vendor) => (
+                    <tr key={vendor.id} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="py-4 px-4 text-sm font-medium text-gray-900">{vendor.name}</td>
+                      <td className="py-4 px-4 text-sm text-gray-500">{vendor.email}</td>
+                      <td className="py-4 px-4 text-sm text-gray-500">{vendor.phone}</td>
+                      <td className="py-4 px-4 text-sm text-gray-500">{vendor.district}</td>
+                      <td className="py-4 px-4 text-sm text-gray-500">
+                        <div className="flex flex-wrap gap-1">
+                          {vendor.serviceCategories.map((cat, idx) => (
+                            <span key={idx} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">{cat}</span>
+                          ))}
+                        </div>
+                      </td>
+                      <td className="py-4 px-4">
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          vendor.status === 'active' ? 'bg-green-100 text-green-800' : 
+                          vendor.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
+                          'bg-red-100 text-red-800'
+                        }`}>
+                          {vendor.status}
+                        </span>
+                      </td>
+                      <td className="py-4 px-4 text-sm font-medium">
+                        <div className="flex items-center gap-2">
+                          <button onClick={() => handleEdit(vendor)} className="text-indigo-600 hover:text-indigo-900">
+                            <Edit size={16} />
+                          </button>
+                          <button onClick={() => handleDelete(vendor.id)} className="text-red-600 hover:text-red-900">
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden divide-y divide-gray-200">
+              {filteredVendors.map((vendor) => (
+                <div key={vendor.id} className="p-4 hover:bg-gray-50">
+                  <div className="mb-3">
+                    <h3 className="font-semibold text-base text-gray-900 mb-2">{vendor.name}</h3>
+                    <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-medium ${
+                      vendor.status === 'active' ? 'bg-green-100 text-green-700' : 
+                      vendor.status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 
+                      'bg-red-100 text-red-700'
+                    }`}>
+                      {vendor.status}
+                    </span>
+                  </div>
+                  <div className="space-y-2 text-sm mb-3">
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Email:</span>
+                      <span className="text-gray-900 truncate ml-2">{vendor.email}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Phone:</span>
+                      <span className="text-gray-900">{vendor.phone}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">District:</span>
+                      <span className="text-gray-900">{vendor.district}</span>
+                    </div>
+                    {vendor.serviceCategories.length > 0 && (
+                      <div>
+                        <span className="text-gray-500 block mb-1">Categories:</span>
+                        <div className="flex flex-wrap gap-1">
+                          {vendor.serviceCategories.map((cat, idx) => (
+                            <span key={idx} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">{cat}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3 pt-2 border-t border-gray-100">
+                    <button 
+                      onClick={() => handleEdit(vendor)} 
+                      className="flex items-center gap-1.5 text-indigo-600 hover:text-indigo-900 text-sm font-medium"
+                    >
+                      <Edit size={16} />
+                      Edit
+                    </button>
+                    <button 
+                      onClick={() => handleDelete(vendor.id)} 
+                      className="flex items-center gap-1.5 text-red-600 hover:text-red-900 text-sm font-medium"
+                    >
+                      <Trash2 size={16} />
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </div>
   )
@@ -1359,18 +1464,18 @@ export default function AdminDashboard() {
     return (
       <div className="space-y-4">
         {/* Filters */}
-        <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
-          <div className="flex items-center gap-2 mb-4">
-            <Filter size={20} className="text-gray-500" />
-            <h3 className="font-semibold text-gray-700">Filters</h3>
+        <div className="bg-white rounded-lg shadow-sm p-3 sm:p-4 border border-gray-200">
+          <div className="flex items-center gap-2 mb-3 sm:mb-4">
+            <Filter size={18} className="sm:w-5 sm:h-5 text-gray-500" />
+            <h3 className="font-semibold text-sm sm:text-base text-gray-700">Filters</h3>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Status</label>
               <select
                 value={serviceRequestStatusFilter}
                 onChange={(e) => setServiceRequestStatusFilter(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md"
               >
                 <option value="all">All Status</option>
                 <option value="submitted">Submitted</option>
@@ -1384,7 +1489,7 @@ export default function AdminDashboard() {
                 <Button
                   variant="outline"
                   onClick={() => setServiceRequestStatusFilter('all')}
-                  className="w-full"
+                  className="w-full text-sm sm:text-base"
                 >
                   <XCircle size={16} className="mr-2" />
                   Clear Filter
@@ -1392,85 +1497,89 @@ export default function AdminDashboard() {
               )}
             </div>
           </div>
-          <div className="mt-2 text-sm text-gray-500">
+          <div className="mt-2 text-xs sm:text-sm text-gray-500">
             Showing {filteredServiceRequests.length} of {serviceRequests.length} requests
           </div>
         </div>
 
         {/* Service Requests List */}
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {filteredServiceRequests.length === 0 ? (
-            <div className="bg-white rounded-lg shadow-sm p-8 text-center text-gray-500">
-              No service requests found matching the filters
+            <div className="bg-white rounded-lg shadow-sm p-6 sm:p-8 text-center text-gray-500">
+              <p className="text-sm sm:text-base">No service requests found matching the filters</p>
             </div>
           ) : (
             filteredServiceRequests.map((request) => (
-              <div key={request.id} className="bg-white rounded-lg shadow-sm p-4 md:p-6 border border-gray-200">
-                <div className="flex flex-col sm:flex-row items-start justify-between gap-4 mb-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-lg font-semibold text-gray-900">{request.serviceName}</h3>
-                      <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                        request.status === 'approved' ? 'bg-green-100 text-green-800' :
-                        request.status === 'rejected' ? 'bg-red-100 text-red-800' :
-                        request.status === 'under-review' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-blue-100 text-blue-800'
-                      }`}>
-                        {request.status.replace('-', ' ').toUpperCase()}
-                      </span>
-                    </div>
-                    <div className="text-sm text-gray-600 space-y-1">
-                      <p><span className="font-medium">Vendor:</span> {request.vendorName}</p>
-                      <p><span className="font-medium">Category:</span> {request.category} {request.subCategory && `> ${request.subCategory}`}</p>
-                      <p><span className="font-medium">Description:</span> {request.description}</p>
-                      <p><span className="font-medium">Submitted:</span> {request.submittedDate}</p>
-                      {request.reviewDate && (
-                        <p><span className="font-medium">Reviewed:</span> {request.reviewDate} by {request.reviewedBy}</p>
-                      )}
-                      {request.rejectionReason && (
-                        <p className="text-red-600"><span className="font-medium">Rejection Reason:</span> {request.rejectionReason}</p>
-                      )}
-                    </div>
+              <div key={request.id} className="bg-white rounded-lg shadow-sm p-4 sm:p-6 border border-gray-200">
+                {/* Header Section */}
+                <div className="mb-4 pb-4 border-b border-gray-200">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 mb-3">
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900">{request.serviceName}</h3>
+                    <span className={`inline-block w-fit px-2.5 sm:px-3 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${
+                      request.status === 'approved' ? 'bg-green-100 text-green-700' :
+                      request.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                      request.status === 'under-review' ? 'bg-yellow-100 text-yellow-700' :
+                      'bg-blue-100 text-blue-700'
+                    }`}>
+                      {request.status.replace('-', ' ').toUpperCase()}
+                    </span>
                   </div>
-                  {request.status === 'submitted' && (
-                    <div className="flex flex-col sm:flex-row gap-2 mt-4 sm:mt-0 sm:ml-4">
-                      <Button
-                        onClick={() => handleApproveServiceRequest(request.id)}
-                        className="bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto"
-                      >
-                        <CheckCircle size={16} className="mr-2" />
-                        Approve
-                      </Button>
-                      <Button
-                        onClick={() => setShowRejectModal(request.id)}
-                        variant="outline"
-                        className="border-red-600 text-red-600 hover:bg-red-50 w-full sm:w-auto"
-                      >
-                        <XCircleIcon size={16} className="mr-2" />
-                        Reject
-                      </Button>
+                </div>
+
+                {/* Details Section */}
+                <div className="space-y-3 mb-4">
+                  <div className="flex flex-col sm:flex-row sm:items-start gap-2">
+                    <span className="text-xs sm:text-sm font-medium text-gray-500 min-w-[80px] sm:min-w-[100px]">Vendor:</span>
+                    <span className="text-sm sm:text-base text-gray-900">{request.vendorName}</span>
+                  </div>
+                  <div className="flex flex-col sm:flex-row sm:items-start gap-2">
+                    <span className="text-xs sm:text-sm font-medium text-gray-500 min-w-[80px] sm:min-w-[100px]">Category:</span>
+                    <span className="text-sm sm:text-base text-gray-900">
+                      {request.category} {request.subCategory && <span className="text-gray-500">→ {request.subCategory}</span>}
+                    </span>
+                  </div>
+                  <div className="flex flex-col sm:flex-row sm:items-start gap-2">
+                    <span className="text-xs sm:text-sm font-medium text-gray-500 min-w-[80px] sm:min-w-[100px]">Description:</span>
+                    <span className="text-sm sm:text-base text-gray-900 flex-1">{request.description}</span>
+                  </div>
+                  <div className="flex flex-col sm:flex-row sm:items-start gap-2">
+                    <span className="text-xs sm:text-sm font-medium text-gray-500 min-w-[80px] sm:min-w-[100px]">Submitted:</span>
+                    <span className="text-sm sm:text-base text-gray-900">{request.submittedDate}</span>
+                  </div>
+                  {request.reviewDate && (
+                    <div className="flex flex-col sm:flex-row sm:items-start gap-2">
+                      <span className="text-xs sm:text-sm font-medium text-gray-500 min-w-[80px] sm:min-w-[100px]">Reviewed:</span>
+                      <span className="text-sm sm:text-base text-gray-900">{request.reviewDate} by {request.reviewedBy}</span>
                     </div>
                   )}
-                  {request.status === 'under-review' && (
-                    <div className="flex flex-col sm:flex-row gap-2 mt-4 sm:mt-0 sm:ml-4">
-                      <Button
-                        onClick={() => handleApproveServiceRequest(request.id)}
-                        className="bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto"
-                      >
-                        <CheckCircle size={16} className="mr-2" />
-                        Approve
-                      </Button>
-                      <Button
-                        onClick={() => setShowRejectModal(request.id)}
-                        variant="outline"
-                        className="border-red-600 text-red-600 hover:bg-red-50 w-full sm:w-auto"
-                      >
-                        <XCircleIcon size={16} className="mr-2" />
-                        Reject
-                      </Button>
+                  {request.rejectionReason && (
+                    <div className="flex flex-col sm:flex-row sm:items-start gap-2 p-3 bg-red-50 rounded-lg border border-red-100">
+                      <span className="text-xs sm:text-sm font-medium text-red-700 min-w-[80px] sm:min-w-[100px]">Rejection Reason:</span>
+                      <span className="text-sm sm:text-base text-red-700 flex-1">{request.rejectionReason}</span>
                     </div>
                   )}
                 </div>
+
+                {/* Action Buttons */}
+                {(request.status === 'submitted' || request.status === 'under-review') && (
+                  <div className="flex flex-col sm:flex-row gap-2 pt-4 border-t border-gray-200">
+                    <Button
+                      onClick={() => handleApproveServiceRequest(request.id)}
+                      className="bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto text-sm sm:text-base"
+                    >
+                      <CheckCircle size={16} className="mr-2" />
+                      Approve
+                    </Button>
+                    <Button
+                      onClick={() => setShowRejectModal(request.id)}
+                      variant="outline"
+                      className="border-red-600 text-red-600 hover:bg-red-50 w-full sm:w-auto text-sm sm:text-base"
+                    >
+                      <XCircleIcon size={16} className="mr-2" />
+                      Reject
+                    </Button>
+                  </div>
+                )}
               </div>
             ))
           )}
