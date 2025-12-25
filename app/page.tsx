@@ -3,12 +3,13 @@
 import { useRouter } from 'next/navigation'
 import { useRef } from 'react'
 import Link from 'next/link'
-import { Search, MapPin, ChevronRight, Star, Clock } from 'lucide-react'
+import { Search, MapPin, ChevronRight, Star, Clock, Scale, Building2, FileBadge, Car, Receipt, Grid2X2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import Image from 'next/image'
 import Navbar from '@/components/navbar'
 import Footer from '@/components/footer'
+
 
 export default function HomePage() {
   const router = useRouter()
@@ -45,14 +46,15 @@ export default function HomePage() {
     }
   }
 
-  const categories = [
-    { name: 'AC Repair Services', icon: '🔧' },
-    { name: 'Appliance Repair', icon: '🔌' },
-    { name: 'Cleaning Solution', icon: '🧹' },
-    { name: 'Beauty & Wellness', icon: '💅' },
-    { name: 'Shifting', icon: '📦' },
-    { name: 'Health & Care', icon: '❤️' },
-  ]
+const categories = [
+  { name: 'Legal Services', icon: Scale },
+  { name: 'Business Registration', icon: Building2 },
+  { name: 'Business Licenses', icon: FileBadge },
+  { name: 'Vehicle Licenses', icon: Car },
+  { name: 'VAT/TAX', icon: Receipt },
+  { name: 'Explore more', icon: Grid2X2 },
+]
+
 
   const homeServices = [
     {
@@ -212,7 +214,12 @@ export default function HomePage() {
                   className="flex flex-col items-center gap-1 sm:gap-2 min-w-[80px] sm:min-w-[90px] md:min-w-[100px] flex-shrink-0 hover:opacity-75 transition-opacity cursor-pointer"
                   onClick={() => router.push('/all-services')}
                 >
-                  <div className="text-3xl sm:text-3xl md:text-4xl">{category.icon}</div>
+                  {/* <div className="text-3xl sm:text-3xl md:text-4xl">{category.icon}</div> */}
+
+                  <div className="flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gray-50 border-[3px] border-gray-500 hover:bg-orange-200 transition-colors">
+                    <category.icon className="w-6 h-6 sm:w-7 sm:h-7 text-[var(--color-primary)]" />
+                  </div>
+
                   <span className="text-[10px] sm:text-xs text-center font-medium leading-tight md:leading-normal">{category.name}</span>
                 </button>
               ))}
