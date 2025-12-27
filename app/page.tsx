@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useRef } from 'react'
 import Link from 'next/link'
-import { Search, MapPin, ChevronRight, Star, Clock, Scale, Building2, FileBadge, Car, Receipt, Grid2X2 } from 'lucide-react'
+import { Search, MapPin, ChevronRight, Star, Clock, Scale, Building2, FileBadge, Car, Receipt, Grid2X2, LandPlot } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import Image from 'next/image'
@@ -48,8 +48,9 @@ export default function HomePage() {
 
 const categories = [
   { name: 'Legal Services', icon: Scale },
-  { name: 'Business Registration', icon: Building2 },
-  { name: 'Business Licenses', icon: FileBadge },
+  { name: 'Business Affairs', icon: Building2 },
+  { name: 'Immigration Affairs', icon: FileBadge },
+  { name: 'Land / Properties', icon: LandPlot },
   { name: 'Vehicle Licenses', icon: Car },
   { name: 'VAT/TAX', icon: Receipt },
   { name: 'Explore more', icon: Grid2X2 },
