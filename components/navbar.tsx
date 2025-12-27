@@ -134,7 +134,7 @@ export default function Navbar() {
           <div className="flex-1 max-w-2xl mx-4">
             <div className="flex items-center gap-2 bg-white border border-gray-300 rounded-lg overflow-hidden focus-within:border-[var(--color-primary)] focus-within:ring-2 focus-within:ring-[var(--color-neutral)]">
               <Input
-                placeholder="Find your service here e.g. AC, Car, Facial ..."
+                placeholder="Find your consultant here, e.g., Legal, Business, TAX..."
                 className="flex-1 border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
               />
               <Button 
