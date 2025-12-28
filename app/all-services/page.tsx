@@ -549,7 +549,7 @@ export default function AllServicesPage() {
                           className="group cursor-pointer rounded-2xl overflow-hidden bg-white shadow-md hover:shadow-2xl transition-all duration-300 border border-gray-100"
                           onClick={() => router.push(`/services/${service.slug}`)}
                         >
-                          <div className="relative h-48 sm:h-56 overflow-hidden p-2 sm:p-3">
+                          <div className="relative h-44 sm:h-56 overflow-hidden p-1.5 sm:p-3">
                             <div className="relative h-full w-full rounded-xl overflow-hidden">
                               <Image
                                 src={service.image || "/placeholder.svg"}
@@ -559,8 +559,8 @@ export default function AllServicesPage() {
                               />
                             </div>
                           </div>
-                          <div className="p-4 sm:p-5">
-                            <div className="flex items-start justify-between mb-2 gap-2">
+                          <div className="p-3 sm:p-5">
+                            <div className="flex items-start justify-between mb-1.5 sm:mb-2 gap-1.5 sm:gap-2">
                               <h3 className="font-bold text-base sm:text-lg text-gray-900 leading-tight flex-1">{service.title}</h3>
                               {serviceWithDetails.rating && (
                                 <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg flex-shrink-0">
@@ -570,9 +570,9 @@ export default function AllServicesPage() {
                               )}
                             </div>
                             {serviceWithDetails.description && (
-                              <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4 line-clamp-2">{serviceWithDetails.description}</p>
+                              <p className="hidden sm:block text-xs sm:text-sm text-gray-600 mb-2 sm:mb-4 line-clamp-2">{serviceWithDetails.description}</p>
                             )}
-                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-3 sm:mb-4">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 sm:gap-0 mb-2.5 sm:mb-4">
                               {serviceWithDetails.deliveryTime && (
                                 <span className="text-xs sm:text-sm text-gray-600">
                                   <Clock size={14} className="inline mr-1 sm:w-4 sm:h-4" />
@@ -585,7 +585,7 @@ export default function AllServicesPage() {
                             </div>
                             <button 
                               onClick={(e) => handleBookNow(e, service.title)}
-                              className="w-full mt-4 sm:mt-6 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 sm:py-2.5 text-sm sm:text-base rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
+                              className="w-full mt-3 sm:mt-6 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 sm:py-2.5 text-sm sm:text-base rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
                             >
                               Book Now
                             </button>
@@ -640,7 +640,7 @@ export default function AllServicesPage() {
                               className="group cursor-pointer rounded-2xl overflow-hidden bg-white shadow-md hover:shadow-2xl transition-all duration-300 border border-gray-100"
                               onClick={() => router.push(`/services/${service.slug}`)}
                             >
-                              <div className="relative h-48 sm:h-56 overflow-hidden p-2 sm:p-3">
+                              <div className="relative h-44 sm:h-56 overflow-hidden p-1.5 sm:p-3">
                                 <div className="relative h-full w-full rounded-xl overflow-hidden">
                                   <Image
                                     src={service.image || "/placeholder.svg"}
@@ -650,8 +650,8 @@ export default function AllServicesPage() {
                                   />
                                 </div>
                               </div>
-                              <div className="p-4 sm:p-5">
-                                <div className="flex items-start justify-between mb-2 gap-2">
+                              <div className="p-3 sm:p-5">
+                                <div className="flex items-start justify-between mb-1.5 sm:mb-2 gap-1.5 sm:gap-2">
                                   <h3 className="font-bold text-base sm:text-lg text-gray-900 leading-tight flex-1">{service.title}</h3>
                                   {serviceWithDetails.rating && (
                                     <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg flex-shrink-0">
@@ -661,9 +661,9 @@ export default function AllServicesPage() {
                                   )}
                                 </div>
                                 {serviceWithDetails.description && (
-                                  <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4 line-clamp-2">{serviceWithDetails.description}</p>
+                                  <p className="hidden sm:block text-xs sm:text-sm text-gray-600 mb-2 sm:mb-4 line-clamp-2">{serviceWithDetails.description}</p>
                                 )}
-                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-3 sm:mb-4">
+                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 sm:gap-0 mb-2.5 sm:mb-4">
                                   {serviceWithDetails.deliveryTime && (
                                     <span className="text-xs sm:text-sm text-gray-600">
                                       <Clock size={14} className="inline mr-1 sm:w-4 sm:h-4" />
@@ -676,7 +676,7 @@ export default function AllServicesPage() {
                                 </div>
                                 <button 
                                   onClick={(e) => handleBookNow(e, service.title)}
-                                  className="w-full mt-4 sm:mt-6 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 sm:py-2.5 text-sm sm:text-base rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
+                                  className="w-full mt-3 sm:mt-6 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 sm:py-2.5 text-sm sm:text-base rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
                                 >
                                   Book Now
                                 </button>
