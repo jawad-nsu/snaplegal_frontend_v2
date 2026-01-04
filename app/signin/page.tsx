@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { signIn } from 'next-auth/react'
 import Navbar from '@/components/navbar'
 
 export default function SignInPage() {
@@ -34,6 +35,8 @@ export default function SignInPage() {
     password?: string
   }>({})
 
+  const [isLoading, setIsLoading] = useState(false)
+
   const handleUserChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setUserFormData(prev => ({ ...prev, [name]: value }))
@@ -50,7 +53,7 @@ export default function SignInPage() {
     }
   }
 
-  const handleUserSubmit = (e: React.FormEvent) => {
+  const handleUserSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const newErrors: typeof userErrors = {}
 
@@ -69,15 +72,29 @@ export default function SignInPage() {
       return
     }
 
-    // Handle sign in logic here
-    console.log('User sign in:', userFormData)
-    // Set auth token and redirect
-    localStorage.setItem('authToken', 'user-token')
-    localStorage.setItem('user', JSON.stringify({ type: 'user', username: userFormData.username }))
-    router.push('/')
+    setIsLoading(true)
+    try {
+      const result = await signIn('credentials', {
+        username: userFormData.username,
+        password: userFormData.password,
+        userType: 'user',
+        redirect: false,
+      })
+
+      if (result?.error) {
+        setUserErrors({ username: 'Invalid credentials' })
+      } else if (result?.ok) {
+        router.push('/')
+        router.refresh()
+      }
+    } catch (error) {
+      setUserErrors({ username: 'An error occurred. Please try again.' })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  const handlePartnerSubmit = (e: React.FormEvent) => {
+  const handlePartnerSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const newErrors: typeof partnerErrors = {}
 
@@ -96,17 +113,46 @@ export default function SignInPage() {
       return
     }
 
-    // Handle sign in logic here
-    console.log('Partner sign in:', partnerFormData)
-    // Set auth token and redirect
-    localStorage.setItem('authToken', 'partner-token')
-    localStorage.setItem('user', JSON.stringify({ type: 'partner', username: partnerFormData.username }))
-    router.push('/vendor')
+    setIsLoading(true)
+    try {
+      const result = await signIn('credentials', {
+        username: partnerFormData.username,
+        password: partnerFormData.password,
+        userType: 'partner',
+        redirect: false,
+      })
+
+      if (result?.error) {
+        setPartnerErrors({ username: 'Invalid credentials' })
+      } else if (result?.ok) {
+        router.push('/vendor')
+        router.refresh()
+      }
+    } catch (error) {
+      setPartnerErrors({ username: 'An error occurred. Please try again.' })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  const handleSocialSignin = (provider: 'google' | 'facebook' | 'instagram') => {
-    console.log(`Sign in with ${provider}`)
-    // Handle social signin logic here
+  const handleSocialSignin = async (provider: 'google' | 'facebook' | 'instagram') => {
+    setIsLoading(true)
+    try {
+      // Note: Instagram OAuth is not directly supported by NextAuth
+      // You may need to use a custom provider or handle it differently
+      if (provider === 'instagram') {
+        console.log('Instagram OAuth not yet implemented')
+        return
+      }
+      
+      await signIn(provider, {
+        callbackUrl: activeTab === 'partner' ? '/vendor' : '/',
+      })
+    } catch (error) {
+      console.error(`Error signing in with ${provider}:`, error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -274,9 +320,10 @@ export default function SignInPage() {
                 {/* Submit Button */}
                 <button
                   type="submit"
-                  className="w-full bg-[var(--color-primary)] text-white py-3 rounded-lg font-medium hover:opacity-90 transition-colors"
+                  disabled={isLoading}
+                  className="w-full bg-[var(--color-primary)] text-white py-3 rounded-lg font-medium hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Sign In
+                  {isLoading ? 'Signing in...' : 'Sign In'}
                 </button>
 
                 {/* Sign Up Link */}
@@ -418,9 +465,10 @@ export default function SignInPage() {
                 {/* Submit Button */}
                 <button
                   type="submit"
-                  className="w-full bg-[var(--color-primary)] text-white py-3 rounded-lg font-medium hover:opacity-90 transition-colors"
+                  disabled={isLoading}
+                  className="w-full bg-[var(--color-primary)] text-white py-3 rounded-lg font-medium hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Sign In
+                  {isLoading ? 'Signing in...' : 'Sign In'}
                 </button>
 
                 {/* Sign Up Link */}

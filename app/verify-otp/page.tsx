@@ -50,6 +50,43 @@ function VerifyOTPContent() {
     }
   }, [router])
 
+  // Send OTP when component mounts or verification method changes
+  useEffect(() => {
+    if (!userData) return
+
+    const identifier = 
+      verificationMethod === 'phone' || verificationMethod === 'whatsapp'
+        ? userData.phone
+        : userData.email
+
+    if (identifier) {
+      // Send OTP automatically
+      fetch('/api/auth/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          identifier,
+          method: verificationMethod,
+        }),
+      })
+        .then(async (response) => {
+          const data = await response.json()
+          // Auto-fill OTP if it's in the response
+          if (data.otp && typeof data.otp === 'string' && data.otp.length === 6) {
+            const otpArray = data.otp.split('')
+            setOtp(otpArray)
+            // Focus the last input
+            setTimeout(() => {
+              if (inputRefs.current[5]) {
+                inputRefs.current[5].focus()
+              }
+            }, 100)
+          }
+        })
+        .catch(console.error)
+    }
+  }, [userData, verificationMethod])
+
   useEffect(() => {
     // Auto-focus first input
     if (inputRefs.current[0]) {
@@ -118,55 +155,132 @@ function VerifyOTPContent() {
       return
     }
 
+    if (!userData) {
+      setError('User data not found. Please sign up again.')
+      return
+    }
+
     setIsLoading(true)
     setError('')
 
-    // Simulate API call
-    setTimeout(() => {
-      // For demo purposes, accept any 6-digit OTP starting with 1
-      if (otpString.startsWith('1')) {
-        setIsVerified(true)
-        // Set auth token and user data
-        if (userData) {
-          localStorage.setItem('authToken', `${userData.type}-token`)
-          localStorage.setItem('user', JSON.stringify({
+    try {
+      // Determine identifier based on verification method
+      const identifier = 
+        verificationMethod === 'phone' || verificationMethod === 'whatsapp'
+          ? userData.phone
+          : userData.email
+
+      if (!identifier) {
+        setError('Contact information not found')
+        setIsLoading(false)
+        return
+      }
+
+      // Call verify OTP API
+      const response = await fetch('/api/auth/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          identifier,
+          otp: otpString,
+          method: verificationMethod,
+          userData: {
             type: userData.type,
-            name: userData.name,
+            email: userData.email,
             phone: userData.phone,
-            email: userData.email
-          }))
-          // Clear pending verification
-          localStorage.removeItem('pendingVerification')
-          
-          // Redirect based on user type
-          setTimeout(() => {
-            if (userData.type === 'partner') {
-              router.push('/vendor')
-            } else {
-              router.push('/')
-            }
-          }, 1500)
-        }
+            name: userData.name,
+          },
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        setError(data.error || 'Invalid OTP. Please try again.')
+        setOtp(['', '', '', '', '', ''])
+        inputRefs.current[0]?.focus()
+        setIsLoading(false)
+        return
+      }
+
+      // OTP verified successfully
+      setIsVerified(true)
+
+      // Clear pending verification
+      localStorage.removeItem('pendingVerification')
+      
+      // After OTP verification, redirect to sign in page
+      // The user can now sign in with their password
+      // In a production app, you might want to automatically sign them in
+      // using a session token or one-time password
+      setTimeout(() => {
+        router.push(`/signin?verified=true&email=${encodeURIComponent(userData.email || '')}`)
+      }, 1500)
+    } catch (error) {
+      console.error('Verify OTP error:', error)
+      setError('An error occurred. Please try again.')
+      setOtp(['', '', '', '', '', ''])
+      inputRefs.current[0]?.focus()
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleResendOtp = async () => {
+    if (!userData) {
+      setError('User data not found')
+      return
+    }
+
+    const identifier = 
+      verificationMethod === 'phone' || verificationMethod === 'whatsapp'
+        ? userData.phone
+        : userData.email
+
+    if (!identifier) {
+      setError('Contact information not found')
+      return
+    }
+
+    try {
+      const response = await fetch('/api/auth/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          identifier,
+          method: verificationMethod,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        setError(data.error || 'Failed to resend OTP')
+        return
+      }
+
+      // Auto-fill OTP if it's in the response
+      if (data.otp && typeof data.otp === 'string' && data.otp.length === 6) {
+        const otpArray = data.otp.split('')
+        setOtp(otpArray)
+        // Focus the last input
+        setTimeout(() => {
+          if (inputRefs.current[5]) {
+            inputRefs.current[5].focus()
+          }
+        }, 100)
       } else {
-        setError('Invalid OTP. Please try again.')
         setOtp(['', '', '', '', '', ''])
         inputRefs.current[0]?.focus()
       }
-      setIsLoading(false)
-    }, 1000)
-  }
 
-  const handleResendOtp = () => {
-    setResendTimer(60)
-    setCanResend(false)
-    setOtp(['', '', '', '', '', ''])
-    setError('')
-    // Simulate resending OTP
-    const contact = verificationMethod === 'phone' || verificationMethod === 'whatsapp' 
-      ? userData?.phone 
-      : userData?.email
-    console.log(`Resending OTP via ${verificationMethod} to ${contact}`)
-    inputRefs.current[0]?.focus()
+      setResendTimer(60)
+      setCanResend(false)
+      setError('')
+    } catch (error) {
+      console.error('Resend OTP error:', error)
+      setError('Failed to resend OTP. Please try again.')
+    }
   }
 
   const handleChangeMethod = (method: 'phone' | 'email' | 'whatsapp') => {

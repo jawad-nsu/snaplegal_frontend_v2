@@ -117,7 +117,7 @@ export default function SignUpPage() {
     })
   }
 
-  const handleUserSubmit = (e: React.FormEvent) => {
+  const handleUserSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const newErrors: typeof userErrors = {}
 
@@ -154,20 +154,50 @@ export default function SignUpPage() {
       return
     }
 
-    // Store user data for verification
-    const verificationData = {
-      type: 'user' as const,
-      name: userFormData.name,
-      phone: userFormData.phone,
-      email: userFormData.email,
+    try {
+      // Call signup API
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: userFormData.name,
+          phone: userFormData.phone,
+          email: userFormData.email,
+          password: userFormData.password,
+          confirmPassword: userFormData.confirmPassword,
+          userType: 'user',
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        if (data.errors) {
+          setUserErrors(data.errors)
+        } else {
+          setUserErrors({ email: data.error || 'An error occurred' })
+        }
+        return
+      }
+
+      // Store user data for verification
+      const verificationData = {
+        type: 'user' as const,
+        name: data.user.name,
+        phone: data.user.phone,
+        email: data.user.email,
+        id: data.user.id,
+      }
+      localStorage.setItem('pendingVerification', JSON.stringify(verificationData))
+      
+      // Navigate to OTP verification page
+      router.push('/verify-otp')
+    } catch (error) {
+      setUserErrors({ email: 'An error occurred. Please try again.' })
     }
-    localStorage.setItem('pendingVerification', JSON.stringify(verificationData))
-    
-    // Navigate to OTP verification page
-    router.push('/verify-otp')
   }
 
-  const handlePartnerSubmit = (e: React.FormEvent) => {
+  const handlePartnerSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const newErrors: typeof partnerErrors = {}
 
@@ -216,17 +246,50 @@ export default function SignUpPage() {
       return
     }
 
-    // Store partner data for verification
-    const verificationData = {
-      type: 'partner' as const,
-      name: partnerFormData.name,
-      phone: partnerFormData.phone,
-      email: partnerFormData.email,
+    try {
+      // Call signup API
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: partnerFormData.name,
+          phone: partnerFormData.phone,
+          email: partnerFormData.email,
+          password: partnerFormData.password,
+          confirmPassword: partnerFormData.confirmPassword,
+          userType: 'partner',
+          address: partnerFormData.address,
+          district: partnerFormData.district,
+          serviceCategories: partnerFormData.serviceCategories,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        if (data.errors) {
+          setPartnerErrors(data.errors)
+        } else {
+          setPartnerErrors({ email: data.error || 'An error occurred' })
+        }
+        return
+      }
+
+      // Store partner data for verification
+      const verificationData = {
+        type: 'partner' as const,
+        name: data.user.name,
+        phone: data.user.phone,
+        email: data.user.email,
+        id: data.user.id,
+      }
+      localStorage.setItem('pendingVerification', JSON.stringify(verificationData))
+      
+      // Navigate to OTP verification page
+      router.push('/verify-otp')
+    } catch (error) {
+      setPartnerErrors({ email: 'An error occurred. Please try again.' })
     }
-    localStorage.setItem('pendingVerification', JSON.stringify(verificationData))
-    
-    // Navigate to OTP verification page
-    router.push('/verify-otp')
   }
 
   const handleSocialSignup = (provider: 'google' | 'facebook' | 'instagram') => {

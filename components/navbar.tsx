@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
+import { useSession, signOut } from 'next-auth/react'
 import { MapPin, Search, ShoppingCart, User, LayoutDashboard, Menu, X, Package, LogOut } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -11,33 +12,14 @@ export default function Navbar() {
   const router = useRouter()
   const pathname = usePathname()
   const profileDropdownRef = useRef<HTMLDivElement>(null)
+  const { data: session, status } = useSession()
   
-  // Check if user is authenticated (in production, this would come from auth context/provider)
-  // Initialize from localStorage if available (client-side only)
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('authToken')
-      const user = localStorage.getItem('user')
-      return !!(token || user)
-    }
-    return false
-  })
+  // Check if user is authenticated using NextAuth session
+  const isAuthenticated = !!session
+  const isLoading = status === 'loading'
 
-  // Check if user is vendor
-  const [isVendor, setIsVendor] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const user = localStorage.getItem('user')
-      if (user) {
-        try {
-          const userData = JSON.parse(user)
-          return userData.type === 'partner'
-        } catch {
-          return false
-        }
-      }
-    }
-    return false
-  })
+  // Check if user is vendor/partner
+  const isVendor = session?.user?.type === 'PARTNER'
 
   const [showProfileDropdown, setShowProfileDropdown] = useState(false)
   const [showMobileMenu, setShowMobileMenu] = useState(false)
@@ -186,15 +168,9 @@ export default function Navbar() {
                           </button>
                           <div className="border-t border-gray-200 my-1"></div>
                           <button
-                            onClick={() => {
-                              // Clear authentication data
-                              localStorage.removeItem('authToken')
-                              localStorage.removeItem('user')
-                              setIsAuthenticated(false)
-                              setIsVendor(false)
+                            onClick={async () => {
                               setShowProfileDropdown(false)
-                              // Redirect to home page
-                              router.push('/')
+                              await signOut({ redirect: true, callbackUrl: '/' })
                             }}
                             className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
                           >
@@ -224,15 +200,9 @@ export default function Navbar() {
                           </button>
                           <div className="border-t border-gray-200 my-1"></div>
                           <button
-                            onClick={() => {
-                              // Clear authentication data
-                              localStorage.removeItem('authToken')
-                              localStorage.removeItem('user')
-                              setIsAuthenticated(false)
-                              setIsVendor(false)
+                            onClick={async () => {
                               setShowProfileDropdown(false)
-                              // Redirect to home page
-                              router.push('/')
+                              await signOut({ redirect: true, callbackUrl: '/' })
                             }}
                             className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
                           >
@@ -349,15 +319,9 @@ export default function Navbar() {
                 )}
                 <div className="border-t border-gray-200 my-1"></div>
                 <button
-                  onClick={() => {
-                    // Clear authentication data
-                    localStorage.removeItem('authToken')
-                    localStorage.removeItem('user')
-                    setIsAuthenticated(false)
-                    setIsVendor(false)
+                  onClick={async () => {
                     setShowMobileMenu(false)
-                    // Redirect to home page
-                    router.push('/')
+                    await signOut({ redirect: true, callbackUrl: '/' })
                   }}
                   className="w-full flex items-center gap-3 px-4 py-3 text-left text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                 >

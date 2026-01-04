@@ -1,0 +1,33 @@
+import bcrypt from 'bcryptjs'
+
+/**
+ * Hash a password using bcrypt
+ */
+export async function hashPassword(password: string): Promise<string> {
+  const saltRounds = 12
+  return bcrypt.hash(password, saltRounds)
+}
+
+/**
+ * Verify a password against a hash
+ */
+export async function verifyPassword(
+  password: string,
+  hashedPassword: string
+): Promise<boolean> {
+  return bcrypt.compare(password, hashedPassword)
+}
+
+/**
+ * Validate password strength
+ */
+export function validatePassword(password: string): {
+  valid: boolean
+  message?: string
+} {
+  if (password.length < 6) {
+    return { valid: false, message: 'Password must be at least 6 characters' }
+  }
+  return { valid: true }
+}
+
