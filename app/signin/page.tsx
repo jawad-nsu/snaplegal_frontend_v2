@@ -83,13 +83,13 @@ export default function SignInPage() {
 
       if (result?.error) {
         setUserErrors({ username: 'Invalid credentials' })
+        setIsLoading(false)
       } else if (result?.ok) {
-        router.push('/')
-        router.refresh()
+        // Session created, now redirect
+        window.location.href = '/'
       }
     } catch (error) {
       setUserErrors({ username: 'An error occurred. Please try again.' })
-    } finally {
       setIsLoading(false)
     }
   }
@@ -124,9 +124,10 @@ export default function SignInPage() {
 
       if (result?.error) {
         setPartnerErrors({ username: 'Invalid credentials' })
+        setIsLoading(false)
       } else if (result?.ok) {
-        router.push('/vendor')
-        router.refresh()
+        // Session created, now redirect
+        window.location.href = '/vendor'
       }
     } catch (error) {
       setPartnerErrors({ username: 'An error occurred. Please try again.' })

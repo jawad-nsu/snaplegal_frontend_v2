@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { signIn } from '@/app/api/auth/[...nextauth]/route'
 import { prisma } from '@/lib/prisma'
 import { verifyPassword } from '@/lib/password'
 import { formatPhone } from '@/lib/auth'

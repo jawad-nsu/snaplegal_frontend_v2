@@ -1,17 +1,18 @@
-import NextAuth, { NextAuthConfig } from 'next-auth'
-import { PrismaAdapter } from '@auth/prisma-adapter'
-import Credentials from 'next-auth/providers/credentials'
-import Google from 'next-auth/providers/google'
-import Facebook from 'next-auth/providers/facebook'
+import NextAuth from 'next-auth'
+import { PrismaAdapter } from '@next-auth/prisma-adapter'
+import CredentialsProvider from 'next-auth/providers/credentials'
+import GoogleProvider from 'next-auth/providers/google'
+import FacebookProvider from 'next-auth/providers/facebook'
 import { prisma } from '@/lib/prisma'
 import { verifyPassword } from '@/lib/password'
 import { UserType } from '@prisma/client'
+import type { JWT } from 'next-auth/jwt'
+import type { Session, User } from 'next-auth'
 
-export const authConfig: NextAuthConfig = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  adapter: PrismaAdapter(prisma) as unknown as any,
+export const authOptions = {
+  adapter: PrismaAdapter(prisma),
   providers: [
-    Credentials({
+    CredentialsProvider({
       name: 'Credentials',
       credentials: {
         username: { label: 'Username', type: 'text' },
@@ -55,22 +56,26 @@ export const authConfig: NextAuthConfig = {
         }
       },
     }),
-    Google({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID || '',
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
     }),
-    Facebook({
-      clientId: process.env.FACEBOOK_CLIENT_ID,
-      clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
+    FacebookProvider({
+      clientId: process.env.FACEBOOK_CLIENT_ID || '',
+      clientSecret: process.env.FACEBOOK_CLIENT_SECRET || '',
     }),
   ],
   callbacks: {
-    async signIn() {
+    async signIn({ user, account }: { user: User; account: { provider?: string } | null }) {
       // For OAuth providers, we need to handle user type
       // This will be set during the signup flow
+      // Log for debugging
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[NextAuth] signIn callback:', { userId: user?.id, account: account?.provider })
+      }
       return true
     },
-    async jwt({ token, user, trigger, session: updateSession }) {
+    async jwt({ token, user, trigger, session: updateSession }: { token: JWT; user?: User; trigger?: string; session?: Partial<Session> }) {
       // When user first signs in, store all user data in token
       if (user) {
         token.id = user.id
@@ -136,7 +141,7 @@ export const authConfig: NextAuthConfig = {
       
       return token
     },
-    async session({ session, token }) {
+    async session({ session, token }: { session: Session; token: JWT }) {
       if (session.user && token.id) {
         // Use data from token (works on both edge and node runtime)
         session.user.id = token.id as string
@@ -147,7 +152,7 @@ export const authConfig: NextAuthConfig = {
       }
       return session
     },
-    async redirect({ url, baseUrl }) {
+    async redirect({ url, baseUrl }: { url: string; baseUrl: string }) {
       // Handle redirects based on user type
       // This will be handled in the sign-in/sign-up pages
       if (url.startsWith('/')) return `${baseUrl}${url}`
@@ -161,12 +166,23 @@ export const authConfig: NextAuthConfig = {
     error: '/signin',
   },
   session: {
-    strategy: 'jwt',
+    strategy: 'jwt' as const,
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET || 'fallback-secret-for-development-only',
 }
-export const { handlers, auth, signIn, signOut } = NextAuth(authConfig)
 
-export const { GET, POST } = handlers
+// For Next.js App Router - NextAuth v4 handler
+// Note: NextAuth v4 was designed for Pages Router, App Router support is limited
+// This is a compatibility layer
+const handler = NextAuth(authOptions)
 
+// Check if NEXTAUTH_SECRET is missing in production
+if (process.env.NODE_ENV === 'production' && !process.env.NEXTAUTH_SECRET) {
+  console.error('NEXTAUTH_SECRET is missing in production!')
+}
+
+// Export GET and POST handlers directly from NextAuth
+// NextAuth v4.24+ supports App Router by exporting handlers directly
+export const GET = handler
+export const POST = handler

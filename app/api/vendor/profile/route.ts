@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { auth } from '@/app/api/auth/[...nextauth]/route'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { UserType } from '@prisma/client'
 
 export async function GET(request: NextRequest) {
   try {
     // Get the current session
-    const session = await auth()
+    const session = await getServerSession(authOptions)
 
     if (!session?.user?.id) {
       return NextResponse.json(

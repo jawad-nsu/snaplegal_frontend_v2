@@ -37,11 +37,14 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(signInUrl)
   }
 
+  // Get user type as string for comparison
+  const userType = String(session.user.type)
+
   // Admin-only routes
   const adminRoutes = ['/admin']
   const isAdminRoute = adminRoutes.some(route => pathname.startsWith(route))
   
-  if (isAdminRoute && session.user.type !== 'ADMIN') {
+  if (isAdminRoute && userType !== 'ADMIN') {
     // Redirect non-admins away from admin routes
     return NextResponse.redirect(new URL('/', request.url))
   }
@@ -50,7 +53,7 @@ export async function middleware(request: NextRequest) {
   const partnerRoutes = ['/vendor']
   const isPartnerRoute = partnerRoutes.some(route => pathname.startsWith(route))
   
-  if (isPartnerRoute && session.user.type !== 'PARTNER') {
+  if (isPartnerRoute && userType !== 'PARTNER') {
     // Redirect non-partners away from partner routes
     return NextResponse.redirect(new URL('/', request.url))
   }
@@ -61,7 +64,7 @@ export async function middleware(request: NextRequest) {
   
   // Only redirect if user type is explicitly PARTNER
   // Allow access if type is USER or undefined/null (defaults to USER)
-  if (isUserRoute && session.user.type === 'PARTNER') {
+  if (isUserRoute && userType === 'PARTNER') {
     // Redirect partners away from user-only routes
     return NextResponse.redirect(new URL('/vendor', request.url))
   }
