@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, use } from 'react'
+import { useState, use, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Edit2, Phone, Mail, MapPin, MessageCircle, User, Briefcase, FileText, Tag, UserCircle, Calendar, CheckSquare, Plus, Trash2, Clock, CheckCircle, ChevronDown, ChevronUp, Save, X } from 'lucide-react'
+import { ArrowLeft, Edit2, Phone, Mail, MapPin, MessageCircle, User, Briefcase, FileText, Tag, UserCircle, Calendar, CheckSquare, Plus, Trash2, Clock, CheckCircle, ChevronDown, ChevronUp, Save, X, Loader2 } from 'lucide-react'
 import Navbar from '@/components/navbar'
 
 type LeadStage = 'New' | 'Qualified' | 'Proposal' | 'Closed'
@@ -51,142 +51,15 @@ interface Lead {
   createdAt: string
 }
 
-// Mock data - in a real app, this would come from an API
-const mockLeads: Record<string, Lead> = {
-  '1': {
-    id: '1',
-    clientName: 'Ahmed Rahman',
-    whatsapp: '+8801712345678',
-    mobile: '+8801712345678',
-    facebook: 'ahmed.rahman',
-    email: 'ahmed@example.com',
-    profession: 'Business Owner',
-    street: 'House 45, Road 12',
-    city: 'Gulshan',
-    thana: 'Gulshan',
-    district: 'Dhaka',
-    country: 'Bangladesh',
-    postalCode: '1212',
-    desiredService: 'AC Servicing',
-    initialDiscussion: 'Interested in monthly AC maintenance. Looking for a reliable service provider for regular maintenance of 3 AC units in office.',
-    stage: 'Proposal',
-    leadSource: 'Website',
-    leadSubSource: 'Google Ads',
-    leadOwner: 'John Doe',
-    comment: 'Follow up next week. Client is very interested and has budget approved. Schedule a site visit.',
-    createdAt: '2024-01-15',
-  },
-  '2': {
-    id: '2',
-    clientName: 'Fatima Khan',
-    whatsapp: '+8801723456789',
-    mobile: '+8801723456789',
-    email: 'fatima@example.com',
-    profession: 'Teacher',
-    street: 'Road 27, House 8',
-    city: 'Dhanmondi',
-    thana: 'Dhanmondi',
-    district: 'Dhaka',
-    country: 'Bangladesh',
-    postalCode: '1205',
-    desiredService: 'Home Cleaning',
-    initialDiscussion: 'Needs deep cleaning service for 4-bedroom house before Eid. Prefers weekend scheduling.',
-    stage: 'New',
-    leadSource: 'Social Media',
-    leadSubSource: 'Facebook Ads',
-    leadOwner: 'Jane Smith',
-    comment: 'Very interested. Waiting for quote approval.',
-    createdAt: '2024-01-16',
-  },
-  '3': {
-    id: '3',
-    clientName: 'Karim Uddin',
-    mobile: '+8801734567890',
-    email: 'karim@example.com',
-    profession: 'Engineer',
-    street: 'Road 11, House 23',
-    city: 'Banani',
-    thana: 'Banani',
-    district: 'Dhaka',
-    country: 'Bangladesh',
-    postalCode: '1213',
-    desiredService: 'Plumbing Services',
-    initialDiscussion: 'Urgent plumbing issue - water leakage in bathroom. Needs immediate attention.',
-    stage: 'New',
-    leadSource: 'Referral',
-    leadSubSource: 'Word of Mouth',
-    leadOwner: 'John Doe',
-    createdAt: '2024-01-17',
-  },
-  '4': {
-    id: '4',
-    clientName: 'Sadia Rahman',
-    whatsapp: '+8801745678901',
-    mobile: '+8801745678901',
-    email: 'sadia@example.com',
-    profession: 'Doctor',
-    street: 'Sector 7, Road 15',
-    city: 'Uttara',
-    thana: 'Uttara',
-    district: 'Dhaka',
-    country: 'Bangladesh',
-    postalCode: '1230',
-    desiredService: 'Beauty & Wellness',
-    initialDiscussion: 'Looking for spa services for monthly relaxation. Interested in package deals.',
-    stage: 'Qualified',
-    leadSource: 'Website',
-    leadSubSource: 'Instagram',
-    leadOwner: 'Jane Smith',
-    comment: 'Price negotiation in progress. Client wants 20% discount on annual package.',
-    createdAt: '2024-01-18',
-  },
-  '5': {
-    id: '5',
-    clientName: 'Hasan Ali',
-    mobile: '+8801756789012',
-    email: 'hasan@example.com',
-    profession: 'Student',
-    street: 'Block C, Road 5',
-    city: 'Mirpur',
-    thana: 'Mirpur',
-    district: 'Dhaka',
-    country: 'Bangladesh',
-    postalCode: '1216',
-    desiredService: 'Electrical Services',
-    initialDiscussion: 'Need electrical repair for home. Multiple outlets not working.',
-    stage: 'Closed',
-    closedReason: 'Won',
-    leadSource: 'Advertisement',
-    leadSubSource: 'Email Campaign',
-    leadOwner: 'John Doe',
-    comment: 'Converted to customer. Service completed successfully.',
-    createdAt: '2024-01-19',
-  },
-}
-
 export default function LeadDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter()
   const { id } = use(params)
-  const [lead, setLead] = useState<Lead | null>(mockLeads[id] || null)
+  const [lead, setLead] = useState<Lead | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   
   // Initialize tasks with default "Follow up call" task for new leads
-  const [tasks, setTasks] = useState<Task[]>(() => {
-    const currentLead = mockLeads[id] || null
-    if (currentLead) {
-      // Create default task for new lead
-      const defaultTask: Task = {
-        id: `task-${Date.now()}`,
-        subject: 'Follow up call',
-        description: '',
-        status: 'Not Started',
-        priority: 'Normal',
-        assignedTo: currentLead.leadOwner || 'Unassigned',
-        createdAt: new Date().toISOString().split('T')[0],
-      }
-      return [defaultTask]
-    }
-    return []
-  })
+  const [tasks, setTasks] = useState<Task[]>([])
   const [showTaskForm, setShowTaskForm] = useState(false)
   const [taskFilter, setTaskFilter] = useState<TaskStatus | 'All'>('All')
   const [newTask, setNewTask] = useState({
@@ -203,13 +76,100 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
   const [closedReasonText, setClosedReasonText] = useState('')
   const [closedReasonError, setClosedReasonError] = useState('')
 
-  if (!lead) {
+  // Fetch lead data from API
+  useEffect(() => {
+    const fetchLead = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        const response = await fetch(`/api/leads/${id}`)
+        const data = await response.json()
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to fetch lead')
+        }
+
+        if (data.success && data.lead) {
+          setLead(data.lead)
+          // Initialize tasks with default "Follow up call" task for new leads
+          if (data.lead.stage === 'New') {
+            const defaultTask: Task = {
+              id: `task-${Date.now()}`,
+              subject: 'Follow up call',
+              description: '',
+              status: 'Not Started',
+              priority: 'Normal',
+              assignedTo: data.lead.leadOwner || 'Unassigned',
+              createdAt: new Date().toISOString().split('T')[0],
+            }
+            setTasks([defaultTask])
+          }
+        } else {
+          throw new Error('Lead not found')
+        }
+      } catch (err) {
+        console.error('Error fetching lead:', err)
+        setError(err instanceof Error ? err.message : 'Failed to fetch lead')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchLead()
+  }, [id])
+
+  // Update lead in backend when stage changes
+  const updateLeadInBackend = async (updatedLead: Lead) => {
+    try {
+      const response = await fetch(`/api/leads/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedLead),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to update lead')
+      }
+
+      if (data.success && data.lead) {
+        setLead(data.lead)
+      }
+    } catch (err) {
+      console.error('Error updating lead:', err)
+      alert(err instanceof Error ? err.message : 'Failed to update lead')
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="container mx-auto px-4 py-8 max-w-7xl">
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin text-[var(--color-primary)]" />
+            <span className="ml-3 text-gray-600">Loading lead...</span>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (error || !lead) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Navbar />
         <div className="container mx-auto px-4 py-8 max-w-7xl">
           <div className="text-center py-12">
-            <h1 className="text-2xl font-bold mb-4">Lead Not Found</h1>
+            <h1 className="text-2xl font-bold mb-4">
+              {error ? 'Error Loading Lead' : 'Lead Not Found'}
+            </h1>
+            {error && (
+              <p className="text-red-600 mb-4">{error}</p>
+            )}
             <Link href="/leads" className="text-[var(--color-primary)] hover:underline">
               Back to Leads
             </Link>
@@ -382,8 +342,9 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
       setShowClosedReasonModal(true)
     } else {
       if (confirm(`Are you sure you want to change the lead stage to "${newStage}"?`)) {
-        setLead({ ...lead, stage: newStage, closedReason: undefined })
-        // In a real app, you would make an API call here to update the lead
+        const updatedLead = { ...lead, stage: newStage, closedReason: undefined, closedReasonText: undefined }
+        setLead(updatedLead)
+        updateLeadInBackend(updatedLead)
       }
     }
   }
@@ -394,11 +355,12 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
     // If it's Won, proceed directly. If it's Lost or Lost (Unqualified), show the text field requirement
     if (reason === 'Won') {
       if (confirm(`Are you sure you want to close this lead as "Closed Won"?`)) {
-        setLead({ ...lead, stage: 'Closed', closedReason: reason, closedReasonText: undefined })
+        const updatedLead = { ...lead, stage: 'Closed', closedReason: reason, closedReasonText: undefined }
+        setLead(updatedLead)
+        updateLeadInBackend(updatedLead)
         setShowClosedReasonModal(false)
         setSelectedClosedReason(null)
         setClosedReasonText('')
-        // In a real app, you would make an API call here to update the lead
       }
     }
   }
@@ -413,17 +375,18 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
     }
 
     if (confirm(`Are you sure you want to close this lead as "${selectedClosedReason === 'Won' ? 'Closed Won' : selectedClosedReason}"?`)) {
-      setLead({ 
+      const updatedLead = { 
         ...lead, 
         stage: 'Closed', 
         closedReason: selectedClosedReason,
         closedReasonText: (selectedClosedReason === 'Lost' || selectedClosedReason === 'Lost (Unqualified)') ? closedReasonText.trim() : undefined
-      })
+      }
+      setLead(updatedLead)
+      updateLeadInBackend(updatedLead)
       setShowClosedReasonModal(false)
       setSelectedClosedReason(null)
       setClosedReasonText('')
       setClosedReasonError('')
-      // In a real app, you would make an API call here to update the lead
     }
   }
 
@@ -473,7 +436,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
                 Home
               </Link>
               <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)]"></span>
-              <Link href="/leads" className="hover:text-[var(--color-primary)]">
+              <Link href="/admin" className="hover:text-[var(--color-primary)]">
                 Leads
               </Link>
               <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)]"></span>
@@ -488,7 +451,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
                 <span className="hidden sm:inline">Edit</span>
               </button>
               <button
-                onClick={() => router.push('/leads')}
+                onClick={() => router.push('/admin')}
                 className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-sm"
               >
                 <ArrowLeft className="w-4 h-4" />

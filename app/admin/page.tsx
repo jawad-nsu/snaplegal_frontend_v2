@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { 
   Users, 
   Store, 
@@ -42,6 +42,7 @@ interface User {
   name: string
   email: string
   phone: string
+  type?: string
   createdAt: string
   status: 'active' | 'inactive'
 }
@@ -208,12 +209,68 @@ export default function AdminDashboard() {
   const [vendorDistrictFilter, setVendorDistrictFilter] = useState<string>('all')
   const [vendorCategoryFilter, setVendorCategoryFilter] = useState<string>('all')
 
-  // Mock data - In production, this would come from API
-  const [users, setUsers] = useState<User[]>([
-    { id: '1', name: 'John Doe', email: 'john@example.com', phone: '+8801712345678', createdAt: '2024-01-15', status: 'active' },
-    { id: '2', name: 'Jane Smith', email: 'jane@example.com', phone: '+8801712345679', createdAt: '2024-01-20', status: 'active' },
-    { id: '3', name: 'Bob Johnson', email: 'bob@example.com', phone: '+8801712345680', createdAt: '2024-02-01', status: 'inactive' },
-  ])
+  // Users - Fetched from API
+  const [users, setUsers] = useState<User[]>([])
+  const [usersLoading, setUsersLoading] = useState(true)
+
+  // Employees - Fetched from API
+  const [employees, setEmployees] = useState<Array<{ id: string; name: string; email: string }>>([])
+  const [employeesLoading, setEmployeesLoading] = useState(true)
+
+  // Fetch employees from API
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        setEmployeesLoading(true)
+        const response = await fetch('/api/employees')
+        const data = await response.json()
+        
+        if (data.success && data.employees) {
+          setEmployees(data.employees)
+        } else {
+          console.error('Failed to fetch employees:', data.error)
+          // Fallback to empty array on error
+          setEmployees([])
+        }
+      } catch (error) {
+        console.error('Error fetching employees:', error)
+        setEmployees([])
+      } finally {
+        setEmployeesLoading(false)
+      }
+    }
+
+    fetchEmployees()
+  }, [])
+
+  // Fetch users from API
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        setUsersLoading(true)
+        const params = new URLSearchParams()
+        if (userSearch) params.append('search', userSearch)
+        if (userStatusFilter !== 'all') params.append('status', userStatusFilter)
+
+        const response = await fetch(`/api/users?${params.toString()}`)
+        const data = await response.json()
+        
+        if (data.success && data.users) {
+          setUsers(data.users)
+        } else {
+          console.error('Failed to fetch users:', data.error)
+          setUsers([])
+        }
+      } catch (error) {
+        console.error('Error fetching users:', error)
+        setUsers([])
+      } finally {
+        setUsersLoading(false)
+      }
+    }
+
+    fetchUsers()
+  }, [userSearch, userStatusFilter])
 
   const [vendors, setVendors] = useState<Vendor[]>([
     { id: '1', name: 'AC Repair Pro', email: 'acpro@example.com', phone: '+8801712345681', address: '123 Main St', district: 'Dhaka', serviceCategories: ['AC Repair Services'], createdAt: '2024-01-10', status: 'active' },
@@ -470,126 +527,186 @@ export default function AdminDashboard() {
   const [selectedOrderForAssignment, setSelectedOrderForAssignment] = useState<Order | null>(null)
   const [selectedVendorId, setSelectedVendorId] = useState<string>('')
 
-  // Leads data
-  const [leads, setLeads] = useState<Lead[]>([
-    {
-      id: '1',
-      clientName: 'Ahmed Rahman',
-      whatsapp: '+8801712345678',
-      mobile: '+8801712345678',
-      facebook: 'ahmed.rahman',
-      email: 'ahmed@example.com',
-      profession: 'Business Owner',
-      street: 'House 45, Road 12',
-      city: 'Gulshan',
-      thana: 'Gulshan',
-      district: 'Dhaka',
-      country: 'Bangladesh',
-      postalCode: '1212',
-      desiredService: 'AC Servicing',
-      initialDiscussion: 'Interested in monthly AC maintenance',
-      stage: 'Proposal',
-      leadSource: 'Website',
-      leadSubSource: 'Google Ads',
-      leadOwner: 'John Doe',
-      comment: 'Follow up next week',
-      createdAt: '2024-01-15',
-    },
-    {
-      id: '2',
-      clientName: 'Fatima Khan',
-      whatsapp: '+8801723456789',
-      mobile: '+8801723456789',
-      email: 'fatima@example.com',
-      profession: 'Teacher',
-      street: 'Road 27, House 8',
-      city: 'Dhanmondi',
-      thana: 'Dhanmondi',
-      district: 'Dhaka',
-      country: 'Bangladesh',
-      postalCode: '1205',
-      desiredService: 'Home Cleaning',
-      initialDiscussion: 'Needs deep cleaning service',
-      stage: 'New',
-      leadSource: 'Social Media',
-      leadSubSource: 'Facebook Ads',
-      leadOwner: 'Jane Smith',
-      comment: 'Very interested',
-      createdAt: '2024-01-16',
-    },
-    {
-      id: '3',
-      clientName: 'Karim Uddin',
-      mobile: '+8801734567890',
-      email: 'karim@example.com',
-      profession: 'Engineer',
-      street: 'Road 11, House 23',
-      city: 'Banani',
-      thana: 'Banani',
-      district: 'Dhaka',
-      country: 'Bangladesh',
-      postalCode: '1213',
-      desiredService: 'Plumbing Services',
-      initialDiscussion: 'Urgent plumbing issue',
-      stage: 'New',
-      leadSource: 'Referral',
-      leadSubSource: 'Word of Mouth',
-      leadOwner: 'John Doe',
-      createdAt: '2024-01-17',
-    },
-    {
-      id: '4',
-      clientName: 'Sadia Rahman',
-      whatsapp: '+8801745678901',
-      mobile: '+8801745678901',
-      email: 'sadia@example.com',
-      profession: 'Doctor',
-      street: 'Sector 7, Road 15',
-      city: 'Uttara',
-      thana: 'Uttara',
-      district: 'Dhaka',
-      country: 'Bangladesh',
-      postalCode: '1230',
-      desiredService: 'Beauty & Wellness',
-      initialDiscussion: 'Looking for spa services',
-      stage: 'Qualified',
-      leadSource: 'Website',
-      leadSubSource: 'Instagram',
-      leadOwner: 'Jane Smith',
-      comment: 'Price negotiation in progress',
-      createdAt: '2024-01-18',
-    },
-    {
-      id: '5',
-      clientName: 'Hasan Ali',
-      mobile: '+8801756789012',
-      email: 'hasan@example.com',
-      profession: 'Student',
-      street: 'Block C, Road 5',
-      city: 'Mirpur',
-      thana: 'Mirpur',
-      district: 'Dhaka',
-      country: 'Bangladesh',
-      postalCode: '1216',
-      desiredService: 'Electrical Services',
-      initialDiscussion: 'Need electrical repair',
-      stage: 'Closed',
-      closedReason: 'Won',
-      leadSource: 'Advertisement',
-      leadSubSource: 'Email Campaign',
-      leadOwner: 'John Doe',
-      comment: 'Converted to customer',
-      createdAt: '2024-01-19',
-    },
-  ])
-
-  // Leads filters
+  // Leads filters - Declare before useEffect
   const [leadSearch, setLeadSearch] = useState('')
   const [leadStageFilter, setLeadStageFilter] = useState<string>('all')
   const [leadSourceFilter, setLeadSourceFilter] = useState<string>('all')
   const [leadOwnerFilter, setLeadOwnerFilter] = useState<string>('all')
   const [leadCurrentPage, setLeadCurrentPage] = useState(1)
   const [leadItemsPerPage] = useState(10)
+
+  // Leads data - Fetched from API
+  const [leads, setLeads] = useState<Lead[]>([])
+  const [leadsLoading, setLeadsLoading] = useState(true)
+
+  // Fetch leads from API
+  useEffect(() => {
+    const fetchLeads = async () => {
+      try {
+        setLeadsLoading(true)
+        const params = new URLSearchParams()
+        if (leadSearch) params.append('search', leadSearch)
+        if (leadStageFilter !== 'all') params.append('stage', leadStageFilter)
+        if (leadSourceFilter !== 'all') params.append('source', leadSourceFilter)
+        if (leadOwnerFilter !== 'all') params.append('owner', leadOwnerFilter)
+
+        const response = await fetch(`/api/leads?${params.toString()}`)
+        const data = await response.json()
+        
+        if (data.success && data.leads) {
+          setLeads(data.leads)
+        } else {
+          console.error('Failed to fetch leads:', data.error)
+          setLeads([])
+        }
+      } catch (error) {
+        console.error('Error fetching leads:', error)
+        setLeads([])
+      } finally {
+        setLeadsLoading(false)
+      }
+    }
+
+    fetchLeads()
+  }, [leadSearch, leadStageFilter, leadSourceFilter, leadOwnerFilter])
+  const [isLeadModalOpen, setIsLeadModalOpen] = useState(false)
+  const [editingLead, setEditingLead] = useState<Lead | null>(null)
+  const [leadForm, setLeadForm] = useState<Partial<Lead>>({
+    clientName: '',
+    whatsapp: '',
+    mobile: '',
+    facebook: '',
+    email: '',
+    profession: '',
+    street: '',
+    city: '',
+    thana: '',
+    district: '',
+    country: 'Bangladesh',
+    postalCode: '',
+    desiredService: '',
+    initialDiscussion: '',
+    stage: 'New',
+    leadSource: 'Website',
+    leadSubSource: undefined,
+    leadOwner: '',
+    comment: '',
+  })
+
+  // Lead CRUD handlers
+  const handleAddLead = () => {
+    setEditingLead(null)
+    setLeadForm({
+      clientName: '',
+      whatsapp: '',
+      mobile: '',
+      facebook: '',
+      email: '',
+      profession: '',
+      street: '',
+      city: '',
+      thana: '',
+      district: '',
+      country: 'Bangladesh',
+      postalCode: '',
+      desiredService: '',
+      initialDiscussion: '',
+      stage: 'New',
+      leadSource: 'Website',
+      leadSubSource: undefined,
+      leadOwner: '',
+      comment: '',
+    })
+    setIsLeadModalOpen(true)
+  }
+
+  const handleEditLead = (lead: Lead) => {
+    setEditingLead(lead)
+    setLeadForm({
+      clientName: lead.clientName,
+      whatsapp: lead.whatsapp || '',
+      mobile: lead.mobile || '',
+      facebook: lead.facebook || '',
+      email: lead.email || '',
+      profession: lead.profession || '',
+      street: lead.street || '',
+      city: lead.city || '',
+      thana: lead.thana || '',
+      district: lead.district || '',
+      country: lead.country || 'Bangladesh',
+      postalCode: lead.postalCode || '',
+      desiredService: lead.desiredService || '',
+      initialDiscussion: lead.initialDiscussion || '',
+      stage: lead.stage,
+      closedReason: lead.closedReason,
+      closedReasonText: lead.closedReasonText || '',
+      leadSource: lead.leadSource,
+      leadSubSource: lead.leadSubSource,
+      leadOwner: lead.leadOwner,
+      comment: lead.comment || '',
+    })
+    setIsLeadModalOpen(true)
+  }
+
+  const handleDeleteLead = async (id: string) => {
+    if (confirm('Are you sure you want to delete this lead?')) {
+      try {
+        const response = await fetch(`/api/leads/${id}`, {
+          method: 'DELETE',
+        })
+
+        const data = await response.json()
+
+        if (data.success) {
+          // Remove from local state
+          setLeads(leads.filter(l => l.id !== id))
+        } else {
+          alert(`Failed to delete lead: ${data.error}`)
+        }
+      } catch (error) {
+        console.error('Error deleting lead:', error)
+        alert('Failed to delete lead. Please try again.')
+      }
+    }
+  }
+
+  const handleSaveLead = async () => {
+    if (!leadForm.clientName || !leadForm.leadSource || !leadForm.leadOwner) {
+      alert('Please fill in all required fields (Client Name, Lead Source, Lead Owner)')
+      return
+    }
+
+    try {
+      const url = editingLead ? `/api/leads/${editingLead.id}` : '/api/leads'
+      const method = editingLead ? 'PUT' : 'POST'
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(leadForm),
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        // Refresh leads list
+        const refreshResponse = await fetch('/api/leads')
+        const refreshData = await refreshResponse.json()
+        if (refreshData.success) {
+          setLeads(refreshData.leads)
+        }
+        setIsLeadModalOpen(false)
+        setEditingLead(null)
+      } else {
+        alert(`Failed to save lead: ${data.error}`)
+      }
+    } catch (error) {
+      console.error('Error saving lead:', error)
+      alert('Failed to save lead. Please try again.')
+    }
+  }
 
   const handleAssignVendor = (order: Order) => {
     setSelectedOrderForAssignment(order)
@@ -619,7 +736,7 @@ export default function AdminDashboard() {
   }
 
   // Form states
-  const [userForm, setUserForm] = useState<{ name: string; email: string; phone: string; status: 'active' | 'inactive' }>({ name: '', email: '', phone: '', status: 'active' })
+  const [userForm, setUserForm] = useState<{ name: string; email: string; phone: string; type: string; status: 'active' | 'inactive' }>({ name: '', email: '', phone: '', type: 'USER', status: 'active' })
   const [vendorForm, setVendorForm] = useState<{ name: string; email: string; phone: string; address: string; district: string; serviceCategories: string[]; status: 'active' | 'inactive' | 'pending' }>({ name: '', email: '', phone: '', address: '', district: '', serviceCategories: [], status: 'active' })
   const [categoryForm, setCategoryForm] = useState({ title: '', icon: '' })
   const [subCategoryForm, setSubCategoryForm] = useState({ title: '', icon: '', categoryId: '' })
@@ -630,7 +747,7 @@ export default function AdminDashboard() {
     setIsModalOpen(true)
     // Reset forms based on active tab
     if (activeTab === 'users') {
-      setUserForm({ name: '', email: '', phone: '', status: 'active' })
+      setUserForm({ name: '', email: '', phone: '', type: 'USER', status: 'active' })
     } else if (activeTab === 'vendors') {
       setVendorForm({ name: '', email: '', phone: '', address: '', district: '', serviceCategories: [], status: 'active' })
     } else if (activeTab === 'categories') {
@@ -647,7 +764,7 @@ export default function AdminDashboard() {
     setIsModalOpen(true)
     if (activeTab === 'users' && 'name' in item && 'email' in item) {
       const userItem = item as User
-      setUserForm({ name: userItem.name, email: userItem.email, phone: userItem.phone, status: userItem.status })
+      setUserForm({ name: userItem.name, email: userItem.email, phone: userItem.phone, type: userItem.type || 'USER', status: userItem.status })
     } else if (activeTab === 'vendors' && 'address' in item) {
       const vendorItem = item as Vendor
       setVendorForm({ name: vendorItem.name, email: vendorItem.email, phone: vendorItem.phone, address: vendorItem.address, district: vendorItem.district, serviceCategories: vendorItem.serviceCategories, status: vendorItem.status })
@@ -663,10 +780,34 @@ export default function AdminDashboard() {
     }
   }
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this item?')) {
       if (activeTab === 'users') {
-        setUsers(users.filter(u => u.id !== id))
+        try {
+          const response = await fetch(`/api/users/${id}`, {
+            method: 'DELETE',
+          })
+
+          const data = await response.json()
+
+          if (data.success) {
+            // Refresh users list with current filters
+            const params = new URLSearchParams()
+            if (userSearch) params.append('search', userSearch)
+            if (userStatusFilter !== 'all') params.append('status', userStatusFilter)
+            
+            const refreshResponse = await fetch(`/api/users?${params.toString()}`)
+            const refreshData = await refreshResponse.json()
+            if (refreshData.success) {
+              setUsers(refreshData.users)
+            }
+          } else {
+            alert(`Failed to delete user: ${data.error}`)
+          }
+        } catch (error) {
+          console.error('Error deleting user:', error)
+          alert('Failed to delete user. Please try again.')
+        }
       } else if (activeTab === 'vendors') {
         setVendors(vendors.filter(v => v.id !== id))
       } else if (activeTab === 'categories') {
@@ -679,12 +820,47 @@ export default function AdminDashboard() {
     }
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (activeTab === 'users') {
-      if (editingItem) {
-        setUsers(users.map(u => u.id === editingItem.id ? { ...u, ...userForm } : u))
-      } else {
-        setUsers([...users, { id: Date.now().toString(), ...userForm, createdAt: new Date().toISOString().split('T')[0] }])
+      try {
+        const url = editingItem ? `/api/users/${editingItem.id}` : '/api/users'
+        const method = editingItem ? 'PUT' : 'POST'
+
+        const response = await fetch(url, {
+          method,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: userForm.name,
+            email: userForm.email,
+            phone: userForm.phone,
+            type: userForm.type,
+            status: userForm.status,
+          }),
+        })
+
+        const data = await response.json()
+
+        if (data.success) {
+          // Refresh users list with current filters
+          const params = new URLSearchParams()
+          if (userSearch) params.append('search', userSearch)
+          if (userStatusFilter !== 'all') params.append('status', userStatusFilter)
+          
+          const refreshResponse = await fetch(`/api/users?${params.toString()}`)
+          const refreshData = await refreshResponse.json()
+          if (refreshData.success) {
+            setUsers(refreshData.users)
+          }
+          setIsModalOpen(false)
+          setEditingItem(null)
+        } else {
+          alert(`Failed to save user: ${data.error}`)
+        }
+      } catch (error) {
+        console.error('Error saving user:', error)
+        alert('Failed to save user. Please try again.')
       }
     } else if (activeTab === 'vendors') {
       if (editingItem) {
@@ -692,27 +868,33 @@ export default function AdminDashboard() {
       } else {
         setVendors([...vendors, { id: Date.now().toString(), ...vendorForm, createdAt: new Date().toISOString().split('T')[0] }])
       }
+      setIsModalOpen(false)
+      setEditingItem(null)
     } else if (activeTab === 'categories') {
       if (editingItem) {
         setCategories(categories.map(c => c.id === editingItem.id ? { ...c, ...categoryForm } : c))
       } else {
         setCategories([...categories, { id: Date.now().toString(), ...categoryForm, createdAt: new Date().toISOString().split('T')[0] }])
       }
+      setIsModalOpen(false)
+      setEditingItem(null)
     } else if (activeTab === 'subcategories') {
       if (editingItem) {
         setSubCategories(subCategories.map(s => s.id === editingItem.id ? { ...s, ...subCategoryForm } : s))
       } else {
         setSubCategories([...subCategories, { id: Date.now().toString(), ...subCategoryForm, createdAt: new Date().toISOString().split('T')[0] }])
       }
+      setIsModalOpen(false)
+      setEditingItem(null)
     } else if (activeTab === 'services') {
       if (editingItem) {
         setServices(services.map(s => s.id === editingItem.id ? { ...s, ...serviceForm } : s))
       } else {
         setServices([...services, { id: Date.now().toString(), ...serviceForm, createdAt: new Date().toISOString().split('T')[0] }])
       }
+      setIsModalOpen(false)
+      setEditingItem(null)
     }
-    setIsModalOpen(false)
-    setEditingItem(null)
   }
 
   // Filter users
@@ -835,19 +1017,23 @@ export default function AdminDashboard() {
             <span className="hidden sm:inline">Bulk Upload</span>
             <span className="sm:hidden">Upload</span>
           </Link>
-          <Link
-            href="/leads/new"
-            className="flex items-center justify-center gap-2 bg-[var(--color-primary)] text-white px-3 sm:px-4 py-2 rounded-lg hover:opacity-90 transition-colors text-sm sm:text-base"
+          <Button
+            onClick={handleAddLead}
+            className="bg-[var(--color-primary)] hover:opacity-90 text-white w-full sm:w-auto text-sm sm:text-base"
           >
-            <Plus size={16} className="sm:w-5 sm:h-5" />
+            <Plus size={16} className="sm:w-5 sm:h-5 mr-2" />
             New Lead
-          </Link>
+          </Button>
         </div>
       </div>
 
       {/* Table */}
       <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-        {paginatedLeads.length === 0 ? (
+        {leadsLoading ? (
+          <div className="text-center py-8 sm:py-12 px-4">
+            <p className="text-sm sm:text-base text-gray-600">Loading leads...</p>
+          </div>
+        ) : paginatedLeads.length === 0 ? (
           <div className="text-center py-8 sm:py-12 px-4">
             <p className="text-sm sm:text-base text-gray-600">No leads found matching the filters</p>
           </div>
@@ -867,6 +1053,7 @@ export default function AdminDashboard() {
                     <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Stage</th>
                     <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Lead Source</th>
                     <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Lead Owner</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -892,6 +1079,16 @@ export default function AdminDashboard() {
                       </td>
                       <td className="py-4 px-4 text-sm text-gray-700">{lead.leadSource}</td>
                       <td className="py-4 px-4 text-sm text-gray-700">{lead.leadOwner}</td>
+                      <td className="py-4 px-4 text-sm font-medium">
+                        <div className="flex items-center gap-2">
+                          <button onClick={() => handleEditLead(lead)} className="text-indigo-600 hover:text-indigo-900">
+                            <Edit size={16} />
+                          </button>
+                          <button onClick={() => handleDeleteLead(lead.id)} className="text-red-600 hover:text-red-900">
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -952,6 +1149,22 @@ export default function AdminDashboard() {
                       <span className="text-gray-500">Owner:</span>
                       <span className="text-gray-900">{lead.leadOwner}</span>
                     </div>
+                  </div>
+                  <div className="flex items-center gap-3 pt-2 border-t border-gray-100">
+                    <button 
+                      onClick={() => handleEditLead(lead)} 
+                      className="flex items-center gap-1.5 text-indigo-600 hover:text-indigo-900 text-sm font-medium"
+                    >
+                      <Edit size={16} />
+                      Edit
+                    </button>
+                    <button 
+                      onClick={() => handleDeleteLead(lead.id)} 
+                      className="flex items-center gap-1.5 text-red-600 hover:text-red-900 text-sm font-medium"
+                    >
+                      <Trash2 size={16} />
+                      Delete
+                    </button>
                   </div>
                 </div>
               ))}
@@ -1055,7 +1268,11 @@ export default function AdminDashboard() {
 
       {/* Table */}
       <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-        {filteredUsers.length === 0 ? (
+        {usersLoading ? (
+          <div className="text-center py-8 sm:py-12 px-4">
+            <p className="text-sm sm:text-base text-gray-600">Loading users...</p>
+          </div>
+        ) : filteredUsers.length === 0 ? (
           <div className="text-center py-8 sm:py-12 px-4">
             <p className="text-sm sm:text-base text-gray-600">No users found matching the filters</p>
           </div>
@@ -1069,6 +1286,7 @@ export default function AdminDashboard() {
                     <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Name</th>
                     <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Email</th>
                     <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Phone</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Type</th>
                     <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Status</th>
                     <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Created</th>
                     <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Actions</th>
@@ -1080,6 +1298,16 @@ export default function AdminDashboard() {
                       <td className="py-4 px-4 text-sm font-medium text-gray-900">{user.name}</td>
                       <td className="py-4 px-4 text-sm text-gray-500">{user.email}</td>
                       <td className="py-4 px-4 text-sm text-gray-500">{user.phone}</td>
+                      <td className="py-4 px-4">
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          user.type === 'ADMIN' ? 'bg-purple-100 text-purple-800' :
+                          user.type === 'EMPLOYEE' ? 'bg-blue-100 text-blue-800' :
+                          user.type === 'PARTNER' ? 'bg-orange-100 text-orange-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {user.type || 'USER'}
+                        </span>
+                      </td>
                       <td className="py-4 px-4">
                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${user.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                           {user.status}
@@ -1120,6 +1348,17 @@ export default function AdminDashboard() {
                     <div className="flex justify-between">
                       <span className="text-gray-500">Phone:</span>
                       <span className="text-gray-900">{user.phone}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Type:</span>
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                        user.type === 'ADMIN' ? 'bg-purple-100 text-purple-700' :
+                        user.type === 'EMPLOYEE' ? 'bg-blue-100 text-blue-700' :
+                        user.type === 'PARTNER' ? 'bg-orange-100 text-orange-700' :
+                        'bg-gray-100 text-gray-700'
+                      }`}>
+                        {user.type || 'USER'}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-500">Created:</span>
@@ -2188,6 +2427,287 @@ export default function AdminDashboard() {
     </div>
   )
 
+  const renderLeadModal = () => {
+    if (!isLeadModalOpen) return null
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="flex items-center justify-between p-4 md:p-6 border-b sticky top-0 bg-white z-10">
+            <h2 className="text-lg md:text-xl font-bold">
+              {editingLead ? 'Edit Lead' : 'Add New Lead'}
+            </h2>
+            <button onClick={() => {
+              setIsLeadModalOpen(false)
+              setEditingLead(null)
+            }} className="text-gray-400 hover:text-gray-600">
+              <X size={24} />
+            </button>
+          </div>
+          <div className="p-4 md:p-6 space-y-4">
+            {/* Client Information */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Client Name *</label>
+                <Input 
+                  value={leadForm.clientName || ''} 
+                  onChange={(e) => setLeadForm({ ...leadForm, clientName: e.target.value })} 
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Profession</label>
+                <Input 
+                  value={leadForm.profession || ''} 
+                  onChange={(e) => setLeadForm({ ...leadForm, profession: e.target.value })} 
+                />
+              </div>
+            </div>
+
+            {/* Contact Information */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp</label>
+                <Input 
+                  value={leadForm.whatsapp || ''} 
+                  onChange={(e) => setLeadForm({ ...leadForm, whatsapp: e.target.value })} 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Mobile</label>
+                <Input 
+                  value={leadForm.mobile || ''} 
+                  onChange={(e) => setLeadForm({ ...leadForm, mobile: e.target.value })} 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <Input 
+                  type="email"
+                  value={leadForm.email || ''} 
+                  onChange={(e) => setLeadForm({ ...leadForm, email: e.target.value })} 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Facebook</label>
+                <Input 
+                  value={leadForm.facebook || ''} 
+                  onChange={(e) => setLeadForm({ ...leadForm, facebook: e.target.value })} 
+                />
+              </div>
+            </div>
+
+            {/* Address Information */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Street</label>
+                <Input 
+                  value={leadForm.street || ''} 
+                  onChange={(e) => setLeadForm({ ...leadForm, street: e.target.value })} 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+                <Input 
+                  value={leadForm.city || ''} 
+                  onChange={(e) => setLeadForm({ ...leadForm, city: e.target.value })} 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Thana</label>
+                <Input 
+                  value={leadForm.thana || ''} 
+                  onChange={(e) => setLeadForm({ ...leadForm, thana: e.target.value })} 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">District</label>
+                <Input 
+                  value={leadForm.district || ''} 
+                  onChange={(e) => setLeadForm({ ...leadForm, district: e.target.value })} 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
+                <Input 
+                  value={leadForm.country || 'Bangladesh'} 
+                  onChange={(e) => setLeadForm({ ...leadForm, country: e.target.value })} 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Postal Code</label>
+                <Input 
+                  value={leadForm.postalCode || ''} 
+                  onChange={(e) => setLeadForm({ ...leadForm, postalCode: e.target.value })} 
+                />
+              </div>
+            </div>
+
+            {/* Service Information */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Desired Service</label>
+                <Input 
+                  value={leadForm.desiredService || ''} 
+                  onChange={(e) => setLeadForm({ ...leadForm, desiredService: e.target.value })} 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Initial Discussion</label>
+                <textarea 
+                  value={leadForm.initialDiscussion || ''} 
+                  onChange={(e) => setLeadForm({ ...leadForm, initialDiscussion: e.target.value })} 
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                  rows={3}
+                />
+              </div>
+            </div>
+
+            {/* Lead Management */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Stage *</label>
+                <select 
+                  value={leadForm.stage || 'New'} 
+                  onChange={(e) => setLeadForm({ ...leadForm, stage: e.target.value as LeadStage })} 
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                >
+                  <option value="New">New</option>
+                  <option value="Qualified">Qualified</option>
+                  <option value="Proposal">Proposal</option>
+                  <option value="Closed">Closed</option>
+                </select>
+              </div>
+              {leadForm.stage === 'Closed' && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Closed Reason</label>
+                    <select 
+                      value={leadForm.closedReason || ''} 
+                      onChange={(e) => setLeadForm({ ...leadForm, closedReason: e.target.value as ClosedReason | undefined })} 
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    >
+                      <option value="">Select reason...</option>
+                      <option value="Won">Won</option>
+                      <option value="Lost">Lost</option>
+                      <option value="Lost (Unqualified)">Lost (Unqualified)</option>
+                    </select>
+                  </div>
+                  {leadForm.closedReason && (
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Closed Reason Text</label>
+                      <textarea 
+                        value={leadForm.closedReasonText || ''} 
+                        onChange={(e) => setLeadForm({ ...leadForm, closedReasonText: e.target.value })} 
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                        rows={2}
+                      />
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+
+            {/* Lead Source */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Lead Source *</label>
+                <select 
+                  value={leadForm.leadSource || 'Website'} 
+                  onChange={(e) => setLeadForm({ ...leadForm, leadSource: e.target.value as LeadSource })} 
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  required
+                >
+                  <option value="Website">Website</option>
+                  <option value="Referral">Referral</option>
+                  <option value="Social Media">Social Media</option>
+                  <option value="Advertisement">Advertisement</option>
+                  <option value="Cold Call">Cold Call</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Lead Sub-Source</label>
+                <select 
+                  value={leadForm.leadSubSource || ''} 
+                  onChange={(e) => setLeadForm({ ...leadForm, leadSubSource: e.target.value as LeadSubSource | undefined })} 
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                >
+                  <option value="">Select sub-source...</option>
+                  <option value="Facebook Ads">Facebook Ads</option>
+                  <option value="Google Ads">Google Ads</option>
+                  <option value="LinkedIn">LinkedIn</option>
+                  <option value="Instagram">Instagram</option>
+                  <option value="Word of Mouth">Word of Mouth</option>
+                  <option value="Email Campaign">Email Campaign</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Lead Owner */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Lead Owner *</label>
+              <select 
+                value={leadForm.leadOwner || ''} 
+                onChange={(e) => setLeadForm({ ...leadForm, leadOwner: e.target.value })} 
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                required
+                disabled={employeesLoading}
+              >
+                <option value="">
+                  {employeesLoading ? 'Loading employees...' : 'Select employee...'}
+                </option>
+                {employees.length === 0 && !employeesLoading && (
+                  <option value="" disabled>No employees found</option>
+                )}
+                {employees.map(employee => (
+                  <option key={employee.id} value={employee.name}>
+                    {employee.name} {employee.email ? `(${employee.email})` : ''}
+                  </option>
+                ))}
+              </select>
+              {employees.length === 0 && !employeesLoading && (
+                <p className="text-xs text-gray-500 mt-1">No employees or admins available. Please add users with type ADMIN or EMPLOYEE.</p>
+              )}
+            </div>
+
+            {/* Comment */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Comment</label>
+              <textarea 
+                value={leadForm.comment || ''} 
+                onChange={(e) => setLeadForm({ ...leadForm, comment: e.target.value })} 
+                className="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                rows={3}
+                placeholder="Additional notes or comments..."
+              />
+            </div>
+          </div>
+          <div className="flex flex-col sm:flex-row justify-end gap-3 p-4 md:p-6 border-t sticky bottom-0 bg-white">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setIsLeadModalOpen(false)
+                setEditingLead(null)
+              }} 
+              className="w-full sm:w-auto"
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSaveLead} 
+              className="bg-[var(--color-primary)] hover:opacity-90 w-full sm:w-auto"
+            >
+              <Save size={16} className="mr-2" />
+              Save Lead
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   const renderModal = () => {
     if (!isModalOpen) return null
 
@@ -2216,6 +2736,15 @@ export default function AdminDashboard() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
                   <Input value={userForm.phone} onChange={(e) => setUserForm({ ...userForm, phone: e.target.value })} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                  <select value={userForm.type} onChange={(e) => setUserForm({ ...userForm, type: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md">
+                    <option value="USER">USER</option>
+                    <option value="PARTNER">PARTNER</option>
+                    <option value="ADMIN">ADMIN</option>
+                    <option value="EMPLOYEE">EMPLOYEE</option>
+                  </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
@@ -2510,6 +3039,7 @@ export default function AdminDashboard() {
       </div>
 
       {renderModal()}
+      {renderLeadModal()}
     </div>
   )
 }

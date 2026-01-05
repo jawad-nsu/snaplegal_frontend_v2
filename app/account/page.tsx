@@ -2,10 +2,12 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useSession } from 'next-auth/react'
 import { User, Edit2, Home, FileText, Trash2, Upload, X, Tag, Gift, Sparkles, TrendingUp } from 'lucide-react'
 import Navbar from '@/components/navbar'
 
 export default function AccountPage() {
+  const { data: session, status } = useSession()
   const [activeTab, setActiveTab] = useState('my-account')
   const [documents, setDocuments] = useState([
     { id: '1', name: 'National ID', fileName: 'national-id.pdf', uploadDate: '2024-01-15' },
@@ -77,10 +79,11 @@ export default function AccountPage() {
     { id: 'my-promotions', label: 'My Promotions' },
   ]
 
+  // Get user info from session
   const userInfo = {
-    name: 'Sharif H',
-    phone: '+8801773241632',
-    email: 'N/A',
+    name: session?.user?.name || 'N/A',
+    phone: (session?.user as any)?.phone || 'N/A',
+    email: session?.user?.email || 'N/A',
     dateOfBirth: 'N/A',
     gender: 'N/A',
   }
@@ -236,6 +239,21 @@ export default function AccountPage() {
             {activeTab === 'my-account' && (
               <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 lg:p-8">
                 <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 sm:mb-8">Personal Info</h1>
+                
+                {status === 'loading' && (
+                  <div className="text-center py-8">
+                    <p className="text-gray-600">Loading user information...</p>
+                  </div>
+                )}
+                
+                {status === 'unauthenticated' && (
+                  <div className="text-center py-8">
+                    <p className="text-gray-600">Please sign in to view your account information.</p>
+                  </div>
+                )}
+                
+                {status === 'authenticated' && (
+                  <>
 
                 {/* Profile Picture */}
                 <div className="flex justify-center mb-6 sm:mb-8">
@@ -272,6 +290,8 @@ export default function AccountPage() {
                     <span className="text-gray-900 font-semibold text-sm sm:text-base break-words">{userInfo.gender}</span>
                   </div>
                 </div>
+                  </>
+                )}
               </div>
             )}
 

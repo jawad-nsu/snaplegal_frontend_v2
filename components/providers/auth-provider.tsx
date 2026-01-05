@@ -19,6 +19,7 @@ interface AuthContextType {
   isAuthenticated: boolean
   isPartner: boolean
   isUser: boolean
+  isAdmin: boolean
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -27,6 +28,7 @@ const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
   isPartner: false,
   isUser: false,
+  isAdmin: false,
 })
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -47,6 +49,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isAuthenticated = !!user
   const isPartner = user?.type === 'PARTNER'
   const isUser = user?.type === 'USER'
+  const isAdmin = user?.type === 'ADMIN'
 
   return (
     <AuthContext.Provider
@@ -56,6 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAuthenticated,
         isPartner,
         isUser,
+        isAdmin,
       }}
     >
       {children}

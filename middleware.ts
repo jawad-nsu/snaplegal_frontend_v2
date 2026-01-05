@@ -37,8 +37,17 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(signInUrl)
   }
 
+  // Admin-only routes
+  const adminRoutes = ['/admin']
+  const isAdminRoute = adminRoutes.some(route => pathname.startsWith(route))
+  
+  if (isAdminRoute && session.user?.type !== 'ADMIN') {
+    // Redirect non-admins away from admin routes
+    return NextResponse.redirect(new URL('/', request.url))
+  }
+
   // Partner-only routes
-  const partnerRoutes = ['/vendor', '/admin']
+  const partnerRoutes = ['/vendor']
   const isPartnerRoute = partnerRoutes.some(route => pathname.startsWith(route))
   
   if (isPartnerRoute && session.user?.type !== 'PARTNER') {
@@ -50,7 +59,9 @@ export async function middleware(request: NextRequest) {
   const userRoutes = ['/account']
   const isUserRoute = userRoutes.some(route => pathname.startsWith(route))
   
-  if (isUserRoute && session.user?.type !== 'USER') {
+  // Only redirect if user type is explicitly PARTNER
+  // Allow access if type is USER or undefined/null (defaults to USER)
+  if (isUserRoute && session.user?.type === 'PARTNER') {
     // Redirect partners away from user-only routes
     return NextResponse.redirect(new URL('/vendor', request.url))
   }

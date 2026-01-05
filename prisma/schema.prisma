@@ -13,23 +13,63 @@ datasource db {
 enum UserType {
   USER
   PARTNER
+  ADMIN
+  EMPLOYEE
+}
+
+enum UserStatus {
+  active
+  inactive
+}
+
+enum LeadStage {
+  New
+  Qualified
+  Proposal
+  Closed
+}
+
+enum ClosedReason {
+  Won
+  Lost
+  Lost_Unqualified
+}
+
+enum LeadSource {
+  Website
+  Referral
+  Social_Media
+  Advertisement
+  Cold_Call
+  Other
+}
+
+enum LeadSubSource {
+  Facebook_Ads
+  Google_Ads
+  LinkedIn
+  Instagram
+  Word_of_Mouth
+  Email_Campaign
+  Other
 }
 
 model User {
-  id            String    @id @default(uuid())
+  id            String      @id @default(uuid())
   name          String?
-  email         String?   @unique
+  email         String?     @unique
   emailVerified DateTime?
-  phone         String?   @unique
+  phone         String?     @unique
   phoneVerified DateTime?
   password      String?
-  type          UserType  @default(USER)
+  type          UserType    @default(USER)
+  status        UserStatus  @default(active)
   image         String?
   address       String?
   district      String?
   serviceCategories String[] @default([])
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
   accounts      Account[]
   sessions      Session[]
 
@@ -72,4 +112,33 @@ model VerificationToken {
 
   @@unique([identifier, token])
   @@map("verification_tokens")
+}
+
+model Lead {
+  id                String        @id @default(uuid())
+  clientName        String
+  whatsapp          String?
+  mobile            String?
+  facebook          String?
+  email             String?
+  profession        String?
+  street            String?
+  city              String?
+  thana             String?
+  district          String?
+  country           String?       @default("Bangladesh")
+  postalCode        String?
+  desiredService    String?
+  initialDiscussion String?
+  stage             LeadStage     @default(New)
+  closedReason      ClosedReason?
+  closedReasonText  String?
+  leadSource        LeadSource
+  leadSubSource     LeadSubSource?
+  leadOwner         String
+  comment           String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  @@map("leads")
 }

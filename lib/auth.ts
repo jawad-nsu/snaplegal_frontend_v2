@@ -4,7 +4,9 @@ import { UserType } from '@prisma/client'
  * Get redirect path based on user type
  */
 export function getRedirectPath(userType: UserType): string {
-  return userType === 'PARTNER' ? '/vendor' : '/'
+  if (userType === 'ADMIN') return '/admin'
+  if (userType === 'PARTNER') return '/vendor'
+  return '/'
 }
 
 /**
