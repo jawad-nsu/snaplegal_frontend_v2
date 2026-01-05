@@ -34,8 +34,6 @@ import { Input } from '@/components/ui/input'
 import Image from 'next/image'
 import Navbar from '@/components/navbar'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-
 // Types
 interface User {
   id: string
@@ -61,17 +59,34 @@ interface Vendor {
 
 interface ServiceCategory {
   id: string
+  serialNumber?: number | null
   title: string
   icon: string
+  status: 'active' | 'inactive'
+  lastModifiedBy?: {
+    id: string
+    name: string | null
+    email: string | null
+  } | null
   createdAt: string
+  updatedAt: string
 }
 
 interface SubCategory {
   id: string
+  serialNumber?: number | null
   title: string
   icon: string
   categoryId: string
+  categoryTitle?: string
+  status: 'active' | 'inactive'
+  lastModifiedBy?: {
+    id: string
+    name: string | null
+    email: string | null
+  } | null
   createdAt: string
+  updatedAt: string
 }
 
 interface Service {
@@ -193,8 +208,49 @@ interface Lead {
 
 type TabType = 'leads' | 'users' | 'vendors' | 'categories' | 'subcategories' | 'services' | 'service-requests' | 'chats' | 'orders'
 
+// Helper function to sort categories: first by serialNumber (ascending), then by updatedAt (descending) for those without serial numbers
+const sortCategories = (categoriesToSort: ServiceCategory[]): ServiceCategory[] => {
+  return [...categoriesToSort].sort((a, b) => {
+    // If both have serial numbers, sort by serial number
+    if (a.serialNumber !== null && a.serialNumber !== undefined && 
+        b.serialNumber !== null && b.serialNumber !== undefined) {
+      return a.serialNumber - b.serialNumber
+    }
+    // If only a has serial number, a comes first
+    if (a.serialNumber !== null && a.serialNumber !== undefined) {
+      return -1
+    }
+    // If only b has serial number, b comes first
+    if (b.serialNumber !== null && b.serialNumber !== undefined) {
+      return 1
+    }
+    // If neither has serial number, sort by updatedAt (descending - most recent first)
+    return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+  })
+}
+
+// Helper function to sort subcategories: first by serialNumber (ascending), then by updatedAt (descending) for those without serial numbers
+const sortSubCategories = (subCategoriesToSort: SubCategory[]): SubCategory[] => {
+  return [...subCategoriesToSort].sort((a, b) => {
+    // If both have serial numbers, sort by serial number
+    if (a.serialNumber !== null && a.serialNumber !== undefined && 
+        b.serialNumber !== null && b.serialNumber !== undefined) {
+      return a.serialNumber - b.serialNumber
+    }
+    // If only a has serial number, a comes first
+    if (a.serialNumber !== null && a.serialNumber !== undefined) {
+      return -1
+    }
+    // If only b has serial number, b comes first
+    if (b.serialNumber !== null && b.serialNumber !== undefined) {
+      return 1
+    }
+    // If neither has serial number, sort by updatedAt (descending - most recent first)
+    return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+  })
+}
+
 export default function AdminDashboard() {
-  const router = useRouter()
   const [activeTab, setActiveTab] = useState<TabType>('leads')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<User | Vendor | ServiceCategory | SubCategory | Service | null>(null)
@@ -278,19 +334,63 @@ export default function AdminDashboard() {
     { id: '3', name: 'Plumbing Experts', email: 'plumbing@example.com', phone: '+8801712345683', address: '789 Oak Rd', district: 'Sylhet', serviceCategories: ['Home Repair'], createdAt: '2024-01-18', status: 'pending' },
   ])
 
-  const [categories, setCategories] = useState<ServiceCategory[]>([
-    { id: '1', title: 'AC Repair Services', icon: '🔧', createdAt: '2024-01-01' },
-    { id: '2', title: 'Appliance Repair', icon: '🔌', createdAt: '2024-01-01' },
-    { id: '3', title: 'Cleaning Solution', icon: '🧹', createdAt: '2024-01-01' },
-    { id: '4', title: 'Beauty & Wellness', icon: '💅', createdAt: '2024-01-01' },
-    { id: '5', title: 'Shifting & Moving', icon: '📦', createdAt: '2024-01-01' },
-    { id: '6', title: 'Home Repair', icon: '🏠', createdAt: '2024-01-01' },
-  ])
+  // Categories - Fetched from API
+  const [categories, setCategories] = useState<ServiceCategory[]>([])
+  const [categoriesLoading, setCategoriesLoading] = useState(true)
 
-  const [subCategories, setSubCategories] = useState<SubCategory[]>([
-    { id: '1', title: 'Fridge Repair', icon: '🧊', categoryId: '2', createdAt: '2024-01-02' },
-    { id: '2', title: 'Microwave Repair', icon: '🍽️', categoryId: '2', createdAt: '2024-01-02' },
-  ])
+  // Fetch categories from API
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setCategoriesLoading(true)
+        const response = await fetch('/api/categories')
+        const data = await response.json()
+        
+        if (data.success && data.categories) {
+          setCategories(sortCategories(data.categories))
+        } else {
+          console.error('Failed to fetch categories:', data.error)
+          setCategories([])
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error)
+        setCategories([])
+      } finally {
+        setCategoriesLoading(false)
+      }
+    }
+
+    fetchCategories()
+  }, [])
+
+  // SubCategories - Fetched from API
+  const [subCategories, setSubCategories] = useState<SubCategory[]>([])
+  const [subCategoriesLoading, setSubCategoriesLoading] = useState(true)
+
+  // Fetch subcategories from API
+  useEffect(() => {
+    const fetchSubCategories = async () => {
+      try {
+        setSubCategoriesLoading(true)
+        const response = await fetch('/api/subcategories')
+        const data = await response.json()
+        
+        if (data.success && data.subcategories) {
+          setSubCategories(sortSubCategories(data.subcategories))
+        } else {
+          console.error('Failed to fetch subcategories:', data.error)
+          setSubCategories([])
+        }
+      } catch (error) {
+        console.error('Error fetching subcategories:', error)
+        setSubCategories([])
+      } finally {
+        setSubCategoriesLoading(false)
+      }
+    }
+
+    fetchSubCategories()
+  }, [])
 
   const [services, setServices] = useState<Service[]>([
     { id: '1', title: 'AC Servicing', slug: 'ac-servicing', image: '/plumbing.jpg', rating: '4.9', description: 'Professional AC servicing and maintenance', deliveryTime: '2-3 hours', startingPrice: '৳800', categoryId: '1', createdAt: '2024-01-05' },
@@ -738,8 +838,19 @@ export default function AdminDashboard() {
   // Form states
   const [userForm, setUserForm] = useState<{ name: string; email: string; phone: string; type: string; status: 'active' | 'inactive' }>({ name: '', email: '', phone: '', type: 'USER', status: 'active' })
   const [vendorForm, setVendorForm] = useState<{ name: string; email: string; phone: string; address: string; district: string; serviceCategories: string[]; status: 'active' | 'inactive' | 'pending' }>({ name: '', email: '', phone: '', address: '', district: '', serviceCategories: [], status: 'active' })
-  const [categoryForm, setCategoryForm] = useState({ title: '', icon: '' })
-  const [subCategoryForm, setSubCategoryForm] = useState({ title: '', icon: '', categoryId: '' })
+  const [categoryForm, setCategoryForm] = useState({ 
+    title: '', 
+    icon: '', 
+    serialNumber: '', 
+    status: 'active' as 'active' | 'inactive'
+  })
+  const [subCategoryForm, setSubCategoryForm] = useState({ 
+    title: '', 
+    icon: '', 
+    categoryId: '',
+    serialNumber: '',
+    status: 'active' as 'active' | 'inactive'
+  })
   const [serviceForm, setServiceForm] = useState({ title: '', slug: '', image: '', rating: '', description: '', deliveryTime: '', startingPrice: '', categoryId: '', subCategoryId: '' })
 
   const handleAdd = () => {
@@ -751,9 +862,9 @@ export default function AdminDashboard() {
     } else if (activeTab === 'vendors') {
       setVendorForm({ name: '', email: '', phone: '', address: '', district: '', serviceCategories: [], status: 'active' })
     } else if (activeTab === 'categories') {
-      setCategoryForm({ title: '', icon: '' })
+      setCategoryForm({ title: '', icon: '', serialNumber: '', status: 'active' })
     } else if (activeTab === 'subcategories') {
-      setSubCategoryForm({ title: '', icon: '', categoryId: '' })
+      setSubCategoryForm({ title: '', icon: '', categoryId: '', serialNumber: '', status: 'active' })
     } else if (activeTab === 'services') {
       setServiceForm({ title: '', slug: '', image: '', rating: '', description: '', deliveryTime: '', startingPrice: '', categoryId: '', subCategoryId: '' })
     }
@@ -770,10 +881,21 @@ export default function AdminDashboard() {
       setVendorForm({ name: vendorItem.name, email: vendorItem.email, phone: vendorItem.phone, address: vendorItem.address, district: vendorItem.district, serviceCategories: vendorItem.serviceCategories, status: vendorItem.status })
     } else if (activeTab === 'categories' && 'title' in item && !('categoryId' in item)) {
       const categoryItem = item as ServiceCategory
-      setCategoryForm({ title: categoryItem.title, icon: categoryItem.icon })
+      setCategoryForm({ 
+        title: categoryItem.title, 
+        icon: categoryItem.icon,
+        serialNumber: categoryItem.serialNumber?.toString() || '',
+        status: categoryItem.status || 'active'
+      })
     } else if (activeTab === 'subcategories' && 'categoryId' in item) {
       const subCategoryItem = item as SubCategory
-      setSubCategoryForm({ title: subCategoryItem.title, icon: subCategoryItem.icon, categoryId: subCategoryItem.categoryId })
+      setSubCategoryForm({ 
+        title: subCategoryItem.title, 
+        icon: subCategoryItem.icon, 
+        categoryId: subCategoryItem.categoryId,
+        serialNumber: subCategoryItem.serialNumber?.toString() || '',
+        status: subCategoryItem.status || 'active'
+      })
     } else if (activeTab === 'services' && 'slug' in item) {
       const serviceItem = item as Service
       setServiceForm({ title: serviceItem.title, slug: serviceItem.slug, image: serviceItem.image, rating: serviceItem.rating, description: serviceItem.description, deliveryTime: serviceItem.deliveryTime, startingPrice: serviceItem.startingPrice, categoryId: serviceItem.categoryId, subCategoryId: serviceItem.subCategoryId || '' })
@@ -812,9 +934,49 @@ export default function AdminDashboard() {
       } else if (activeTab === 'vendors') {
         setVendors(vendors.filter(v => v.id !== id))
       } else if (activeTab === 'categories') {
-        setCategories(categories.filter(c => c.id !== id))
+        try {
+          const response = await fetch(`/api/categories/${id}`, {
+            method: 'DELETE',
+          })
+
+          const data = await response.json()
+
+          if (data.success) {
+            // Refresh categories list
+            const refreshResponse = await fetch('/api/categories')
+            const refreshData = await refreshResponse.json()
+            if (refreshData.success) {
+              setCategories(sortCategories(refreshData.categories))
+            }
+          } else {
+            alert(`Failed to delete category: ${data.error}`)
+          }
+        } catch (error) {
+          console.error('Error deleting category:', error)
+          alert('Failed to delete category. Please try again.')
+        }
       } else if (activeTab === 'subcategories') {
-        setSubCategories(subCategories.filter(s => s.id !== id))
+        try {
+          const response = await fetch(`/api/subcategories/${id}`, {
+            method: 'DELETE',
+          })
+
+          const data = await response.json()
+
+          if (data.success) {
+            // Refresh subcategories list
+            const refreshResponse = await fetch('/api/subcategories')
+            const refreshData = await refreshResponse.json()
+            if (refreshData.success) {
+              setSubCategories(sortSubCategories(refreshData.subcategories))
+            }
+          } else {
+            alert(`Failed to delete subcategory: ${data.error}`)
+          }
+        } catch (error) {
+          console.error('Error deleting subcategory:', error)
+          alert('Failed to delete subcategory. Please try again.')
+        }
       } else if (activeTab === 'services') {
         setServices(services.filter(s => s.id !== id))
       }
@@ -872,22 +1034,99 @@ export default function AdminDashboard() {
       }
       setIsModalOpen(false)
       setEditingItem(null)
-    } else if (activeTab === 'categories') {
-      if (editingItem) {
-        setCategories(categories.map(c => c.id === editingItem.id ? { ...c, ...categoryForm } : c))
-      } else {
-        setCategories([...categories, { id: Date.now().toString(), ...categoryForm, createdAt: new Date().toISOString().split('T')[0] }])
-      }
-      setIsModalOpen(false)
-      setEditingItem(null)
+      } else if (activeTab === 'categories') {
+        try {
+          const url = editingItem ? `/api/categories/${editingItem.id}` : '/api/categories'
+          const method = editingItem ? 'PUT' : 'POST'
+
+          const response = await fetch(url, {
+            method,
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              title: categoryForm.title,
+              icon: categoryForm.icon,
+              serialNumber: categoryForm.serialNumber ? Number(categoryForm.serialNumber) : null,
+              status: categoryForm.status,
+            }),
+          })
+
+          const data = await response.json()
+
+          if (!response.ok) {
+            const errorMsg = data.error || data.message || 'Unknown error'
+            const details = data.details ? ` (${data.details})` : ''
+            alert(`Failed to save category: ${errorMsg}${details}`)
+            return
+          }
+
+          if (data.success) {
+            // Refresh categories list
+            const refreshResponse = await fetch('/api/categories')
+            const refreshData = await refreshResponse.json()
+            if (refreshData.success) {
+              setCategories(sortCategories(refreshData.categories))
+            }
+            setIsModalOpen(false)
+            setEditingItem(null)
+          } else {
+            const errorMsg = data.error || data.message || 'Unknown error'
+            const details = data.details ? ` (${data.details})` : ''
+            alert(`Failed to save category: ${errorMsg}${details}`)
+          }
+        } catch (error) {
+          console.error('Error saving category:', error)
+          const errorMsg = error instanceof Error ? error.message : 'Network error or server unavailable'
+          alert(`Failed to save category: ${errorMsg}`)
+        }
     } else if (activeTab === 'subcategories') {
-      if (editingItem) {
-        setSubCategories(subCategories.map(s => s.id === editingItem.id ? { ...s, ...subCategoryForm } : s))
-      } else {
-        setSubCategories([...subCategories, { id: Date.now().toString(), ...subCategoryForm, createdAt: new Date().toISOString().split('T')[0] }])
+      try {
+        const url = editingItem ? `/api/subcategories/${editingItem.id}` : '/api/subcategories'
+        const method = editingItem ? 'PUT' : 'POST'
+
+        const response = await fetch(url, {
+          method,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title: subCategoryForm.title,
+            icon: subCategoryForm.icon,
+            categoryId: subCategoryForm.categoryId,
+            serialNumber: subCategoryForm.serialNumber ? Number(subCategoryForm.serialNumber) : null,
+            status: subCategoryForm.status,
+          }),
+        })
+
+        const data = await response.json()
+
+        if (!response.ok) {
+          const errorMsg = data.error || data.message || 'Unknown error'
+          const details = data.details ? ` (${data.details})` : ''
+          alert(`Failed to save subcategory: ${errorMsg}${details}`)
+          return
+        }
+
+        if (data.success) {
+          // Refresh subcategories list
+          const refreshResponse = await fetch('/api/subcategories')
+          const refreshData = await refreshResponse.json()
+          if (refreshData.success) {
+            setSubCategories(sortSubCategories(refreshData.subcategories))
+          }
+          setIsModalOpen(false)
+          setEditingItem(null)
+        } else {
+          const errorMsg = data.error || data.message || 'Unknown error'
+          const details = data.details ? ` (${data.details})` : ''
+          alert(`Failed to save subcategory: ${errorMsg}${details}`)
+        }
+      } catch (error) {
+        console.error('Error saving subcategory:', error)
+        const errorMsg = error instanceof Error ? error.message : 'Network error or server unavailable'
+        alert(`Failed to save subcategory: ${errorMsg}`)
       }
-      setIsModalOpen(false)
-      setEditingItem(null)
     } else if (activeTab === 'services') {
       if (editingItem) {
         setServices(services.map(s => s.id === editingItem.id ? { ...s, ...serviceForm } : s))
@@ -1592,59 +1831,120 @@ export default function AdminDashboard() {
 
   const renderCategoriesTab = () => (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {categories.map((category) => (
-          <div key={category.id} className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <span className="text-3xl">{category.icon}</span>
-                <h3 className="text-lg font-semibold text-gray-900">{category.title}</h3>
+      {categoriesLoading ? (
+        <div className="text-center py-8 sm:py-12 px-4">
+          <p className="text-sm sm:text-base text-gray-600">Loading categories...</p>
+        </div>
+      ) : categories.length === 0 ? (
+        <div className="text-center py-8 sm:py-12 px-4">
+          <p className="text-sm sm:text-base text-gray-600">No categories found. Add your first category!</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {categories.map((category) => (
+            <div key={category.id} className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <span className="text-3xl">{category.icon || '📁'}</span>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">{category.title}</h3>
+                    {category.serialNumber && (
+                      <p className="text-xs text-gray-500">Serial: #{category.serialNumber}</p>
+                    )}
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={() => handleEdit(category)} className="text-indigo-600 hover:text-indigo-900">
+                    <Edit size={16} />
+                  </button>
+                  <button onClick={() => handleDelete(category.id)} className="text-red-600 hover:text-red-900">
+                    <Trash2 size={16} />
+                  </button>
+                </div>
               </div>
-              <div className="flex gap-2">
-                <button onClick={() => handleEdit(category)} className="text-indigo-600 hover:text-indigo-900">
-                  <Edit size={16} />
-                </button>
-                <button onClick={() => handleDelete(category.id)} className="text-red-600 hover:text-red-900">
-                  <Trash2 size={16} />
-                </button>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    category.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                  }`}>
+                    {category.status}
+                  </span>
+                </div>
+                {category.lastModifiedBy && (
+                  <p className="text-xs text-gray-500">
+                    Modified by: {category.lastModifiedBy.name || category.lastModifiedBy.email || 'Unknown'}
+                  </p>
+                )}
+                <p className="text-sm text-gray-500">Last Modified: {category.updatedAt}</p>
               </div>
             </div>
-            <p className="text-sm text-gray-500">Created: {category.createdAt}</p>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 
   const renderSubCategoriesTab = () => (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {subCategories.map((subCategory) => {
-          const category = categories.find(c => c.id === subCategory.categoryId)
-          return (
-            <div key={subCategory.id} className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <span className="text-3xl">{subCategory.icon}</span>
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900">{subCategory.title}</h3>
-                    <p className="text-sm text-gray-500">Under: {category?.title || 'Unknown'}</p>
+      {subCategoriesLoading ? (
+        <div className="text-center py-8 sm:py-12 px-4">
+          <p className="text-sm sm:text-base text-gray-600">Loading subcategories...</p>
+        </div>
+      ) : subCategories.length === 0 ? (
+        <div className="text-center py-8 sm:py-12 px-4">
+          <p className="text-sm sm:text-base text-gray-600">No subcategories found. Add your first subcategory!</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {subCategories.map((subCategory) => {
+            const category = categories.find(c => c.id === subCategory.categoryId)
+            return (
+              <div key={subCategory.id} className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                <div className="mb-2">
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    subCategory.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                  }`}>
+                    {subCategory.status}
+                  </span>
+                </div>
+                <div className="mb-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-3">
+                      <span className="text-3xl leading-none">{subCategory.icon || '📁'}</span>
+                      <h3 className="text-lg font-semibold text-gray-900 leading-none">{subCategory.title}</h3>
+                    </div>
+                    <div className="flex gap-2">
+                      <button onClick={() => handleEdit(subCategory)} className="text-indigo-600 hover:text-indigo-900">
+                        <Edit size={16} />
+                      </button>
+                      <button onClick={() => handleDelete(subCategory.id)} className="text-red-600 hover:text-red-900">
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-3xl leading-none opacity-0">{subCategory.icon || '📁'}</span>
+                    <div>
+                      <p className="text-sm text-gray-500">Category: {category?.title || subCategory.categoryTitle || 'Unknown'}</p>
+                      {subCategory.serialNumber && (
+                        <p className="text-xs text-gray-500">Serial: #{subCategory.serialNumber}</p>
+                      )}
+                    </div>
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <button onClick={() => handleEdit(subCategory)} className="text-indigo-600 hover:text-indigo-900">
-                    <Edit size={16} />
-                  </button>
-                  <button onClick={() => handleDelete(subCategory.id)} className="text-red-600 hover:text-red-900">
-                    <Trash2 size={16} />
-                  </button>
+                <div className="space-y-2">
+                  {subCategory.lastModifiedBy && (
+                    <p className="text-xs text-gray-500">
+                      Modified by: {subCategory.lastModifiedBy.name || subCategory.lastModifiedBy.email || 'Unknown'}
+                    </p>
+                  )}
+                  <p className="text-xs text-gray-500">Last Modified: {subCategory.updatedAt}</p>
                 </div>
               </div>
-              <p className="text-sm text-gray-500">Created: {subCategory.createdAt}</p>
-            </div>
-          )
-        })}
-      </div>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 
@@ -2788,12 +3088,32 @@ export default function AdminDashboard() {
             {activeTab === 'categories' && (
               <>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
-                  <Input value={categoryForm.title} onChange={(e) => setCategoryForm({ ...categoryForm, title: e.target.value })} />
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+                  <Input value={categoryForm.title} onChange={(e) => setCategoryForm({ ...categoryForm, title: e.target.value })} required />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Icon (Emoji)</label>
                   <Input value={categoryForm.icon} onChange={(e) => setCategoryForm({ ...categoryForm, icon: e.target.value })} placeholder="🔧" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Serial Number</label>
+                  <Input 
+                    type="number" 
+                    value={categoryForm.serialNumber} 
+                    onChange={(e) => setCategoryForm({ ...categoryForm, serialNumber: e.target.value })} 
+                    placeholder="Auto-generated if left empty"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                  <select 
+                    value={categoryForm.status} 
+                    onChange={(e) => setCategoryForm({ ...categoryForm, status: e.target.value as 'active' | 'inactive' })} 
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  >
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
                 </div>
               </>
             )}
@@ -2801,20 +3121,40 @@ export default function AdminDashboard() {
             {activeTab === 'subcategories' && (
               <>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
-                  <Input value={subCategoryForm.title} onChange={(e) => setSubCategoryForm({ ...subCategoryForm, title: e.target.value })} />
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+                  <Input value={subCategoryForm.title} onChange={(e) => setSubCategoryForm({ ...subCategoryForm, title: e.target.value })} required />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Icon (Emoji)</label>
                   <Input value={subCategoryForm.icon} onChange={(e) => setSubCategoryForm({ ...subCategoryForm, icon: e.target.value })} placeholder="🧊" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                  <select value={subCategoryForm.categoryId} onChange={(e) => setSubCategoryForm({ ...subCategoryForm, categoryId: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Category *</label>
+                  <select value={subCategoryForm.categoryId} onChange={(e) => setSubCategoryForm({ ...subCategoryForm, categoryId: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md" required>
                     <option value="">Select Category</option>
                     {categories.map((cat) => (
                       <option key={cat.id} value={cat.id}>{cat.title}</option>
                     ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Serial Number</label>
+                  <Input 
+                    type="number" 
+                    value={subCategoryForm.serialNumber} 
+                    onChange={(e) => setSubCategoryForm({ ...subCategoryForm, serialNumber: e.target.value })} 
+                    placeholder="Auto-generated if left empty"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                  <select 
+                    value={subCategoryForm.status} 
+                    onChange={(e) => setSubCategoryForm({ ...subCategoryForm, status: e.target.value as 'active' | 'inactive' })} 
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  >
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
                   </select>
                 </div>
               </>

@@ -72,6 +72,8 @@ model User {
   updatedAt     DateTime    @updatedAt
   accounts      Account[]
   sessions      Session[]
+  modifiedCategories Category[] @relation("CategoryLastModifiedBy")
+  modifiedSubCategories SubCategory[] @relation("SubCategoryLastModifiedBy")
 
   @@map("users")
 }
@@ -141,4 +143,36 @@ model Lead {
   updatedAt         DateTime      @updatedAt
 
   @@map("leads")
+}
+
+model Category {
+  id            String   @id @default(uuid())
+  serialNumber  Int?      @unique
+  title         String   @unique
+  icon          String?
+  status        String   @default("active") // active, inactive
+  lastModifiedById String?
+  lastModifiedBy User?   @relation("CategoryLastModifiedBy", fields: [lastModifiedById], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  subCategories SubCategory[]
+
+  @@map("categories")
+}
+
+model SubCategory {
+  id            String   @id @default(uuid())
+  serialNumber  Int?      @unique
+  title         String
+  icon          String?
+  categoryId    String
+  category      Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  status        String   @default("active") // active, inactive
+  lastModifiedById String?
+  lastModifiedBy User?   @relation("SubCategoryLastModifiedBy", fields: [lastModifiedById], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([title, categoryId])
+  @@map("sub_categories")
 }
