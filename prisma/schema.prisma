@@ -74,6 +74,7 @@ model User {
   sessions      Session[]
   modifiedCategories Category[] @relation("CategoryLastModifiedBy")
   modifiedSubCategories SubCategory[] @relation("SubCategoryLastModifiedBy")
+  modifiedServices Service[] @relation("ServiceLastModifiedBy")
 
   @@map("users")
 }
@@ -156,6 +157,7 @@ model Category {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   subCategories SubCategory[]
+  services     Service[] @relation("ServiceCategory")
 
   @@map("categories")
 }
@@ -172,7 +174,65 @@ model SubCategory {
   lastModifiedBy User?   @relation("SubCategoryLastModifiedBy", fields: [lastModifiedById], references: [id])
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  services     Service[] @relation("ServiceSubCategory")
 
   @@unique([title, categoryId])
   @@map("sub_categories")
+}
+
+model Service {
+  id            String   @id @default(uuid())
+  title         String
+  slug          String   @unique
+  image         String?
+  rating        String?  @default("0")
+  description   String?  @db.Text
+  deliveryTime  String?
+  startingPrice String?
+  categoryId    String
+  category      Category @relation("ServiceCategory", fields: [categoryId], references: [id], onDelete: Cascade)
+  subCategoryId String?
+  subCategory   SubCategory? @relation("ServiceSubCategory", fields: [subCategoryId], references: [id], onDelete: SetNull)
+  status        String   @default("active") // active, inactive
+  
+  // Overview fields
+  shortDescription String? @db.Text
+  detailedDescription String? @db.Text // acts, laws, orders, rules, with years
+  providerAuthority String? // court/council
+  requiredDocuments String[] @default([]) // needed from the client
+  whatsIncluded String? @db.Text // what will we do
+  whatsNotIncluded String? @db.Text // what must be done externally
+  timeline String? // approximate
+  additionalNotes String? @db.Text // comments
+  
+  // Learning and Discussion
+  processFlow String? @db.Text
+  videoUrl String? // TBA
+  
+  // FAQ
+  faqs Json? // array of {question: string, answer: string}
+  
+  // Consultants
+  consultantQualifications String? @db.Text
+  
+  // Price Packages
+  packages Json? // array of {name: string, price: string, features: string[], description?: string}
+  
+  // Core cost breakdown (for snaplegal)
+  coreFiling String?
+  coreStamps String?
+  coreCourtFee String?
+  
+  // Presented cost breakdown (for the client)
+  clientFiling String?
+  clientStamps String?
+  clientCourtFee String?
+  clientConsultantFee String?
+  
+  lastModifiedById String?
+  lastModifiedBy User?   @relation("ServiceLastModifiedBy", fields: [lastModifiedById], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("services")
 }

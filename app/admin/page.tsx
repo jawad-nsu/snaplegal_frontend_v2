@@ -101,6 +101,33 @@ interface Service {
   categoryId: string
   subCategoryId?: string
   createdAt: string
+  // Overview fields
+  shortDescription?: string
+  detailedDescription?: string
+  providerAuthority?: string
+  requiredDocuments?: string[]
+  whatsIncluded?: string
+  whatsNotIncluded?: string
+  timeline?: string
+  additionalNotes?: string
+  // Learning and Discussion
+  processFlow?: string
+  videoUrl?: string
+  // FAQ
+  faqs?: Array<{ question: string; answer: string }>
+  // Consultants
+  consultantQualifications?: string
+  // Price Packages
+  packages?: Array<{ name: string; price: string; features: string[]; description?: string }>
+  // Core cost breakdown
+  coreFiling?: string
+  coreStamps?: string
+  coreCourtFee?: string
+  // Presented cost breakdown
+  clientFiling?: string
+  clientStamps?: string
+  clientCourtFee?: string
+  clientConsultantFee?: string
 }
 
 interface VendorServiceRequest {
@@ -392,11 +419,34 @@ export default function AdminDashboard() {
     fetchSubCategories()
   }, [])
 
-  const [services, setServices] = useState<Service[]>([
-    { id: '1', title: 'AC Servicing', slug: 'ac-servicing', image: '/plumbing.jpg', rating: '4.9', description: 'Professional AC servicing and maintenance', deliveryTime: '2-3 hours', startingPrice: '৳800', categoryId: '1', createdAt: '2024-01-05' },
-    { id: '2', title: 'Home Cleaning', slug: 'home-cleaning', image: '/cleaning_service.jpg', rating: '4.7', description: 'Comprehensive home cleaning services', deliveryTime: '3-5 hours', startingPrice: '৳1,500', categoryId: '3', createdAt: '2024-01-06' },
-    { id: '3', title: 'Fridge Servicing', slug: 'fridge-servicing', image: '/plumbing.jpg', rating: '4.8', description: 'Professional fridge servicing', deliveryTime: '2-3 hours', startingPrice: '৳700', categoryId: '2', subCategoryId: '1', createdAt: '2024-01-07' },
-  ])
+  // Services - Fetched from API
+  const [services, setServices] = useState<Service[]>([])
+  const [servicesLoading, setServicesLoading] = useState(true)
+
+  // Fetch services from API
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        setServicesLoading(true)
+        const response = await fetch('/api/services')
+        const data = await response.json()
+        
+        if (data.success && data.services) {
+          setServices(data.services)
+        } else {
+          console.error('Failed to fetch services:', data.error)
+          setServices([])
+        }
+      } catch (error) {
+        console.error('Error fetching services:', error)
+        setServices([])
+      } finally {
+        setServicesLoading(false)
+      }
+    }
+
+    fetchServices()
+  }, [])
 
   // Vendor Service Requests
   const [serviceRequests, setServiceRequests] = useState<VendorServiceRequest[]>([
@@ -851,7 +901,24 @@ export default function AdminDashboard() {
     serialNumber: '',
     status: 'active' as 'active' | 'inactive'
   })
-  const [serviceForm, setServiceForm] = useState({ title: '', slug: '', image: '', rating: '', description: '', deliveryTime: '', startingPrice: '', categoryId: '', subCategoryId: '' })
+  const [serviceForm, setServiceForm] = useState({
+    title: '', slug: '', image: '', rating: '', description: '', deliveryTime: '', startingPrice: '', categoryId: '', subCategoryId: '',
+    // Overview fields
+    shortDescription: '', detailedDescription: '', providerAuthority: '', requiredDocuments: [] as string[], whatsIncluded: '', whatsNotIncluded: '',
+    timeline: '', additionalNotes: '',
+    // Learning and Discussion
+    processFlow: '', videoUrl: '',
+    // FAQ
+    faqs: [] as Array<{ question: string; answer: string }>,
+    // Consultants
+    consultantQualifications: '',
+    // Price Packages
+    packages: [] as Array<{ name: string; price: string; features: string[]; description?: string }>,
+    // Core cost breakdown
+    coreFiling: '', coreStamps: '', coreCourtFee: '',
+    // Presented cost breakdown
+    clientFiling: '', clientStamps: '', clientCourtFee: '', clientConsultantFee: ''
+  })
 
   const handleAdd = () => {
     setEditingItem(null)
@@ -866,7 +933,12 @@ export default function AdminDashboard() {
     } else if (activeTab === 'subcategories') {
       setSubCategoryForm({ title: '', icon: '', categoryId: '', serialNumber: '', status: 'active' })
     } else if (activeTab === 'services') {
-      setServiceForm({ title: '', slug: '', image: '', rating: '', description: '', deliveryTime: '', startingPrice: '', categoryId: '', subCategoryId: '' })
+      setServiceForm({
+        title: '', slug: '', image: '', rating: '', description: '', deliveryTime: '', startingPrice: '', categoryId: '', subCategoryId: '',
+        shortDescription: '', detailedDescription: '', providerAuthority: '', requiredDocuments: [], whatsIncluded: '', whatsNotIncluded: '',
+        timeline: '', additionalNotes: '', processFlow: '', videoUrl: '', faqs: [], consultantQualifications: '', packages: [],
+        coreFiling: '', coreStamps: '', coreCourtFee: '', clientFiling: '', clientStamps: '', clientCourtFee: '', clientConsultantFee: ''
+      })
     }
   }
 
@@ -898,7 +970,17 @@ export default function AdminDashboard() {
       })
     } else if (activeTab === 'services' && 'slug' in item) {
       const serviceItem = item as Service
-      setServiceForm({ title: serviceItem.title, slug: serviceItem.slug, image: serviceItem.image, rating: serviceItem.rating, description: serviceItem.description, deliveryTime: serviceItem.deliveryTime, startingPrice: serviceItem.startingPrice, categoryId: serviceItem.categoryId, subCategoryId: serviceItem.subCategoryId || '' })
+      setServiceForm({
+        title: serviceItem.title, slug: serviceItem.slug, image: serviceItem.image, rating: serviceItem.rating, description: serviceItem.description,
+        deliveryTime: serviceItem.deliveryTime, startingPrice: serviceItem.startingPrice, categoryId: serviceItem.categoryId, subCategoryId: serviceItem.subCategoryId || '',
+        shortDescription: serviceItem.shortDescription || '', detailedDescription: serviceItem.detailedDescription || '', providerAuthority: serviceItem.providerAuthority || '',
+        requiredDocuments: serviceItem.requiredDocuments || [], whatsIncluded: serviceItem.whatsIncluded || '', whatsNotIncluded: serviceItem.whatsNotIncluded || '',
+        timeline: serviceItem.timeline || '', additionalNotes: serviceItem.additionalNotes || '', processFlow: serviceItem.processFlow || '', videoUrl: serviceItem.videoUrl || '',
+        faqs: serviceItem.faqs || [], consultantQualifications: serviceItem.consultantQualifications || '', packages: serviceItem.packages || [],
+        coreFiling: serviceItem.coreFiling || '', coreStamps: serviceItem.coreStamps || '', coreCourtFee: serviceItem.coreCourtFee || '',
+        clientFiling: serviceItem.clientFiling || '', clientStamps: serviceItem.clientStamps || '', clientCourtFee: serviceItem.clientCourtFee || '',
+        clientConsultantFee: serviceItem.clientConsultantFee || ''
+      })
     }
   }
 
@@ -978,7 +1060,27 @@ export default function AdminDashboard() {
           alert('Failed to delete subcategory. Please try again.')
         }
       } else if (activeTab === 'services') {
-        setServices(services.filter(s => s.id !== id))
+        try {
+          const response = await fetch(`/api/services/${id}`, {
+            method: 'DELETE',
+          })
+
+          const data = await response.json()
+
+          if (data.success) {
+            // Refresh services list
+            const refreshResponse = await fetch('/api/services')
+            const refreshData = await refreshResponse.json()
+            if (refreshData.success) {
+              setServices(refreshData.services)
+            }
+          } else {
+            alert(`Failed to delete service: ${data.error}`)
+          }
+        } catch (error) {
+          console.error('Error deleting service:', error)
+          alert('Failed to delete service. Please try again.')
+        }
       }
     }
   }
@@ -1128,13 +1230,83 @@ export default function AdminDashboard() {
         alert(`Failed to save subcategory: ${errorMsg}`)
       }
     } else if (activeTab === 'services') {
-      if (editingItem) {
-        setServices(services.map(s => s.id === editingItem.id ? { ...s, ...serviceForm } : s))
-      } else {
-        setServices([...services, { id: Date.now().toString(), ...serviceForm, createdAt: new Date().toISOString().split('T')[0] }])
+      try {
+        const url = editingItem ? `/api/services/${editingItem.id}` : '/api/services'
+        const method = editingItem ? 'PUT' : 'POST'
+
+        const response = await fetch(url, {
+          method,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title: serviceForm.title,
+            slug: serviceForm.slug,
+            image: serviceForm.image,
+            rating: serviceForm.rating,
+            description: serviceForm.description,
+            deliveryTime: serviceForm.deliveryTime,
+            startingPrice: serviceForm.startingPrice,
+            categoryId: serviceForm.categoryId,
+            subCategoryId: serviceForm.subCategoryId || null,
+            // Overview fields
+            shortDescription: serviceForm.shortDescription,
+            detailedDescription: serviceForm.detailedDescription,
+            providerAuthority: serviceForm.providerAuthority,
+            requiredDocuments: serviceForm.requiredDocuments,
+            whatsIncluded: serviceForm.whatsIncluded,
+            whatsNotIncluded: serviceForm.whatsNotIncluded,
+            timeline: serviceForm.timeline,
+            additionalNotes: serviceForm.additionalNotes,
+            // Learning and Discussion
+            processFlow: serviceForm.processFlow,
+            videoUrl: serviceForm.videoUrl,
+            // FAQ
+            faqs: serviceForm.faqs,
+            // Consultants
+            consultantQualifications: serviceForm.consultantQualifications,
+            // Price Packages
+            packages: serviceForm.packages,
+            // Core cost breakdown
+            coreFiling: serviceForm.coreFiling,
+            coreStamps: serviceForm.coreStamps,
+            coreCourtFee: serviceForm.coreCourtFee,
+            // Presented cost breakdown
+            clientFiling: serviceForm.clientFiling,
+            clientStamps: serviceForm.clientStamps,
+            clientCourtFee: serviceForm.clientCourtFee,
+            clientConsultantFee: serviceForm.clientConsultantFee,
+          }),
+        })
+
+        const data = await response.json()
+
+        if (!response.ok) {
+          const errorMsg = data.error || data.message || 'Unknown error'
+          const details = data.details ? ` (${data.details})` : ''
+          alert(`Failed to save service: ${errorMsg}${details}`)
+          return
+        }
+
+        if (data.success) {
+          // Refresh services list
+          const refreshResponse = await fetch('/api/services')
+          const refreshData = await refreshResponse.json()
+          if (refreshData.success) {
+            setServices(refreshData.services)
+          }
+          setIsModalOpen(false)
+          setEditingItem(null)
+        } else {
+          const errorMsg = data.error || data.message || 'Unknown error'
+          const details = data.details ? ` (${data.details})` : ''
+          alert(`Failed to save service: ${errorMsg}${details}`)
+        }
+      } catch (error) {
+        console.error('Error saving service:', error)
+        const errorMsg = error instanceof Error ? error.message : 'Network error or server unavailable'
+        alert(`Failed to save service: ${errorMsg}`)
       }
-      setIsModalOpen(false)
-      setEditingItem(null)
     }
   }
 
@@ -1875,7 +2047,7 @@ export default function AdminDashboard() {
                     Modified by: {category.lastModifiedBy.name || category.lastModifiedBy.email || 'Unknown'}
                   </p>
                 )}
-                <p className="text-sm text-gray-500">Last Modified: {category.updatedAt}</p>
+                <p className="text-xs text-gray-500">Last Modified: {category.updatedAt}</p>
               </div>
             </div>
           ))}
@@ -2648,8 +2820,17 @@ export default function AdminDashboard() {
 
   const renderServicesTab = () => (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-        {services.map((service) => {
+      {servicesLoading ? (
+        <div className="text-center py-8 sm:py-12 px-4">
+          <p className="text-sm sm:text-base text-gray-600">Loading services...</p>
+        </div>
+      ) : services.length === 0 ? (
+        <div className="text-center py-8 sm:py-12 px-4">
+          <p className="text-sm sm:text-base text-gray-600">No services found. Add your first service!</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+          {services.map((service) => {
           const category = categories.find(c => c.id === service.categoryId)
           const subCategory = service.subCategoryId ? subCategories.find(s => s.id === service.subCategoryId) : null
           return (
@@ -2698,7 +2879,8 @@ export default function AdminDashboard() {
             </div>
           )
         })}
-      </div>
+        </div>
+      )}
     </div>
   )
 
@@ -2988,7 +3170,7 @@ export default function AdminDashboard() {
 
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className={`bg-white rounded-lg shadow-xl ${activeTab === 'services' ? 'max-w-6xl' : 'max-w-2xl'} w-full max-h-[90vh] overflow-y-auto`}>
           <div className="flex items-center justify-between p-4 md:p-6 border-b sticky top-0 bg-white z-10">
             <h2 className="text-lg md:text-xl font-bold">
               {editingItem ? 'Edit' : 'Add New'} {activeTab === 'users' ? 'User' : activeTab === 'vendors' ? 'Vendor' : activeTab === 'categories' ? 'Category' : activeTab === 'subcategories' ? 'Sub-Category' : 'Service'}
@@ -3161,54 +3343,299 @@ export default function AdminDashboard() {
             )}
 
             {activeTab === 'services' && (
-              <>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
-                  <Input value={serviceForm.title} onChange={(e) => setServiceForm({ ...serviceForm, title: e.target.value })} />
+              <div className="space-y-6">
+                {/* Basic Information */}
+                <div className="border-b pb-4">
+                  <h3 className="text-lg font-semibold mb-4">Basic Information</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Service Title *</label>
+                      <Input value={serviceForm.title} onChange={(e) => setServiceForm({ ...serviceForm, title: e.target.value })} required />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Slug *</label>
+                      <Input value={serviceForm.slug} onChange={(e) => setServiceForm({ ...serviceForm, slug: e.target.value })} placeholder="ac-servicing" required />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Category *</label>
+                      <select value={serviceForm.categoryId} onChange={(e) => setServiceForm({ ...serviceForm, categoryId: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                        <option value="">Select Category</option>
+                        {categories.map((cat) => (
+                          <option key={cat.id} value={cat.id}>{cat.title}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Sub-Category (Optional)</label>
+                      <select value={serviceForm.subCategoryId} onChange={(e) => setServiceForm({ ...serviceForm, subCategoryId: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md">
+                        <option value="">None</option>
+                        {subCategories.filter(s => s.categoryId === serviceForm.categoryId).map((subCat) => (
+                          <option key={subCat.id} value={subCat.id}>{subCat.title}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+                      <Input value={serviceForm.image} onChange={(e) => setServiceForm({ ...serviceForm, image: e.target.value })} placeholder="/plumbing.jpg" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Rating</label>
+                      <Input value={serviceForm.rating} onChange={(e) => setServiceForm({ ...serviceForm, rating: e.target.value })} placeholder="4.9" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Delivery Time</label>
+                      <Input value={serviceForm.deliveryTime} onChange={(e) => setServiceForm({ ...serviceForm, deliveryTime: e.target.value })} placeholder="2-3 hours" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Starting Price</label>
+                      <Input value={serviceForm.startingPrice} onChange={(e) => setServiceForm({ ...serviceForm, startingPrice: e.target.value })} placeholder="৳800" />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                      <textarea value={serviceForm.description} onChange={(e) => setServiceForm({ ...serviceForm, description: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md" rows={3} />
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Slug</label>
-                  <Input value={serviceForm.slug} onChange={(e) => setServiceForm({ ...serviceForm, slug: e.target.value })} placeholder="ac-servicing" />
+
+                {/* Overview Section */}
+                <div className="border-b pb-4">
+                  <h3 className="text-lg font-semibold mb-4">1. Overview</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Short Description (One Line)</label>
+                      <Input value={serviceForm.shortDescription} onChange={(e) => setServiceForm({ ...serviceForm, shortDescription: e.target.value })} placeholder="Brief one-line description" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Detailed Description (Acts, Laws, Orders, Rules with Years)</label>
+                      <textarea value={serviceForm.detailedDescription} onChange={(e) => setServiceForm({ ...serviceForm, detailedDescription: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md" rows={4} placeholder="Detailed description including relevant acts, laws, orders, rules with years..." />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Service Provider Authority (Court/Council)</label>
+                      <Input value={serviceForm.providerAuthority} onChange={(e) => setServiceForm({ ...serviceForm, providerAuthority: e.target.value })} placeholder="e.g., Supreme Court, High Court, District Council" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Required Documents (One per line)</label>
+                      <textarea 
+                        value={serviceForm.requiredDocuments.join('\n')} 
+                        onChange={(e) => setServiceForm({ ...serviceForm, requiredDocuments: e.target.value.split('\n').filter(doc => doc.trim()) })} 
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                        rows={4}
+                        placeholder="Document 1&#10;Document 2&#10;Document 3"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">Enter each document on a new line</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">What&apos;s Included?</label>
+                      <textarea value={serviceForm.whatsIncluded} onChange={(e) => setServiceForm({ ...serviceForm, whatsIncluded: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md" rows={3} placeholder="What will we do for the client..." />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">What&apos;s Not Included?</label>
+                      <textarea value={serviceForm.whatsNotIncluded} onChange={(e) => setServiceForm({ ...serviceForm, whatsNotIncluded: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md" rows={3} placeholder="What must be done externally..." />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Timeline (Approximate)</label>
+                      <Input value={serviceForm.timeline} onChange={(e) => setServiceForm({ ...serviceForm, timeline: e.target.value })} placeholder="e.g., 15-30 days" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Additional Notes</label>
+                      <textarea value={serviceForm.additionalNotes} onChange={(e) => setServiceForm({ ...serviceForm, additionalNotes: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md" rows={3} placeholder="Additional comments or notes..." />
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
-                  <Input value={serviceForm.image} onChange={(e) => setServiceForm({ ...serviceForm, image: e.target.value })} placeholder="/plumbing.jpg" />
+
+                {/* Learning and Discussion */}
+                <div className="border-b pb-4">
+                  <h3 className="text-lg font-semibold mb-4">2. Learning and Discussion</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Process Flow</label>
+                      <textarea value={serviceForm.processFlow} onChange={(e) => setServiceForm({ ...serviceForm, processFlow: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md" rows={5} placeholder="Step-by-step process flow..." />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Video URL (TBA)</label>
+                      <Input value={serviceForm.videoUrl} onChange={(e) => setServiceForm({ ...serviceForm, videoUrl: e.target.value })} placeholder="https://youtube.com/..." />
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Rating</label>
-                  <Input value={serviceForm.rating} onChange={(e) => setServiceForm({ ...serviceForm, rating: e.target.value })} placeholder="4.9" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                  <textarea value={serviceForm.description} onChange={(e) => setServiceForm({ ...serviceForm, description: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md" rows={3} />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Delivery Time</label>
-                  <Input value={serviceForm.deliveryTime} onChange={(e) => setServiceForm({ ...serviceForm, deliveryTime: e.target.value })} placeholder="2-3 hours" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Starting Price</label>
-                  <Input value={serviceForm.startingPrice} onChange={(e) => setServiceForm({ ...serviceForm, startingPrice: e.target.value })} placeholder="৳800" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                  <select value={serviceForm.categoryId} onChange={(e) => setServiceForm({ ...serviceForm, categoryId: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md">
-                    <option value="">Select Category</option>
-                    {categories.map((cat) => (
-                      <option key={cat.id} value={cat.id}>{cat.title}</option>
+
+                {/* FAQ Section */}
+                <div className="border-b pb-4">
+                  <h3 className="text-lg font-semibold mb-4">3. FAQ</h3>
+                  <div className="space-y-4">
+                    {serviceForm.faqs.map((faq, index) => (
+                      <div key={index} className="border p-4 rounded-lg">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-sm font-medium text-gray-700">Question {index + 1}</span>
+                          <button
+                            type="button"
+                            onClick={() => setServiceForm({ ...serviceForm, faqs: serviceForm.faqs.filter((_, i) => i !== index) })}
+                            className="text-red-600 hover:text-red-800 text-sm"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                        <div className="mb-2">
+                          <Input
+                            value={faq.question}
+                            onChange={(e) => {
+                              const newFaqs = [...serviceForm.faqs]
+                              newFaqs[index].question = e.target.value
+                              setServiceForm({ ...serviceForm, faqs: newFaqs })
+                            }}
+                            placeholder="Question"
+                          />
+                        </div>
+                        <div>
+                          <textarea
+                            value={faq.answer}
+                            onChange={(e) => {
+                              const newFaqs = [...serviceForm.faqs]
+                              newFaqs[index].answer = e.target.value
+                              setServiceForm({ ...serviceForm, faqs: newFaqs })
+                            }}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                            rows={2}
+                            placeholder="Answer"
+                          />
+                        </div>
+                      </div>
                     ))}
-                  </select>
+                    <button
+                      type="button"
+                      onClick={() => setServiceForm({ ...serviceForm, faqs: [...serviceForm.faqs, { question: '', answer: '' }] })}
+                      className="text-sm text-blue-600 hover:text-blue-800"
+                    >
+                      + Add FAQ
+                    </button>
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Sub-Category (Optional)</label>
-                  <select value={serviceForm.subCategoryId} onChange={(e) => setServiceForm({ ...serviceForm, subCategoryId: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md">
-                    <option value="">None</option>
-                    {subCategories.filter(s => s.categoryId === serviceForm.categoryId).map((subCat) => (
-                      <option key={subCat.id} value={subCat.id}>{subCat.title}</option>
+
+                {/* Consultants */}
+                <div className="border-b pb-4">
+                  <h3 className="text-lg font-semibold mb-4">4. Consultants</h3>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Consultant Qualifications and Expertise</label>
+                    <textarea value={serviceForm.consultantQualifications} onChange={(e) => setServiceForm({ ...serviceForm, consultantQualifications: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md" rows={4} placeholder="Describe consultant qualifications and expertise..." />
+                  </div>
+                </div>
+
+                {/* Price Packages */}
+                <div className="border-b pb-4">
+                  <h3 className="text-lg font-semibold mb-4">5. Price Packages</h3>
+                  <div className="space-y-4">
+                    {serviceForm.packages.map((pkg, index) => (
+                      <div key={index} className="border p-4 rounded-lg">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-sm font-medium text-gray-700">Package {index + 1}</span>
+                          <button
+                            type="button"
+                            onClick={() => setServiceForm({ ...serviceForm, packages: serviceForm.packages.filter((_, i) => i !== index) })}
+                            className="text-red-600 hover:text-red-800 text-sm"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
+                          <Input
+                            value={pkg.name}
+                            onChange={(e) => {
+                              const newPackages = [...serviceForm.packages]
+                              newPackages[index].name = e.target.value
+                              setServiceForm({ ...serviceForm, packages: newPackages })
+                            }}
+                            placeholder="Package Name"
+                          />
+                          <Input
+                            value={pkg.price}
+                            onChange={(e) => {
+                              const newPackages = [...serviceForm.packages]
+                              newPackages[index].price = e.target.value
+                              setServiceForm({ ...serviceForm, packages: newPackages })
+                            }}
+                            placeholder="Price"
+                          />
+                        </div>
+                        <div className="mb-2">
+                          <label className="block text-xs text-gray-600 mb-1">Features (One per line)</label>
+                          <textarea
+                            value={pkg.features.join('\n')}
+                            onChange={(e) => {
+                              const newPackages = [...serviceForm.packages]
+                              newPackages[index].features = e.target.value.split('\n').filter(f => f.trim())
+                              setServiceForm({ ...serviceForm, packages: newPackages })
+                            }}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                            rows={3}
+                            placeholder="Feature 1&#10;Feature 2"
+                          />
+                        </div>
+                        <div>
+                          <textarea
+                            value={pkg.description || ''}
+                            onChange={(e) => {
+                              const newPackages = [...serviceForm.packages]
+                              newPackages[index].description = e.target.value
+                              setServiceForm({ ...serviceForm, packages: newPackages })
+                            }}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                            rows={2}
+                            placeholder="Package Description (Optional)"
+                          />
+                        </div>
+                      </div>
                     ))}
-                  </select>
+                    <button
+                      type="button"
+                      onClick={() => setServiceForm({ ...serviceForm, packages: [...serviceForm.packages, { name: '', price: '', features: [] }] })}
+                      className="text-sm text-blue-600 hover:text-blue-800"
+                    >
+                      + Add Package
+                    </button>
+                  </div>
                 </div>
-              </>
+
+                {/* Cost Breakdown */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="border-b pb-4">
+                    <h3 className="text-lg font-semibold mb-4">6. Core Cost Breakdown (For SnapLegal)</h3>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Filing</label>
+                        <Input value={serviceForm.coreFiling} onChange={(e) => setServiceForm({ ...serviceForm, coreFiling: e.target.value })} placeholder="৳0" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Stamps</label>
+                        <Input value={serviceForm.coreStamps} onChange={(e) => setServiceForm({ ...serviceForm, coreStamps: e.target.value })} placeholder="৳0" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Court Fee</label>
+                        <Input value={serviceForm.coreCourtFee} onChange={(e) => setServiceForm({ ...serviceForm, coreCourtFee: e.target.value })} placeholder="৳0" />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="border-b pb-4">
+                    <h3 className="text-lg font-semibold mb-4">7. Presented Cost Breakdown (For Client)</h3>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Filing</label>
+                        <Input value={serviceForm.clientFiling} onChange={(e) => setServiceForm({ ...serviceForm, clientFiling: e.target.value })} placeholder="৳0" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Stamps</label>
+                        <Input value={serviceForm.clientStamps} onChange={(e) => setServiceForm({ ...serviceForm, clientStamps: e.target.value })} placeholder="৳0" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Court Fee</label>
+                        <Input value={serviceForm.clientCourtFee} onChange={(e) => setServiceForm({ ...serviceForm, clientCourtFee: e.target.value })} placeholder="৳0" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Consultant Fee</label>
+                        <Input value={serviceForm.clientConsultantFee} onChange={(e) => setServiceForm({ ...serviceForm, clientConsultantFee: e.target.value })} placeholder="৳0" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
           <div className="flex flex-col sm:flex-row justify-end gap-3 p-4 md:p-6 border-t sticky bottom-0 bg-white">

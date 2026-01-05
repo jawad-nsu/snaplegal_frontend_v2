@@ -8,349 +8,240 @@ import { Star, Clock } from 'lucide-react'
 import Navbar from '@/components/navbar'
 import Footer from '@/components/footer'
 
-const serviceCategories = [
-  {
-    id: 'ac-repair',
-    title: 'AC Repair Services',
-    icon: '🔧',
-    featured: [
-      {
-        title: 'AC Servicing',
-        image: '/plumbing.jpg',
-        slug: 'ac-servicing',
-        rating: '4.9',
-        description: 'Professional AC servicing and maintenance to keep your air conditioner running efficiently.',
-        deliveryTime: '2-3 hours',
-        startingPrice: '৳800',
-      },
-      {
-        title: 'AC Doctor',
-        image: '/moving_service.webp',
-        slug: 'ac-doctor',
-        rating: '4.8',
-        description: 'Expert AC diagnosis and repair services for all your air conditioning needs.',
-        deliveryTime: '1-2 hours',
-        startingPrice: '৳600',
-      },
-      {
-        title: 'AC Combo Packages',
-        image: '/cleaning_service.jpg',
-        slug: 'ac-combo-packages',
-        rating: '4.7',
-        description: 'Complete AC maintenance packages with multiple services at discounted rates.',
-        deliveryTime: '3-4 hours',
-        startingPrice: '৳1,200',
-      },
-    ],
-    services: [
-      { title: 'AC Cooling Problem', slug: 'ac-cooling-problem' },
-      { title: 'AC Installation & Uninstallation', slug: 'ac-installation-uninstallation' },
-      { title: 'VRF AC Service', slug: 'vrf-ac-service' },
-    ],
-  },
+// Helper function to convert title to slug
+const titleToSlug = (title: string): string => {
+  return title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+}
 
-  {
-    id: 'appliance-repair',
-    title: 'Appliance Repair',
-    icon: '🔌',
-    subCategories: [
-      {
-        id: 'fridge-repair',
-        title: 'Fridge Repair',
-        icon: '🧊',
-        featured: [
-          {
-            title: 'Fridge Servicing',
-            image: '/plumbing.jpg',
-            slug: 'fridge-servicing',
-            rating: '4.8',
-            description: 'Professional fridge servicing and maintenance to keep your refrigerator running efficiently.',
-            deliveryTime: '2-3 hours',
-            startingPrice: '৳700',
-          },
-          {
-            title: 'Fridge Gas Refill',
-            image: '/moving_service.webp',
-            slug: 'fridge-gas-refill',
-            rating: '4.7',
-            description: 'Expert fridge gas refill service to restore cooling performance.',
-            deliveryTime: '1-2 hours',
-            startingPrice: '৳500',
-          },
-        ],
-        services: [
-          { title: 'Fridge Not Cooling', slug: 'fridge-not-cooling' },
-          { title: 'Fridge Compressor Repair', slug: 'fridge-compressor-repair' },
-          { title: 'Fridge Installation', slug: 'fridge-installation' },
-        ],
-      },
-      {
-        id: 'microwave-repair',
-        title: 'Microwave Repair',
-        icon: '🍽️',
-        featured: [
-          {
-            title: 'Microwave Servicing',
-            image: '/cleaning_service.jpg',
-            slug: 'microwave-servicing',
-            rating: '4.6',
-            description: 'Complete microwave servicing and repair for all brands and models.',
-            deliveryTime: '1-2 hours',
-            startingPrice: '৳600',
-          },
-          {
-            title: 'Microwave Installation',
-            image: '/gas-cooker-repair.jpg',
-            slug: 'microwave-installation',
-            rating: '4.8',
-            description: 'Professional microwave installation service with safety checks.',
-            deliveryTime: '1 hour',
-            startingPrice: '৳400',
-          },
-        ],
-        services: [
-          { title: 'Microwave Not Heating', slug: 'microwave-not-heating' },
-          { title: 'Microwave Door Repair', slug: 'microwave-door-repair' },
-          { title: 'Microwave Panel Replacement', slug: 'microwave-panel-replacement' },
-        ],
-      },
-    ],
-    featured: [
-      {
-        title: 'Exclusive Combo Offer',
-        image: '/gas-cooker-repair.jpg',
-        slug: 'exclusive-combo-offer',
-        rating: '4.9',
-        description: 'Special combo packages for multiple appliance services at discounted rates.',
-        deliveryTime: '4-6 hours',
-        startingPrice: '৳2,000',
-      },
-      {
-        title: 'Oven Services',
-        image: '/plumbing.jpg',
-        slug: 'oven-services',
-        rating: '4.7',
-        description: 'Professional oven repair, servicing, and installation services.',
-        deliveryTime: '2-3 hours',
-        startingPrice: '৳800',
-      },
-      {
-        title: 'TV Services',
-        image: '/moving_service.webp',
-        slug: 'tv-services',
-        rating: '4.8',
-        description: 'Expert TV repair, installation, and maintenance services for all brands.',
-        deliveryTime: '2-4 hours',
-        startingPrice: '৳900',
-      },
-    ],
-    services: [
-      { title: 'Refrigerator Services', slug: 'refrigerator-services' },
-      { title: 'Washing Machine Services', slug: 'washing-machine-services' },
-      { title: 'Kitchen Hood Services', slug: 'kitchen-hood-services' },
-      { title: 'IPS Services', slug: 'ips-services' },
-      { title: 'Treadmill Services', slug: 'treadmill-services' },
-      { title: 'Water Purifier Services', slug: 'water-purifier-services' },
-      { title: 'Geyser Services', slug: 'geyser-services' },
-      { title: 'Gas Stove/Burner Services', slug: 'gas-stove-burner-services' },
-      { title: 'Generator Services', slug: 'generator-services' },
-    ],
-  },
+// Types for API responses
+interface Category {
+  id: string
+  title: string
+  icon: string
+  status: string
+  serialNumber?: number | null
+}
 
-  {
-    id: 'cleaning-solution',
-    title: 'Cleaning Solution',
-    icon: '🧹',
-    featured: [
-      {
-        title: 'Home Cleaning',
-        image: '/cleaning_service.jpg',
-        slug: 'home-cleaning',
-        rating: '4.7',
-        description: 'Comprehensive home cleaning services for a spotless and fresh living space.',
-        deliveryTime: '3-5 hours',
-        startingPrice: '৳1,500',
-      },
-      {
-        title: 'Cleaning Combo',
-        image: '/gas-cooker-repair.jpg',
-        slug: 'cleaning-combo',
-        rating: '4.8',
-        description: 'Special combo packages combining multiple cleaning services at great value.',
-        deliveryTime: '4-6 hours',
-        startingPrice: '৳2,500',
-      },
-      {
-        title: 'Furniture & Carpet Cleaning',
-        image: '/plumbing.jpg',
-        slug: 'furniture-carpet-cleaning',
-        rating: '4.6',
-        description: 'Deep cleaning services for furniture, carpets, and upholstery.',
-        deliveryTime: '2-4 hours',
-        startingPrice: '৳1,200',
-      },
-    ],
-    services: [
-      { title: 'Outdoor Cleaning', slug: 'outdoor-cleaning' },
-      { title: 'Appliance Cleaning', slug: 'appliance-cleaning' },
-      { title: 'Tank & Pipe Cleaning', slug: 'tank-pipe-cleaning' },
-      { title: 'Special Cleaning Combo', slug: 'special-cleaning-combo' },
-    ],
-  },
+interface SubCategory {
+  id: string
+  title: string
+  icon: string
+  categoryId: string
+  status: string
+  serialNumber?: number | null
+}
 
-  {
-    id: 'beauty-wellness',
-    title: 'Beauty & Wellness',
-    icon: '💅',
-    featured: [
-      {
-        title: 'Nail Extension',
-        image: '/plumbing.jpg',
-        slug: 'nail-extension',
-        rating: '4.8',
-        description: 'Professional nail extension services with premium quality materials.',
-        deliveryTime: '2-3 hours',
-        startingPrice: '৳1,500',
-      },
-      {
-        title: 'Salon Care',
-        image: '/moving_service.webp',
-        slug: 'salon-care',
-        rating: '4.7',
-        description: 'Complete salon services including hair, makeup, and beauty treatments.',
-        deliveryTime: '2-4 hours',
-        startingPrice: '৳1,200',
-      },
-      {
-        title: 'At-home Hair Studio',
-        image: '/cleaning_service.jpg',
-        slug: 'at-home-hair-studio',
-        rating: '4.9',
-        description: 'Premium hair styling and treatment services at your doorstep.',
-        deliveryTime: '1-2 hours',
-        startingPrice: '৳800',
-      },
-    ],
-    services: [
-      { title: 'Makeup', slug: 'makeup' },
-      { title: 'Spa & Massage', slug: 'spa-massage' },
-      { title: 'Hair Care', slug: 'hair-care' },
-      { title: 'Skin Care', slug: 'skin-care' },
-      { title: 'Nail Care', slug: 'nail-care' },
-      { title: 'Bridal Package', slug: 'bridal-package' },
-      { title: 'Body Treatment', slug: 'body-treatment' },
-      { title: 'Waxing', slug: 'waxing' },
-    ],
-  },
+interface Service {
+  id: string
+  title: string
+  slug: string
+  image: string
+  rating: string
+  description: string
+  deliveryTime: string
+  startingPrice: string
+  categoryId: string
+  subCategoryId?: string
+  status: string
+}
 
-  {
-    id: 'shifting-moving',
-    title: 'Shifting & Moving',
-    icon: '📦',
-    featured: [
-      {
-        title: 'House Shifting',
-        image: '/moving_service.webp',
-        slug: 'house-shifting',
-        rating: '4.9',
-        description: 'Complete house shifting solutions with packing, moving, and unpacking services.',
-        deliveryTime: 'Same day',
-        startingPrice: '৳3,000',
-      },
-      {
-        title: 'Office Shifting',
-        image: '/gas-cooker-repair.jpg',
-        slug: 'office-shifting',
-        rating: '4.8',
-        description: 'Professional office relocation services with minimal business disruption.',
-        deliveryTime: '1-2 days',
-        startingPrice: '৳5,000',
-      },
-      {
-        title: 'Local Shifting',
-        image: '/moving_service.webp',
-        slug: 'local-shifting',
-        rating: '4.7',
-        description: 'Affordable local shifting services within the city.',
-        deliveryTime: 'Same day',
-        startingPrice: '৳2,000',
-      },
-    ],
-    services: [
-      { title: 'Packing Service', slug: 'packing-service' },
-      { title: 'Inter-city Shifting', slug: 'inter-city-shifting' },
-      { title: 'International Shifting', slug: 'international-shifting' },
-    ],
-  },
-
-  {
-    id: 'home-repair',
-    title: 'Home Repair',
-    icon: '🏠',
-    featured: [
-      {
-        title: 'Plumbing Services',
-        image: '/plumbing.jpg',
-        slug: 'plumbing-services',
-        rating: '4.8',
-        description: 'Professional plumbing and sanitary services for your home. Expert technicians available 24/7.',
-        deliveryTime: '2-4 hours',
-        startingPrice: '৳500',
-      },
-      {
-        title: 'Electrical Services',
-        image: '/moving_service.webp',
-        slug: 'electrical-services',
-        rating: '4.7',
-        description: 'Expert electrical repair, installation, and maintenance services.',
-        deliveryTime: '2-3 hours',
-        startingPrice: '৳600',
-      },
-      {
-        title: 'Painting Services',
-        image: '/cleaning_service.jpg',
-        slug: 'painting-services',
-        rating: '4.6',
-        description: 'Professional interior and exterior painting services with quality materials.',
-        deliveryTime: '1-2 days',
-        startingPrice: '৳2,500',
-      },
-    ],
-    services: [
-      { title: 'Carpentry Services', slug: 'carpentry-services' },
-      { title: 'Sanitary Services', slug: 'sanitary-services' },
-      { title: 'Interior Design', slug: 'interior-design' },
-      { title: 'Door & Lock Services', slug: 'door-lock-services' },
-      { title: 'Welding Services', slug: 'welding-services' },
-      { title: 'Glass & Glazing', slug: 'glass-glazing' },
-    ],
-  },
-]
+interface ServiceCategory {
+  id: string
+  title: string
+  icon: string
+  featured?: Array<{
+    title: string
+    image: string
+    slug: string
+    rating: string
+    description: string
+    deliveryTime: string
+    startingPrice: string
+  }>
+  subCategories?: Array<{
+    id: string
+    title: string
+    icon: string
+    featured?: Array<{
+      title: string
+      image: string
+      slug: string
+      rating: string
+      description: string
+      deliveryTime: string
+      startingPrice: string
+    }>
+    services: Array<{
+      title: string
+      slug: string
+    }>
+  }>
+  services: Array<{
+    title: string
+    slug: string
+  }>
+}
 
 
 export default function AllServicesPage() {
   const router = useRouter()
   const [activeSection, setActiveSection] = useState('')
+  const [serviceCategories, setServiceCategories] = useState<ServiceCategory[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  // Fetch data from backend
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+
+        // Fetch all data in parallel
+        const [categoriesRes, subcategoriesRes, servicesRes] = await Promise.all([
+          fetch('/api/categories'),
+          fetch('/api/subcategories'),
+          fetch('/api/services'),
+        ])
+
+        if (!categoriesRes.ok || !subcategoriesRes.ok || !servicesRes.ok) {
+          throw new Error('Failed to fetch data from server')
+        }
+
+        const categoriesData = await categoriesRes.json()
+        const subcategoriesData = await subcategoriesRes.json()
+        const servicesData = await servicesRes.json()
+
+        if (!categoriesData.success || !subcategoriesData.success || !servicesData.success) {
+          throw new Error('Invalid response from server')
+        }
+
+        const categories: Category[] = categoriesData.categories.filter((c: Category) => c.status === 'active')
+        const subcategories: SubCategory[] = subcategoriesData.subcategories.filter((s: SubCategory) => s.status === 'active')
+        const services: Service[] = servicesData.services.filter((s: Service) => s.status === 'active')
+
+        // Transform data to match component structure
+        const transformedCategories: ServiceCategory[] = categories.map((category) => {
+          // Get subcategories for this category
+          const categorySubcategories = subcategories.filter(
+            (sub) => sub.categoryId === category.id
+          )
+
+          // Get services for this category (not in a subcategory)
+          const categoryServices = services.filter(
+            (service) => service.categoryId === category.id && !service.subCategoryId
+          )
+
+          // Get services for each subcategory
+          // Sort subcategories by serialNumber if available
+          const sortedSubcategories = [...categorySubcategories].sort((a, b) => {
+            if (a.serialNumber !== null && a.serialNumber !== undefined && 
+                b.serialNumber !== null && b.serialNumber !== undefined) {
+              return a.serialNumber - b.serialNumber
+            }
+            return a.title.localeCompare(b.title)
+          })
+
+          const subCategoriesWithServices = sortedSubcategories.map((subCategory) => {
+            const subCategoryServices = services.filter(
+              (service) => service.subCategoryId === subCategory.id
+            )
+
+            // First 3 services as featured
+            const featured = subCategoryServices.slice(0, 3).map((service) => ({
+              title: service.title,
+              image: service.image || '/placeholder.svg',
+              slug: service.slug,
+              rating: service.rating || '0',
+              description: service.description || '',
+              deliveryTime: service.deliveryTime || '',
+              startingPrice: service.startingPrice || '',
+            }))
+
+            // Remaining services as list
+            const servicesList = subCategoryServices.slice(3).map((service) => ({
+              title: service.title,
+              slug: service.slug,
+            }))
+
+            return {
+              id: subCategory.id,
+              title: subCategory.title,
+              icon: subCategory.icon || '',
+              featured: featured.length > 0 ? featured : undefined,
+              services: servicesList,
+            }
+          })
+
+          // First 3 services as featured for category
+          const featured = categoryServices.slice(0, 3).map((service) => ({
+            title: service.title,
+            image: service.image || '/placeholder.svg',
+            slug: service.slug,
+            rating: service.rating || '0',
+            description: service.description || '',
+            deliveryTime: service.deliveryTime || '',
+            startingPrice: service.startingPrice || '',
+          }))
+
+          // Remaining services as list
+          const servicesList = categoryServices.slice(3).map((service) => ({
+            title: service.title,
+            slug: service.slug,
+          }))
+
+          return {
+            id: category.id,
+            title: category.title,
+            icon: category.icon || '',
+            featured: featured.length > 0 ? featured : undefined,
+            subCategories: subCategoriesWithServices.length > 0 ? subCategoriesWithServices : undefined,
+            services: servicesList,
+          }
+        })
+
+        // Sort categories by serialNumber if available, otherwise by title
+        transformedCategories.sort((a, b) => {
+          const categoryA = categories.find((c) => c.id === a.id)
+          const categoryB = categories.find((c) => c.id === b.id)
+          if (categoryA?.serialNumber !== null && categoryA?.serialNumber !== undefined && 
+              categoryB?.serialNumber !== null && categoryB?.serialNumber !== undefined) {
+            return categoryA.serialNumber! - categoryB.serialNumber!
+          }
+          return a.title.localeCompare(b.title)
+        })
+
+        setServiceCategories(transformedCategories)
+      } catch (err) {
+        console.error('Error fetching services:', err)
+        setError(err instanceof Error ? err.message : 'Failed to load services')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [])
 
   // Helper function to convert service title to slug
   const getServiceSlug = (title: string): string => {
     // Try to find the slug from the service categories
     for (const category of serviceCategories) {
       if (category.featured) {
-        const found = category.featured.find(s => s.title === title)
+        const found = category.featured.find((s) => s.title === title)
         if (found) return found.slug
       }
       if (category.subCategories) {
         for (const subCategory of category.subCategories) {
           if (subCategory.featured) {
-            const found = subCategory.featured.find(s => s.title === title)
+            const found = subCategory.featured.find((s) => s.title === title)
             if (found) return found.slug
           }
         }
       }
     }
     // Fallback to generating slug from title
-    return title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+    return titleToSlug(title)
   }
 
   const handleBookNow = (e: React.MouseEvent, serviceTitle: string) => {
@@ -360,6 +251,8 @@ export default function AllServicesPage() {
   }
 
   useEffect(() => {
+    if (serviceCategories.length === 0) return
+
     const updateActiveSection = () => {
       const allSections: { id: string; element: HTMLElement }[] = []
 
@@ -449,7 +342,7 @@ export default function AllServicesPage() {
       window.removeEventListener('scroll', updateActiveSection)
       observer.disconnect()
     }
-  }, [])
+  }, [serviceCategories])
 
   const handleSidebarClick = (e: React.MouseEvent<HTMLAnchorElement>, categoryId: string) => {
     e.preventDefault()
@@ -457,6 +350,45 @@ export default function AllServicesPage() {
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <main className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-primary)] mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading services...</p>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <main className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <div className="text-center">
+              <p className="text-red-600 mb-4">Error: {error}</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-4 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:opacity-90"
+              >
+                Retry
+              </button>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    )
   }
 
   return (
@@ -493,28 +425,21 @@ export default function AllServicesPage() {
                     </a>
                     {category.subCategories && (
                       <div className="ml-6 sm:ml-8 mt-1 space-y-1">
-                        {category.subCategories.map((subCategory) => {
-                          const isPrimary = subCategory.id === 'fridge-repair' || subCategory.id === 'microwave-repair'
-                          return (
-                            <a
-                              key={subCategory.id}
-                              href={`#${subCategory.id}`}
-                              onClick={(e) => handleSidebarClick(e, subCategory.id)}
-                              className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors text-sm sm:text-base ${
-                                activeSection === subCategory.id
-                                  ? isPrimary
-                                    ? 'bg-[var(--color-neutral)] text-[var(--color-primary)] font-semibold'
-                                    : 'bg-blue-100 text-blue-600 font-semibold'
-                                  : isPrimary
-                                  ? 'text-gray-600 hover:bg-[var(--color-neutral)] hover:text-[var(--color-primary)]'
-                                  : 'text-gray-600 hover:bg-blue-50 hover:text-blue-600'
-                              }`}
-                            >
-                              {subCategory.icon && <span className="text-base sm:text-lg">{subCategory.icon}</span>}
-                              <span>{subCategory.title}</span>
-                            </a>
-                          )
-                        })}
+                        {category.subCategories.map((subCategory) => (
+                          <a
+                            key={subCategory.id}
+                            href={`#${subCategory.id}`}
+                            onClick={(e) => handleSidebarClick(e, subCategory.id)}
+                            className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors text-sm sm:text-base ${
+                              activeSection === subCategory.id
+                                ? 'bg-blue-100 text-blue-600 font-semibold'
+                                : 'text-gray-600 hover:bg-blue-50 hover:text-blue-600'
+                            }`}
+                          >
+                            {subCategory.icon && <span className="text-base sm:text-lg">{subCategory.icon}</span>}
+                            <span>{subCategory.title}</span>
+                          </a>
+                        ))}
                       </div>
                     )}
                   </div>
@@ -534,8 +459,9 @@ export default function AllServicesPage() {
                   </h2>
 
                   {/* Featured Services Grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
-                    {category.featured.map((service, index) => {
+                  {category.featured && category.featured.length > 0 && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+                      {category.featured.map((service, index) => {
                       const serviceWithDetails = service as typeof service & {
                         rating?: string
                         description?: string
@@ -593,15 +519,17 @@ export default function AllServicesPage() {
                         </div>
                       )
                     })}
-                  </div>
+                    </div>
+                  )}
 
                   {/* All Services List */}
-                  <div>
-                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
-                      All {category.title.toLowerCase()} services
-                    </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                      {category.services.map((service, index) => (
+                  {category.services && category.services.length > 0 && (
+                    <div>
+                      <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
+                        All {category.title.toLowerCase()} services
+                      </h3>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                        {category.services.map((service, index) => (
                         <Link
                           key={index}
                           href={`/services/${service.slug}`}
@@ -611,8 +539,9 @@ export default function AllServicesPage() {
                           <span>{service.title}</span>
                         </Link>
                       ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </section>
 
                 {/* Sub-Categories */}
@@ -694,27 +623,16 @@ export default function AllServicesPage() {
                           All {subCategory.title.toLowerCase()} services
                         </h3>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                          {subCategory.services.map((service, index) => {
-                            const isPrimary = subCategory.id === 'fridge-repair' || subCategory.id === 'microwave-repair'
-                            return (
-                              <Link
-                                key={index}
-                                href={`/services/${service.slug}`}
-                                className={`flex items-center gap-2 text-left text-sm sm:text-base text-gray-700 transition-colors ${
-                                  isPrimary
-                                    ? 'hover:text-[var(--color-primary)]'
-                                    : 'hover:text-blue-600'
-                                }`}
-                              >
-                                <span className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                                  isPrimary
-                                    ? 'bg-[var(--color-primary)]'
-                                    : 'bg-blue-600'
-                                }`} />
-                                <span>{service.title}</span>
-                              </Link>
-                            )
-                          })}
+                          {subCategory.services.map((service, index) => (
+                            <Link
+                              key={index}
+                              href={`/services/${service.slug}`}
+                              className="flex items-center gap-2 text-left text-sm sm:text-base text-gray-700 hover:text-blue-600 transition-colors"
+                            >
+                              <span className="w-2 h-2 rounded-full bg-blue-600 flex-shrink-0" />
+                              <span>{service.title}</span>
+                            </Link>
+                          ))}
                         </div>
                       </div>
                     )}
