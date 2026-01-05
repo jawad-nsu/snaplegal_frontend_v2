@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { auth } from '@/app/api/auth/[...nextauth]/route'
+import { getSessionFromRequest } from '@/lib/middleware-auth'
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -26,11 +26,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // Get session
-  const session = await auth()
+  // Get session using lightweight decoder
+  const session = await getSessionFromRequest(request)
 
   // Protected routes
-  if (!session) {
+  if (!session?.user) {
     // Redirect to sign in if not authenticated
     const signInUrl = new URL('/signin', request.url)
     signInUrl.searchParams.set('callbackUrl', pathname)
@@ -41,7 +41,7 @@ export async function middleware(request: NextRequest) {
   const adminRoutes = ['/admin']
   const isAdminRoute = adminRoutes.some(route => pathname.startsWith(route))
   
-  if (isAdminRoute && session.user?.type !== 'ADMIN') {
+  if (isAdminRoute && session.user.type !== 'ADMIN') {
     // Redirect non-admins away from admin routes
     return NextResponse.redirect(new URL('/', request.url))
   }
@@ -50,7 +50,7 @@ export async function middleware(request: NextRequest) {
   const partnerRoutes = ['/vendor']
   const isPartnerRoute = partnerRoutes.some(route => pathname.startsWith(route))
   
-  if (isPartnerRoute && session.user?.type !== 'PARTNER') {
+  if (isPartnerRoute && session.user.type !== 'PARTNER') {
     // Redirect non-partners away from partner routes
     return NextResponse.redirect(new URL('/', request.url))
   }
@@ -61,7 +61,7 @@ export async function middleware(request: NextRequest) {
   
   // Only redirect if user type is explicitly PARTNER
   // Allow access if type is USER or undefined/null (defaults to USER)
-  if (isUserRoute && session.user?.type === 'PARTNER') {
+  if (isUserRoute && session.user.type === 'PARTNER') {
     // Redirect partners away from user-only routes
     return NextResponse.redirect(new URL('/vendor', request.url))
   }
