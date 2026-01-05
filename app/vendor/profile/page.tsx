@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { User, Edit2, Home, FileText, Trash2, Upload, X, CheckCircle } from 'lucide-react'
+import { User, Edit2, Home, FileText, Trash2, Upload, X, CheckCircle, Loader2 } from 'lucide-react'
 import Navbar from '@/components/navbar'
 
 type ServiceStatus = 'submitted' | 'under-review' | 'approved' | 'rejected'
@@ -136,6 +136,23 @@ const serviceCategories = [
   },
 ]
 
+interface PartnerInfo {
+  id: string
+  name: string
+  email: string
+  phone: string
+  businessName: string
+  businessType: string
+  registrationNumber: string
+  address: string
+  district: string
+  serviceCategories: string[]
+  image: string | null
+  status: string
+  createdAt: string
+  updatedAt: string
+}
+
 export default function VendorProfilePage() {
   const [activeTab, setActiveTab] = useState('my-account')
   const [documents, setDocuments] = useState([
@@ -151,15 +168,15 @@ export default function VendorProfilePage() {
   const [showAddressModal, setShowAddressModal] = useState(false)
   const [addressType, setAddressType] = useState('')
   const [addressLocation, setAddressLocation] = useState('')
-  const [addresses, setAddresses] = useState([
-    { id: '1', type: 'Business Address', location: 'Gulshan, Dhaka' },
-    { id: '2', type: 'Service Location', location: 'Dhanmondi, Dhaka' },
-  ])
+  const [addresses, setAddresses] = useState<Array<{ id: string; type: string; location: string }>>([])
   const [myServicesTab, setMyServicesTab] = useState('my-segments')
   const [selectedCategory, setSelectedCategory] = useState<string>('ac-repair')
   const [selectedServices, setSelectedServices] = useState<string[]>([])
   const [submittedServices, setSubmittedServices] = useState<Service[]>([])
   const [approvedServices, setApprovedServices] = useState<Service[]>([])
+  const [vendorInfo, setVendorInfo] = useState<PartnerInfo | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   const menuItems = [
     { id: 'my-account', label: 'My Account' },
@@ -168,14 +185,53 @@ export default function VendorProfilePage() {
     { id: 'service-management', label: 'Service Management' },
   ]
 
-  const vendorInfo = {
-    name: 'Vendor Name',
-    phone: '+8801712345678',
-    email: 'vendor@example.com',
-    businessName: 'ABC Services Ltd',
-    businessType: 'Service Provider',
-    registrationNumber: 'REG-123456',
-  }
+  // Fetch partner information from backend
+  useEffect(() => {
+    const fetchPartnerInfo = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+        const response = await fetch('/api/vendor/profile')
+        
+        if (!response.ok) {
+          if (response.status === 401) {
+            setError('Please sign in to view your profile')
+          } else if (response.status === 403) {
+            setError('Access denied. Partner account required.')
+          } else {
+            setError('Failed to load partner information')
+          }
+          setIsLoading(false)
+          return
+        }
+
+        const data = await response.json()
+        if (data.success && data.partner) {
+          setVendorInfo(data.partner)
+          
+          // Initialize addresses from partner data
+          const addressList: Array<{ id: string; type: string; location: string }> = []
+          if (data.partner.address) {
+            addressList.push({
+              id: '1',
+              type: 'Business Address',
+              location: data.partner.address + (data.partner.district ? `, ${data.partner.district}` : ''),
+            })
+          }
+          setAddresses(addressList)
+        } else {
+          setError('Failed to load partner information')
+        }
+      } catch (err) {
+        console.error('Error fetching partner info:', err)
+        setError('An error occurred while loading your profile')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchPartnerInfo()
+  }, [])
 
   const getBreadcrumbLabel = () => {
     const activeItem = menuItems.find(item => item.id === activeTab)
@@ -436,45 +492,98 @@ export default function VendorProfilePage() {
               <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 lg:p-8">
                 <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 sm:mb-8">Personal Info</h1>
 
-                {/* Profile Picture */}
-                <div className="flex justify-center mb-6 sm:mb-8">
-                  <div className="relative">
-                    <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gray-200 flex items-center justify-center">
-                      <User className="w-12 h-12 sm:w-16 sm:h-16 text-gray-400" />
+                {isLoading ? (
+                  <div className="flex flex-col items-center justify-center py-12">
+                    <Loader2 className="w-8 h-8 text-[var(--color-primary)] animate-spin mb-4" />
+                    <p className="text-gray-600">Loading partner information...</p>
+                  </div>
+                ) : error ? (
+                  <div className="flex flex-col items-center justify-center py-12">
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-4 max-w-md w-full">
+                      <p className="text-red-800 text-center">{error}</p>
                     </div>
-                    <button className="absolute bottom-0 right-0 w-7 h-7 sm:w-8 sm:h-8 bg-[var(--color-primary)] rounded-full flex items-center justify-center hover:opacity-90 transition-colors">
-                      <Edit2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
-                    </button>
                   </div>
-                </div>
+                ) : vendorInfo ? (
+                  <>
+                    {/* Profile Picture */}
+                    <div className="flex justify-center mb-6 sm:mb-8">
+                      <div className="relative">
+                        {vendorInfo.image ? (
+                          <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                            <img 
+                              src={vendorInfo.image} 
+                              alt={vendorInfo.name}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gray-200 flex items-center justify-center">
+                            <User className="w-12 h-12 sm:w-16 sm:h-16 text-gray-400" />
+                          </div>
+                        )}
+                        <button className="absolute bottom-0 right-0 w-7 h-7 sm:w-8 sm:h-8 bg-[var(--color-primary)] rounded-full flex items-center justify-center hover:opacity-90 transition-colors">
+                          <Edit2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
+                        </button>
+                      </div>
+                    </div>
 
-                {/* Vendor Details */}
-                <div className="space-y-4 max-w-2xl mx-auto">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 border-b gap-2 sm:gap-0">
-                    <span className="text-gray-600 font-medium text-sm sm:text-base">Name</span>
-                    <span className="text-gray-900 font-semibold text-sm sm:text-base break-words">{vendorInfo.name}</span>
+                    {/* Vendor Details */}
+                    <div className="space-y-4 max-w-2xl mx-auto">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 border-b gap-2 sm:gap-0">
+                        <span className="text-gray-600 font-medium text-sm sm:text-base">Name</span>
+                        <span className="text-gray-900 font-semibold text-sm sm:text-base break-words">{vendorInfo.name || 'N/A'}</span>
+                      </div>
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 border-b gap-2 sm:gap-0">
+                        <span className="text-gray-600 font-medium text-sm sm:text-base">Phone</span>
+                        <span className="text-gray-900 font-semibold text-sm sm:text-base break-words">{vendorInfo.phone || 'N/A'}</span>
+                      </div>
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 border-b gap-2 sm:gap-0">
+                        <span className="text-gray-600 font-medium text-sm sm:text-base">Email</span>
+                        <span className="text-gray-900 font-semibold text-sm sm:text-base break-words">{vendorInfo.email || 'N/A'}</span>
+                      </div>
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 border-b gap-2 sm:gap-0">
+                        <span className="text-gray-600 font-medium text-sm sm:text-base">Business Name</span>
+                        <span className="text-gray-900 font-semibold text-sm sm:text-base break-words">{vendorInfo.businessName || 'N/A'}</span>
+                      </div>
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 border-b gap-2 sm:gap-0">
+                        <span className="text-gray-600 font-medium text-sm sm:text-base">Business Type</span>
+                        <span className="text-gray-900 font-semibold text-sm sm:text-base break-words">{vendorInfo.businessType || 'N/A'}</span>
+                      </div>
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 border-b gap-2 sm:gap-0">
+                        <span className="text-gray-600 font-medium text-sm sm:text-base">Registration Number</span>
+                        <span className="text-gray-900 font-semibold text-sm sm:text-base break-words">{vendorInfo.registrationNumber || 'N/A'}</span>
+                      </div>
+                      {vendorInfo.address && (
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 border-b gap-2 sm:gap-0">
+                          <span className="text-gray-600 font-medium text-sm sm:text-base">Address</span>
+                          <span className="text-gray-900 font-semibold text-sm sm:text-base break-words">
+                            {vendorInfo.address}
+                            {vendorInfo.district && `, ${vendorInfo.district}`}
+                          </span>
+                        </div>
+                      )}
+                      {vendorInfo.serviceCategories && vendorInfo.serviceCategories.length > 0 && (
+                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between py-3 border-b gap-2 sm:gap-0">
+                          <span className="text-gray-600 font-medium text-sm sm:text-base">Service Categories</span>
+                          <div className="flex flex-wrap gap-2">
+                            {vendorInfo.serviceCategories.map((category, index) => (
+                              <span 
+                                key={index}
+                                className="px-2 py-1 bg-[var(--color-neutral)] text-[var(--color-primary)] rounded-md text-xs sm:text-sm font-medium"
+                              >
+                                {category}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-12">
+                    <p className="text-gray-600">No partner information available</p>
                   </div>
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 border-b gap-2 sm:gap-0">
-                    <span className="text-gray-600 font-medium text-sm sm:text-base">Phone</span>
-                    <span className="text-gray-900 font-semibold text-sm sm:text-base break-words">{vendorInfo.phone}</span>
-                  </div>
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 border-b gap-2 sm:gap-0">
-                    <span className="text-gray-600 font-medium text-sm sm:text-base">Email</span>
-                    <span className="text-gray-900 font-semibold text-sm sm:text-base break-words">{vendorInfo.email}</span>
-                  </div>
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 border-b gap-2 sm:gap-0">
-                    <span className="text-gray-600 font-medium text-sm sm:text-base">Business Name</span>
-                    <span className="text-gray-900 font-semibold text-sm sm:text-base break-words">{vendorInfo.businessName}</span>
-                  </div>
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 border-b gap-2 sm:gap-0">
-                    <span className="text-gray-600 font-medium text-sm sm:text-base">Business Type</span>
-                    <span className="text-gray-900 font-semibold text-sm sm:text-base break-words">{vendorInfo.businessType}</span>
-                  </div>
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 border-b gap-2 sm:gap-0">
-                    <span className="text-gray-600 font-medium text-sm sm:text-base">Registration Number</span>
-                    <span className="text-gray-900 font-semibold text-sm sm:text-base break-words">{vendorInfo.registrationNumber}</span>
-                  </div>
-                </div>
+                )}
               </div>
             )}
 

@@ -62,6 +62,11 @@ export async function PUT(
     // Check if user exists
     const existingUser = await prisma.user.findUnique({
       where: { id },
+      select: {
+        id: true,
+        status: true,
+        type: true,
+      },
     })
 
     if (!existingUser) {
@@ -116,9 +121,9 @@ export async function PUT(
       )
     }
 
-    // Validate status
+    // Validate status if provided
     const validStatuses: UserStatus[] = ['active', 'inactive']
-    if (status && !validStatuses.includes(status as UserStatus)) {
+    if (status !== undefined && status !== null && status !== '' && !validStatuses.includes(status as UserStatus)) {
       return NextResponse.json(
         { error: 'Invalid status. Must be one of: active, inactive' },
         { status: 400 }
@@ -160,12 +165,8 @@ export async function PUT(
       name: name.trim(),
       email,
       phone: formatPhone(phone),
-      type: (type || 'USER') as UserType,
-    }
-
-    // Update status if provided
-    if (status) {
-      updateData.status = status as UserStatus
+      type: (type || existingUser.type) as UserType,
+      status: (status || existingUser.status) as UserStatus,
     }
 
     const user = await prisma.user.update({

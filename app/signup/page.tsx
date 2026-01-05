@@ -639,6 +639,27 @@ export default function SignUpPage() {
                   )}
                 </div>
 
+                {/* Address */}
+                <div>
+                  <label htmlFor="partner-address" className="block text-sm font-medium text-gray-700 mb-2">
+                    Address
+                  </label>
+                  <input
+                    type="text"
+                    id="partner-address"
+                    name="address"
+                    value={partnerFormData.address}
+                    onChange={handlePartnerChange}
+                    placeholder="Enter your address"
+                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] ${
+                      partnerErrors.address ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                  />
+                  {partnerErrors.address && (
+                    <p className="mt-1 text-sm text-red-600">{partnerErrors.address}</p>
+                  )}
+                </div>
+
                 {/* Password */}
                 <div>
                   <label htmlFor="partner-password" className="block text-sm font-medium text-gray-700 mb-2">
