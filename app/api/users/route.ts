@@ -8,6 +8,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const search = searchParams.get('search') || ''
     const status = searchParams.get('status') // 'all', 'active', 'inactive'
+    const type = searchParams.get('type') // 'all', 'USER', 'PARTNER', 'ADMIN', 'EMPLOYEE'
 
     const where: any = {}
 
@@ -22,6 +23,11 @@ export async function GET(request: NextRequest) {
     // Filter by status
     if (status && status !== 'all') {
       where.status = status as UserStatus
+    }
+
+    // Filter by type
+    if (type && type !== 'all') {
+      where.type = type as UserType
     }
 
     const users = await prisma.user.findMany({

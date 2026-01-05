@@ -202,12 +202,11 @@ export default function AdminDashboard() {
   // Filter states for Users
   const [userSearch, setUserSearch] = useState('')
   const [userStatusFilter, setUserStatusFilter] = useState<string>('all')
+  const [userTypeFilter, setUserTypeFilter] = useState<string>('all')
 
   // Filter states for Vendors
   const [vendorSearch, setVendorSearch] = useState('')
   const [vendorStatusFilter, setVendorStatusFilter] = useState<string>('all')
-  const [vendorDistrictFilter, setVendorDistrictFilter] = useState<string>('all')
-  const [vendorCategoryFilter, setVendorCategoryFilter] = useState<string>('all')
 
   // Users - Fetched from API
   const [users, setUsers] = useState<User[]>([])
@@ -251,6 +250,7 @@ export default function AdminDashboard() {
         const params = new URLSearchParams()
         if (userSearch) params.append('search', userSearch)
         if (userStatusFilter !== 'all') params.append('status', userStatusFilter)
+        if (userTypeFilter !== 'all') params.append('type', userTypeFilter)
 
         const response = await fetch(`/api/users?${params.toString()}`)
         const data = await response.json()
@@ -270,7 +270,7 @@ export default function AdminDashboard() {
     }
 
     fetchUsers()
-  }, [userSearch, userStatusFilter])
+  }, [userSearch, userStatusFilter, userTypeFilter])
 
   const [vendors, setVendors] = useState<Vendor[]>([
     { id: '1', name: 'AC Repair Pro', email: 'acpro@example.com', phone: '+8801712345681', address: '123 Main St', district: 'Dhaka', serviceCategories: ['AC Repair Services'], createdAt: '2024-01-10', status: 'active' },
@@ -795,6 +795,7 @@ export default function AdminDashboard() {
             const params = new URLSearchParams()
             if (userSearch) params.append('search', userSearch)
             if (userStatusFilter !== 'all') params.append('status', userStatusFilter)
+            if (userTypeFilter !== 'all') params.append('type', userTypeFilter)
             
             const refreshResponse = await fetch(`/api/users?${params.toString()}`)
             const refreshData = await refreshResponse.json()
@@ -847,6 +848,7 @@ export default function AdminDashboard() {
           const params = new URLSearchParams()
           if (userSearch) params.append('search', userSearch)
           if (userStatusFilter !== 'all') params.append('status', userStatusFilter)
+          if (userTypeFilter !== 'all') params.append('type', userTypeFilter)
           
           const refreshResponse = await fetch(`/api/users?${params.toString()}`)
           const refreshData = await refreshResponse.json()
@@ -904,12 +906,14 @@ export default function AdminDashboard() {
       user.email.toLowerCase().includes(userSearch.toLowerCase()) ||
       user.phone.includes(userSearch)
     const matchesStatus = userStatusFilter === 'all' || user.status === userStatusFilter
-    return matchesSearch && matchesStatus
+    const matchesType = userTypeFilter === 'all' || user.type === userTypeFilter
+    return matchesSearch && matchesStatus && matchesType
   })
 
   const clearUserFilters = () => {
     setUserSearch('')
     setUserStatusFilter('all')
+    setUserTypeFilter('all')
   }
 
   const renderLeadsTab = () => (
@@ -1223,7 +1227,7 @@ export default function AdminDashboard() {
           <Filter size={18} className="sm:w-5 sm:h-5 text-gray-500" />
           <h3 className="font-semibold text-sm sm:text-base text-gray-700">Filters</h3>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
           <div>
             <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Search</label>
             <div className="relative">
@@ -1248,8 +1252,22 @@ export default function AdminDashboard() {
               <option value="inactive">Inactive</option>
             </select>
           </div>
+          <div>
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">User Type</label>
+            <select
+              value={userTypeFilter}
+              onChange={(e) => setUserTypeFilter(e.target.value)}
+              className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md"
+            >
+              <option value="all">All Types</option>
+              <option value="USER">USER</option>
+              <option value="PARTNER">PARTNER</option>
+              <option value="ADMIN">ADMIN</option>
+              <option value="EMPLOYEE">EMPLOYEE</option>
+            </select>
+          </div>
           <div className="flex items-end">
-            {(userSearch || userStatusFilter !== 'all') && (
+            {(userSearch || userStatusFilter !== 'all' || userTypeFilter !== 'all') && (
               <Button
                 variant="outline"
                 onClick={clearUserFilters}
@@ -1390,27 +1408,21 @@ export default function AdminDashboard() {
     </div>
   )
 
-  // Filter vendors
-  const filteredVendors = vendors.filter(vendor => {
+  // Filter vendors - show only PARTNER type users
+  const partnerUsers = users.filter(user => user.type === 'PARTNER')
+  
+  const filteredVendors = partnerUsers.filter(user => {
     const matchesSearch = vendorSearch === '' || 
-      vendor.name.toLowerCase().includes(vendorSearch.toLowerCase()) ||
-      vendor.email.toLowerCase().includes(vendorSearch.toLowerCase()) ||
-      vendor.phone.includes(vendorSearch) ||
-      vendor.district.toLowerCase().includes(vendorSearch.toLowerCase())
-    const matchesStatus = vendorStatusFilter === 'all' || vendor.status === vendorStatusFilter
-    const matchesDistrict = vendorDistrictFilter === 'all' || vendor.district === vendorDistrictFilter
-    const matchesCategory = vendorCategoryFilter === 'all' || vendor.serviceCategories.includes(vendorCategoryFilter)
-    return matchesSearch && matchesStatus && matchesDistrict && matchesCategory
+      user.name.toLowerCase().includes(vendorSearch.toLowerCase()) ||
+      user.email.toLowerCase().includes(vendorSearch.toLowerCase()) ||
+      user.phone.includes(vendorSearch)
+    const matchesStatus = vendorStatusFilter === 'all' || user.status === vendorStatusFilter
+    return matchesSearch && matchesStatus
   })
-
-  // Get unique districts from vendors
-  const uniqueDistricts = Array.from(new Set(vendors.map(v => v.district))).sort()
 
   const clearVendorFilters = () => {
     setVendorSearch('')
     setVendorStatusFilter('all')
-    setVendorDistrictFilter('all')
-    setVendorCategoryFilter('all')
   }
 
   const renderVendorsTab = () => (
@@ -1421,7 +1433,7 @@ export default function AdminDashboard() {
           <Filter size={18} className="sm:w-5 sm:h-5 text-gray-500" />
           <h3 className="font-semibold text-sm sm:text-base text-gray-700">Filters</h3>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           <div>
             <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Search</label>
             <div className="relative">
@@ -1429,7 +1441,7 @@ export default function AdminDashboard() {
               <Input
                 value={vendorSearch}
                 onChange={(e) => setVendorSearch(e.target.value)}
-                placeholder="Search by name, email, phone, or district..."
+                placeholder="Search by name, email, or phone..."
                 className="pl-9 sm:pl-10 text-sm sm:text-base"
               />
             </div>
@@ -1444,41 +1456,14 @@ export default function AdminDashboard() {
               <option value="all">All Status</option>
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
-              <option value="pending">Pending</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">District</label>
-            <select
-              value={vendorDistrictFilter}
-              onChange={(e) => setVendorDistrictFilter(e.target.value)}
-              className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md"
-            >
-              <option value="all">All Districts</option>
-              {uniqueDistricts.map(district => (
-                <option key={district} value={district}>{district}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Service Category</label>
-            <select
-              value={vendorCategoryFilter}
-              onChange={(e) => setVendorCategoryFilter(e.target.value)}
-              className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md"
-            >
-              <option value="all">All Categories</option>
-              {categories.map(cat => (
-                <option key={cat.id} value={cat.title}>{cat.title}</option>
-              ))}
             </select>
           </div>
         </div>
         <div className="mt-3 sm:mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
           <div className="text-xs sm:text-sm text-gray-500">
-            Showing {filteredVendors.length} of {vendors.length} vendors
+            Showing {filteredVendors.length} of {partnerUsers.length} vendors (PARTNER users)
           </div>
-          {(vendorSearch || vendorStatusFilter !== 'all' || vendorDistrictFilter !== 'all' || vendorCategoryFilter !== 'all') && (
+          {(vendorSearch || vendorStatusFilter !== 'all') && (
             <Button
               variant="outline"
               onClick={clearVendorFilters}
@@ -1493,9 +1478,13 @@ export default function AdminDashboard() {
 
       {/* Table */}
       <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-        {filteredVendors.length === 0 ? (
+        {usersLoading ? (
           <div className="text-center py-8 sm:py-12 px-4">
-            <p className="text-sm sm:text-base text-gray-600">No vendors found matching the filters</p>
+            <p className="text-sm sm:text-base text-gray-600">Loading vendors...</p>
+          </div>
+        ) : filteredVendors.length === 0 ? (
+          <div className="text-center py-8 sm:py-12 px-4">
+            <p className="text-sm sm:text-base text-gray-600">No vendors (PARTNER users) found matching the filters</p>
           </div>
         ) : (
           <>
@@ -1514,34 +1503,31 @@ export default function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredVendors.map((vendor) => (
-                    <tr key={vendor.id} className="border-b border-gray-100 hover:bg-gray-50">
-                      <td className="py-4 px-4 text-sm font-medium text-gray-900">{vendor.name}</td>
-                      <td className="py-4 px-4 text-sm text-gray-500">{vendor.email}</td>
-                      <td className="py-4 px-4 text-sm text-gray-500">{vendor.phone}</td>
-                      <td className="py-4 px-4 text-sm text-gray-500">{vendor.district}</td>
+                  {filteredVendors.map((user) => (
+                    <tr key={user.id} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="py-4 px-4 text-sm font-medium text-gray-900">{user.name}</td>
+                      <td className="py-4 px-4 text-sm text-gray-500">{user.email}</td>
+                      <td className="py-4 px-4 text-sm text-gray-500">{user.phone}</td>
+                      <td className="py-4 px-4 text-sm text-gray-500">-</td>
                       <td className="py-4 px-4 text-sm text-gray-500">
                         <div className="flex flex-wrap gap-1">
-                          {vendor.serviceCategories.map((cat, idx) => (
-                            <span key={idx} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">{cat}</span>
-                          ))}
+                          <span className="text-xs text-gray-400">-</span>
                         </div>
                       </td>
                       <td className="py-4 px-4">
                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          vendor.status === 'active' ? 'bg-green-100 text-green-800' : 
-                          vendor.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
+                          user.status === 'active' ? 'bg-green-100 text-green-800' : 
                           'bg-red-100 text-red-800'
                         }`}>
-                          {vendor.status}
+                          {user.status}
                         </span>
                       </td>
                       <td className="py-4 px-4 text-sm font-medium">
                         <div className="flex items-center gap-2">
-                          <button onClick={() => handleEdit(vendor)} className="text-indigo-600 hover:text-indigo-900">
+                          <button onClick={() => handleEdit(user)} className="text-indigo-600 hover:text-indigo-900">
                             <Edit size={16} />
                           </button>
-                          <button onClick={() => handleDelete(vendor.id)} className="text-red-600 hover:text-red-900">
+                          <button onClick={() => handleDelete(user.id)} className="text-red-600 hover:text-red-900">
                             <Trash2 size={16} />
                           </button>
                         </div>
@@ -1554,52 +1540,41 @@ export default function AdminDashboard() {
 
             {/* Mobile Card View */}
             <div className="md:hidden divide-y divide-gray-200">
-              {filteredVendors.map((vendor) => (
-                <div key={vendor.id} className="p-4 hover:bg-gray-50">
+              {filteredVendors.map((user) => (
+                <div key={user.id} className="p-4 hover:bg-gray-50">
                   <div className="mb-3">
-                    <h3 className="font-semibold text-base text-gray-900 mb-2">{vendor.name}</h3>
+                    <h3 className="font-semibold text-base text-gray-900 mb-2">{user.name}</h3>
                     <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-medium ${
-                      vendor.status === 'active' ? 'bg-green-100 text-green-700' : 
-                      vendor.status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 
+                      user.status === 'active' ? 'bg-green-100 text-green-700' : 
                       'bg-red-100 text-red-700'
                     }`}>
-                      {vendor.status}
+                      {user.status}
                     </span>
                   </div>
                   <div className="space-y-2 text-sm mb-3">
                     <div className="flex justify-between">
                       <span className="text-gray-500">Email:</span>
-                      <span className="text-gray-900 truncate ml-2">{vendor.email}</span>
+                      <span className="text-gray-900 truncate ml-2">{user.email}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-500">Phone:</span>
-                      <span className="text-gray-900">{vendor.phone}</span>
+                      <span className="text-gray-900">{user.phone}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-500">District:</span>
-                      <span className="text-gray-900">{vendor.district}</span>
+                      <span className="text-gray-900">-</span>
                     </div>
-                    {vendor.serviceCategories.length > 0 && (
-                      <div>
-                        <span className="text-gray-500 block mb-1">Categories:</span>
-                        <div className="flex flex-wrap gap-1">
-                          {vendor.serviceCategories.map((cat, idx) => (
-                            <span key={idx} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">{cat}</span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
                   </div>
                   <div className="flex items-center gap-3 pt-2 border-t border-gray-100">
                     <button 
-                      onClick={() => handleEdit(vendor)} 
+                      onClick={() => handleEdit(user)} 
                       className="flex items-center gap-1.5 text-indigo-600 hover:text-indigo-900 text-sm font-medium"
                     >
                       <Edit size={16} />
                       Edit
                     </button>
                     <button 
-                      onClick={() => handleDelete(vendor.id)} 
+                      onClick={() => handleDelete(user.id)} 
                       className="flex items-center gap-1.5 text-red-600 hover:text-red-900 text-sm font-medium"
                     >
                       <Trash2 size={16} />
