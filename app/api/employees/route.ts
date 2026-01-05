@@ -1,17 +1,15 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { UserType } from '@prisma/client'
 
 export async function GET() {
   try {
     // Fetch all users with type ADMIN or EMPLOYEE (exclude regular USER and PARTNER)
-    // Note: Prisma client needs to be regenerated after adding EMPLOYEE to UserType enum
     const employees = await prisma.user.findMany({
       where: {
         OR: [
-          // @ts-expect-error - Temporary workaround until Prisma client is regenerated
-          { type: 'ADMIN' },
-          // @ts-expect-error - Temporary workaround until Prisma client is regenerated
-          { type: 'EMPLOYEE' },
+          { type: 'ADMIN' as UserType },
+          { type: 'EMPLOYEE' as UserType },
         ],
       },
       select: {

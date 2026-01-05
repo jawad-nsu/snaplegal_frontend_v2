@@ -355,7 +355,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
     // If it's Won, proceed directly. If it's Lost or Lost (Unqualified), show the text field requirement
     if (reason === 'Won') {
       if (confirm(`Are you sure you want to close this lead as "Closed Won"?`)) {
-        const updatedLead = { ...lead, stage: 'Closed', closedReason: reason, closedReasonText: undefined }
+        const updatedLead = { ...lead, stage: 'Closed' as LeadStage, closedReason: reason, closedReasonText: undefined }
         setLead(updatedLead)
         updateLeadInBackend(updatedLead)
         setShowClosedReasonModal(false)
@@ -377,7 +377,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
     if (confirm(`Are you sure you want to close this lead as "${selectedClosedReason === 'Won' ? 'Closed Won' : selectedClosedReason}"?`)) {
       const updatedLead = { 
         ...lead, 
-        stage: 'Closed', 
+        stage: 'Closed' as LeadStage, 
         closedReason: selectedClosedReason,
         closedReasonText: (selectedClosedReason === 'Lost' || selectedClosedReason === 'Lost (Unqualified)') ? closedReasonText.trim() : undefined
       }

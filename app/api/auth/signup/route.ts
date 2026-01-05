@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     } else {
       const passwordValidation = validatePassword(password)
       if (!passwordValidation.valid) {
-        errors.password = passwordValidation.message
+        errors.password = passwordValidation.message || 'Invalid password'
       }
     }
 
