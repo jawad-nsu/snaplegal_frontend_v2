@@ -496,7 +496,7 @@ export default function AllServicesPage() {
                               )}
                             </div>
                             {serviceWithDetails.description && (
-                              <p className="hidden sm:block text-xs sm:text-sm text-gray-600 mb-2 sm:mb-4 line-clamp-2">{serviceWithDetails.description}</p>
+                              <p className="text-xs sm:text-sm text-gray-600 mb-2 sm:mb-4 line-clamp-2">{serviceWithDetails.description}</p>
                             )}
                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 sm:gap-0 mb-2.5 sm:mb-4">
                               {serviceWithDetails.deliveryTime && (
@@ -590,7 +590,7 @@ export default function AllServicesPage() {
                                   )}
                                 </div>
                                 {serviceWithDetails.description && (
-                                  <p className="hidden sm:block text-xs sm:text-sm text-gray-600 mb-2 sm:mb-4 line-clamp-2">{serviceWithDetails.description}</p>
+                                  <p className="text-xs sm:text-sm text-gray-600 mb-2 sm:mb-4 line-clamp-2">{serviceWithDetails.description}</p>
                                 )}
                                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 sm:gap-0 mb-2.5 sm:mb-4">
                                   {serviceWithDetails.deliveryTime && (
