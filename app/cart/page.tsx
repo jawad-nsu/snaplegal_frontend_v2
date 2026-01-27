@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Home, Trash2, ChevronDown, Tag, FileText } from 'lucide-react'
+import { Home, Trash2, ChevronDown, Tag, FileText, ShoppingCart } from 'lucide-react'
 import Navbar from '@/components/navbar'
 
 interface CartItem {
@@ -22,40 +22,147 @@ interface CartItem {
   selected: boolean
 }
 
+interface StoredCartItem {
+  id: string
+  serviceId?: string | null
+  serviceSlug?: string
+  serviceName: string
+  packageName?: string
+  image: string
+  price: number
+  originalPrice: number
+  quantity: number
+  tonnage?: string
+  date?: string
+  timeSlot?: string
+  selected?: boolean
+}
+
 export default function CartPage() {
   const router = useRouter()
   const [selectAll, setSelectAll] = useState(true)
-  const [cartItems, setCartItems] = useState<CartItem[]>([
-    {
-      id: '1',
-      parentService: 'Hire AC Technician for',
-      serviceName: 'AC Check Up',
-      image: '/plumbing.jpg',
-      tonnage: '1-2.5 Ton',
-      quantity: 1,
-      price: 382.625,
-      originalPrice: 757.625,
-      discount: 375,
-      date: '16 Nov',
-      timeSlot: '9:00 AM - 10:00 AM',
-      selected: true,
-    },
-    {
-      id: '2',
-      serviceName: 'AC Check Up',
-      image: '/plumbing.jpg',
-      tonnage: '1-2.5 Ton',
-      quantity: 1,
-      price: 382.625,
-      originalPrice: 757.625,
-      discount: 375,
-      date: '16 Nov',
-      timeSlot: '10:00 AM - 11:00 AM',
-      selected: true,
-    },
-  ])
+  const [cartItems, setCartItems] = useState<CartItem[]>([])
   const [notes, setNotes] = useState('')
   const [agreeToTerms, setAgreeToTerms] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [promoCode, setPromoCode] = useState('')
+  const [isPromoExpanded, setIsPromoExpanded] = useState(false)
+  const [appliedPromo, setAppliedPromo] = useState<string | null>(null)
+
+  // Function to map stored cart item to CartItem interface
+  const mapStoredToCartItem = (stored: StoredCartItem): CartItem => {
+    const discount = stored.originalPrice - stored.price
+    let formattedDate = ''
+    
+    if (stored.date) {
+      try {
+        // Try to parse the date (could be ISO string or formatted string)
+        const dateObj = new Date(stored.date)
+        if (!isNaN(dateObj.getTime())) {
+          formattedDate = dateObj.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })
+        } else {
+          // If it's already formatted, use as is
+          formattedDate = stored.date
+        }
+      } catch {
+        formattedDate = stored.date
+      }
+    }
+    
+    return {
+      id: stored.id,
+      parentService: stored.packageName ? `Hire ${stored.serviceName} for` : undefined,
+      serviceName: stored.packageName || stored.serviceName,
+      image: stored.image || '/placeholder.svg',
+      tonnage: stored.tonnage || '1-2.5 Ton',
+      quantity: stored.quantity || 1,
+      price: stored.price,
+      originalPrice: stored.originalPrice,
+      discount: discount > 0 ? discount : 0,
+      date: formattedDate,
+      timeSlot: stored.timeSlot || '',
+      selected: stored.selected !== undefined ? stored.selected : true,
+    }
+  }
+
+  // Load cart items from localStorage on mount
+  useEffect(() => {
+    const loadCartItems = () => {
+      try {
+        const cartKey = 'snaplegal_cart'
+        const storedCart = localStorage.getItem(cartKey)
+        
+        if (storedCart) {
+          const parsedCart: StoredCartItem[] = JSON.parse(storedCart)
+          
+          if (Array.isArray(parsedCart) && parsedCart.length > 0) {
+            const mappedItems = parsedCart.map(mapStoredToCartItem)
+            setCartItems(mappedItems)
+            setSelectAll(mappedItems.every(item => item.selected))
+          } else {
+            setCartItems([])
+          }
+        } else {
+          setCartItems([])
+        }
+      } catch (error) {
+        console.error('Error loading cart from localStorage:', error)
+        setCartItems([])
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadCartItems()
+  }, [])
+
+  // Save cart items to localStorage whenever they change
+  useEffect(() => {
+    if (!isLoading) {
+      try {
+        const cartKey = 'snaplegal_cart'
+        const itemsToStore: StoredCartItem[] = cartItems.map(item => {
+          // Try to preserve the original date format if it exists
+          let dateToStore = ''
+          if (item.date) {
+            // If date is already in a format like "16 Nov", keep it as is
+            // Otherwise try to parse and convert to ISO
+            try {
+              const parsedDate = new Date(item.date)
+              if (!isNaN(parsedDate.getTime())) {
+                dateToStore = parsedDate.toISOString().split('T')[0]
+              } else {
+                dateToStore = item.date // Keep formatted string
+              }
+            } catch {
+              dateToStore = item.date
+            }
+          }
+          
+          return {
+            id: item.id,
+            serviceName: item.serviceName,
+            image: item.image,
+            price: item.price,
+            originalPrice: item.originalPrice,
+            quantity: item.quantity,
+            tonnage: item.tonnage,
+            date: dateToStore,
+            timeSlot: item.timeSlot,
+            selected: item.selected,
+          }
+        })
+        
+        if (itemsToStore.length > 0) {
+          localStorage.setItem(cartKey, JSON.stringify(itemsToStore))
+        } else {
+          localStorage.removeItem(cartKey)
+        }
+      } catch (error) {
+        console.error('Error saving cart to localStorage:', error)
+      }
+    }
+  }, [cartItems, isLoading])
 
   const handleSelectAll = () => {
     const newSelectAll = !selectAll
@@ -86,7 +193,24 @@ export default function CartPage() {
   }
 
   const handleDelete = (id: string) => {
-    setCartItems(items => items.filter(item => item.id !== id))
+    setCartItems(items => {
+      const updated = items.filter(item => item.id !== id)
+      setSelectAll(updated.length > 0 && updated.every(item => item.selected))
+      return updated
+    })
+  }
+
+  const handleApplyPromo = () => {
+    if (promoCode.trim()) {
+      setAppliedPromo(promoCode.trim())
+      setIsPromoExpanded(false)
+      // TODO: Add API call to validate and apply promo code
+    }
+  }
+
+  const handleRemovePromo = () => {
+    setAppliedPromo(null)
+    setPromoCode('')
   }
 
   const selectedItems = cartItems.filter(item => item.selected)
@@ -94,6 +218,22 @@ export default function CartPage() {
   const totalDiscount = selectedItems.reduce((sum, item) => sum + item.discount * item.quantity, 0)
   const deliveryCharge = 0
   const total = subtotal - totalDiscount + deliveryCharge
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-primary)] mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading cart...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -132,25 +272,47 @@ export default function CartPage() {
                 <h2 className="text-lg sm:text-xl font-bold text-gray-900">
                   My Cart ({cartItems.length})
                 </h2>
-                <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={selectAll}
-                      onChange={handleSelectAll}
-                      className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--color-primary)] border-gray-300 rounded focus:ring-[var(--color-primary)]"
-                    />
-                    <span className="text-xs sm:text-sm text-gray-700">Select all items</span>
-                  </label>
-                  <button className="text-gray-500 hover:text-red-600 p-1 sm:p-0">
-                    <Trash2 className="w-5 h-5" />
-                  </button>
-                </div>
+                {cartItems.length > 0 && (
+                  <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={selectAll}
+                        onChange={handleSelectAll}
+                        className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--color-primary)] border-gray-300 rounded focus:ring-[var(--color-primary)]"
+                      />
+                      <span className="text-xs sm:text-sm text-gray-700">Select all items</span>
+                    </label>
+                    <button 
+                      onClick={() => {
+                        setCartItems([])
+                        setSelectAll(false)
+                      }}
+                      className="text-gray-500 hover:text-red-600 p-1 sm:p-0"
+                      aria-label="Clear all items"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Cart Items */}
-              <div className="space-y-4 sm:space-y-6">
-                {cartItems.map((item) => (
+              {cartItems.length === 0 ? (
+                <div className="text-center py-12 sm:py-16">
+                  <ShoppingCart className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">Your cart is empty</h3>
+                  <p className="text-sm sm:text-base text-gray-600 mb-6">Add services to your cart to get started</p>
+                  <Link
+                    href="/all-services"
+                    className="inline-block bg-[var(--color-primary)] text-white px-6 py-3 rounded-lg font-medium hover:opacity-90 transition-colors"
+                  >
+                    Browse Services
+                  </Link>
+                </div>
+              ) : (
+                <div className="space-y-4 sm:space-y-6">
+                  {cartItems.map((item) => (
                   <div key={item.id} className="border rounded-lg p-3 sm:p-4 hover:shadow-md transition-shadow">
                     {item.parentService && (
                       <div className="mb-3 pb-3 border-b">
@@ -189,7 +351,7 @@ export default function CartPage() {
                             <h3 className="font-semibold text-gray-900 mb-1.5 text-sm sm:text-base">
                               {item.serviceName} <span className="text-gray-500">× {item.quantity}</span>
                             </h3>
-                            <div className="mb-2">
+                            {/* <div className="mb-2">
                               <select
                                 value={item.tonnage}
                                 className="text-xs sm:text-sm border border-gray-300 rounded px-2 sm:px-3 py-1.5 sm:py-2 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] w-full sm:w-auto"
@@ -198,28 +360,38 @@ export default function CartPage() {
                                 <option>3-5 Ton</option>
                                 <option>Above 5 Ton</option>
                               </select>
-                            </div>
+                            </div> */}
                             <div className="flex flex-wrap items-center gap-2 mb-2">
                               <span className="text-base sm:text-lg font-bold text-green-600">
                                 ৳{item.price.toFixed(3)}
                               </span>
-                              <span className="text-xs sm:text-sm text-gray-400 line-through">
-                                ৳{item.originalPrice.toFixed(3)}
-                              </span>
-                              <span className="text-xs sm:text-sm text-red-600 font-medium bg-red-50 px-2 py-0.5 rounded">
-                                {item.discount} BDT off
-                              </span>
+                              {appliedPromo && (
+                                <>
+                                  <span className="text-xs sm:text-sm text-gray-400 line-through">
+                                    ৳{item.originalPrice.toFixed(3)}
+                                  </span>
+                                  <span className="text-xs sm:text-sm text-red-600 font-medium bg-red-50 px-2 py-0.5 rounded">
+                                    {item.discount} BDT off
+                                  </span>
+                                </>
+                              )}
                             </div>
-                            <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-gray-600 mb-3">
-                              <span className="flex items-center gap-1">
-                                <span className="font-medium">Date:</span>
-                                <span>{item.date}</span>
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <span className="font-medium">Time:</span>
-                                <span>{item.timeSlot}</span>
-                              </span>
-                            </div>
+                            {(item.date || item.timeSlot) && (
+                              <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-gray-600 mb-3">
+                                {item.date && (
+                                  <span className="flex items-center gap-1">
+                                    <span className="font-medium">Date:</span>
+                                    <span>{item.date}</span>
+                                  </span>
+                                )}
+                                {item.timeSlot && (
+                                  <span className="flex items-center gap-1">
+                                    <span className="font-medium">Time:</span>
+                                    <span>{item.timeSlot}</span>
+                                  </span>
+                                )}
+                              </div>
+                            )}
                             <div className="flex items-center gap-3 sm:gap-4">
                               <div className="flex items-center gap-1 border rounded-lg overflow-hidden">
                                 <button
@@ -253,8 +425,9 @@ export default function CartPage() {
                       </label>
                     </div>
                   </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
@@ -272,7 +445,7 @@ export default function CartPage() {
                         <div className="font-medium mb-1 text-gray-800">{item.parentService}</div>
                       )}
                       <div className="ml-2 sm:ml-4 text-gray-600">
-                        → {item.serviceName} × {item.quantity} {item.tonnage} - ৳
+                        → {item.serviceName} - ৳
                         {item.originalPrice.toFixed(3)}
                       </div>
                     </div>
@@ -305,17 +478,65 @@ export default function CartPage() {
               </div>
 
               {/* Add Promo & Offer */}
-              <div className="border rounded-lg p-3 sm:p-4 mb-4 hover:border-[var(--color-primary)] transition-colors cursor-pointer">
-                <div className="flex items-center justify-between">
+              <div className="border rounded-lg p-3 sm:p-4 mb-4">
+                <div 
+                  className="flex items-center justify-between cursor-pointer"
+                  onClick={() => !appliedPromo && setIsPromoExpanded(!isPromoExpanded)}
+                >
                   <div className="flex items-center gap-2">
                     <Tag className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
                     <span className="text-xs sm:text-sm font-medium text-gray-700">Add promo & offer</span>
                   </div>
                   <div className="flex items-center gap-1 text-[var(--color-primary)]">
-                    <span className="text-xs sm:text-sm">0 offers</span>
-                    <ChevronDown className="w-4 h-4" />
+                    <span className="text-xs sm:text-sm">
+                      {appliedPromo ? '1 offer' : '0 offers'}
+                    </span>
+                    {!appliedPromo && (
+                      <ChevronDown 
+                        className={`w-4 h-4 transition-transform ${isPromoExpanded ? 'rotate-180' : ''}`} 
+                      />
+                    )}
                   </div>
                 </div>
+                
+                {appliedPromo ? (
+                  <div className="mt-3 pt-3 border-t flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs sm:text-sm font-medium text-green-600">{appliedPromo}</span>
+                      <span className="text-xs sm:text-sm text-gray-500">Applied</span>
+                    </div>
+                    <button
+                      onClick={handleRemovePromo}
+                      className="text-xs sm:text-sm text-red-600 hover:text-red-700 font-medium"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ) : isPromoExpanded && (
+                  <div className="mt-3 pt-3 border-t">
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={promoCode}
+                        onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                        placeholder="Enter promo code"
+                        className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            handleApplyPromo()
+                          }
+                        }}
+                      />
+                      <button
+                        onClick={handleApplyPromo}
+                        disabled={!promoCode.trim()}
+                        className="bg-[var(--color-primary)] text-white px-4 py-2 rounded-lg text-xs sm:text-sm font-medium hover:opacity-90 active:opacity-75 transition-all disabled:bg-gray-300 disabled:cursor-not-allowed whitespace-nowrap"
+                      >
+                        Apply
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Add Notes */}

@@ -54,27 +54,54 @@ enum LeadSubSource {
   Other
 }
 
+enum OrderStatus {
+  Submitted
+  Confirmed
+  Assigned
+  InProgress
+  Review
+  Delivered
+  Closed
+  Cancelled
+}
+
+enum PaymentMethod {
+  bKash
+  Card
+  Cash
+}
+
+enum PaymentStatus {
+  Pending
+  Paid
+  Refunded
+  Failed
+}
+
 model User {
-  id            String      @id @default(uuid())
-  name          String?
-  email         String?     @unique
-  emailVerified DateTime?
-  phone         String?     @unique
-  phoneVerified DateTime?
-  password      String?
-  type          UserType    @default(USER)
-  status        UserStatus  @default(active)
-  image         String?
-  address       String?
-  district      String?
-  serviceCategories String[] @default([])
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  accounts      Account[]
-  sessions      Session[]
-  modifiedCategories Category[] @relation("CategoryLastModifiedBy")
+  id                    String        @id @default(uuid())
+  name                  String?
+  email                 String?       @unique
+  emailVerified         DateTime?
+  phone                 String?       @unique
+  phoneVerified         DateTime?
+  password              String?
+  type                  UserType      @default(USER)
+  status                UserStatus    @default(active)
+  image                 String?
+  address               String?
+  district              String?
+  serviceCategories     String[]      @default([])
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+  accounts              Account[]
+  sessions              Session[]
+  modifiedCategories    Category[]    @relation("CategoryLastModifiedBy")
   modifiedSubCategories SubCategory[] @relation("SubCategoryLastModifiedBy")
-  modifiedServices Service[] @relation("ServiceLastModifiedBy")
+  modifiedServices      Service[]     @relation("ServiceLastModifiedBy")
+  customerOrders        Order[]       @relation("CustomerOrders")
+  vendorOrders          Order[]       @relation("VendorOrders")
+  assignedOrders        Order[]       @relation("AssignedOrders")
 
   @@map("users")
 }
@@ -118,7 +145,7 @@ model VerificationToken {
 }
 
 model Lead {
-  id                String        @id @default(uuid())
+  id                String         @id @default(uuid())
   clientName        String
   whatsapp          String?
   mobile            String?
@@ -129,110 +156,155 @@ model Lead {
   city              String?
   thana             String?
   district          String?
-  country           String?       @default("Bangladesh")
+  country           String?        @default("Bangladesh")
   postalCode        String?
   desiredService    String?
   initialDiscussion String?
-  stage             LeadStage     @default(New)
+  stage             LeadStage      @default(New)
   closedReason      ClosedReason?
   closedReasonText  String?
   leadSource        LeadSource
   leadSubSource     LeadSubSource?
   leadOwner         String
   comment           String?
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
 
   @@map("leads")
 }
 
 model Category {
-  id            String   @id @default(uuid())
-  serialNumber  Int?      @unique
-  title         String   @unique
-  icon          String?
-  status        String   @default("active") // active, inactive
+  id               String        @id @default(uuid())
+  serialNumber     Int?          @unique
+  title            String        @unique
+  icon             String?
+  status           String        @default("active") // active, inactive
   lastModifiedById String?
-  lastModifiedBy User?   @relation("CategoryLastModifiedBy", fields: [lastModifiedById], references: [id])
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  subCategories SubCategory[]
-  services     Service[] @relation("ServiceCategory")
+  lastModifiedBy   User?         @relation("CategoryLastModifiedBy", fields: [lastModifiedById], references: [id])
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  subCategories    SubCategory[]
+  services         Service[]     @relation("ServiceCategory")
 
   @@map("categories")
 }
 
 model SubCategory {
-  id            String   @id @default(uuid())
-  serialNumber  Int?      @unique
-  title         String
-  icon          String?
-  categoryId    String
-  category      Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  status        String   @default("active") // active, inactive
+  id               String    @id @default(uuid())
+  serialNumber     Int?      @unique
+  title            String
+  icon             String?
+  categoryId       String
+  category         Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  status           String    @default("active") // active, inactive
   lastModifiedById String?
-  lastModifiedBy User?   @relation("SubCategoryLastModifiedBy", fields: [lastModifiedById], references: [id])
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  services     Service[] @relation("ServiceSubCategory")
+  lastModifiedBy   User?     @relation("SubCategoryLastModifiedBy", fields: [lastModifiedById], references: [id])
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  services         Service[] @relation("ServiceSubCategory")
 
   @@unique([title, categoryId])
   @@map("sub_categories")
 }
 
 model Service {
-  id            String   @id @default(uuid())
+  id            String       @id @default(uuid())
   title         String
-  slug          String   @unique
+  slug          String       @unique
   image         String?
-  rating        String?  @default("0")
-  description   String?  @db.Text
+  rating        String?      @default("0")
+  description   String?      @db.Text
   deliveryTime  String?
   startingPrice String?
   categoryId    String
-  category      Category @relation("ServiceCategory", fields: [categoryId], references: [id], onDelete: Cascade)
+  category      Category     @relation("ServiceCategory", fields: [categoryId], references: [id], onDelete: Cascade)
   subCategoryId String?
   subCategory   SubCategory? @relation("ServiceSubCategory", fields: [subCategoryId], references: [id], onDelete: SetNull)
-  status        String   @default("active") // active, inactive
-  
+  status        String       @default("active") // active, inactive
+
   // Overview fields
-  shortDescription String? @db.Text
-  detailedDescription String? @db.Text // acts, laws, orders, rules, with years
-  providerAuthority String? // court/council
-  requiredDocuments String[] @default([]) // needed from the client
-  whatsIncluded String? @db.Text // what will we do
-  whatsNotIncluded String? @db.Text // what must be done externally
-  timeline String? // approximate
-  additionalNotes String? @db.Text // comments
-  
+  shortDescription    String?  @db.Text
+  detailedDescription String?  @db.Text // acts, laws, orders, rules, with years
+  providerAuthority   String? // court/council
+  requiredDocuments   String[] @default([]) // needed from the client
+  whatsIncluded       String?  @db.Text // what will we do
+  whatsNotIncluded    String?  @db.Text // what must be done externally
+  timeline            String? // approximate
+  additionalNotes     String?  @db.Text // comments
+
   // Learning and Discussion
   processFlow String? @db.Text
-  videoUrl String? // TBA
-  
+  videoUrl    String? // TBA
+
   // FAQ
   faqs Json? // array of {question: string, answer: string}
-  
+
   // Consultants
   consultantQualifications String? @db.Text
-  
+
   // Price Packages
   packages Json? // array of {name: string, price: string, features: string[], description?: string}
-  
+
   // Core cost breakdown (for snaplegal)
-  coreFiling String?
-  coreStamps String?
+  coreFiling   String?
+  coreStamps   String?
   coreCourtFee String?
-  
+
   // Presented cost breakdown (for the client)
-  clientFiling String?
-  clientStamps String?
-  clientCourtFee String?
+  clientFiling        String?
+  clientStamps        String?
+  clientCourtFee      String?
   clientConsultantFee String?
-  
+
   lastModifiedById String?
-  lastModifiedBy User?   @relation("ServiceLastModifiedBy", fields: [lastModifiedById], references: [id])
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  lastModifiedBy   User?       @relation("ServiceLastModifiedBy", fields: [lastModifiedById], references: [id])
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  orderItems       OrderItem[]
 
   @@map("services")
+}
+
+model Order {
+  id             String        @id @default(uuid())
+  orderNumber    String        @unique
+  customerId     String
+  customer       User          @relation("CustomerOrders", fields: [customerId], references: [id], onDelete: Cascade)
+  vendorId       String?
+  vendor         User?         @relation("VendorOrders", fields: [vendorId], references: [id], onDelete: SetNull)
+  assignedToId   String?
+  assignedTo     User?         @relation("AssignedOrders", fields: [assignedToId], references: [id], onDelete: SetNull)
+  status         OrderStatus   @default(Submitted)
+  paymentMethod  PaymentMethod
+  paymentStatus  PaymentStatus @default(Pending)
+  subtotal       Float
+  additionalCost Float         @default(0)
+  deliveryCharge Float         @default(0)
+  discount       Float         @default(0)
+  total          Float
+  scheduledDate  DateTime?
+  scheduledTime  String?
+  address        String?
+  notes          String?       @db.Text
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  items          OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id            String   @id @default(uuid())
+  orderId       String
+  order         Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  serviceId     String?
+  service       Service? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  serviceName   String
+  quantity      Int      @default(1)
+  price         Float
+  originalPrice Float?
+  details       String?  @db.Text
+  createdAt     DateTime @default(now())
+
+  @@map("order_items")
 }

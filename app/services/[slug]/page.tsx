@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, use } from 'react'
+import { useState, use, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
@@ -8,13 +8,14 @@ import { Star, ChevronDown, ChevronUp, CheckCircle, Info, MessageCircle, BookOpe
 import Navbar from '@/components/navbar'
 import Footer from '@/components/footer'
 
-const serviceData: Record<string, {
+interface ServiceData {
   name: string
   category: string
   rating: number
   reviewCount: number
   image: string
   description: string
+  detailedDescription?: string
   features: string[]
   faqs: { question: string; answer: string }[]
   packages: {
@@ -24,161 +25,17 @@ const serviceData: Record<string, {
     features: string[]
     popular?: boolean
   }[]
-}> = {
-  'ac-servicing': {
-    name: 'AC Servicing',
-    category: 'AC Repair Services',
-    rating: 4.8,
-    reviewCount: 1250,
-    image: '/cleaning_service.jpg',
-    description: 'Professional AC servicing to keep your air conditioner running efficiently. Our expert technicians will clean, inspect, and optimize your AC unit for maximum performance.',
-    features: [
-      'Complete AC inspection',
-      'Filter cleaning and replacement',
-      'Coil cleaning (indoor & outdoor)',
-      'Gas pressure check',
-      'Thermostat calibration',
-      'Performance testing',
-      'Expert technicians',
-      '90-day service warranty'
-    ],
-    faqs: [
-      {
-        question: 'How often should I service my AC?',
-        answer: 'We recommend servicing your AC every 3-4 months, especially before and after the summer season for optimal performance.'
-      },
-      {
-        question: 'How long does the servicing take?',
-        answer: 'Regular AC servicing typically takes 45-60 minutes depending on the condition of your unit.'
-      },
-      {
-        question: 'Do you provide spare parts?',
-        answer: 'Yes, if any parts need replacement, our technician will inform you and provide genuine spare parts at transparent prices.'
-      },
-      {
-        question: 'What brands do you service?',
-        answer: 'We service all major AC brands including Daikin, LG, Samsung, General, Gree, and more.'
-      }
-    ],
-    packages: [
-      {
-        name: 'Basic Servicing',
-        price: 599,
-        originalPrice: 799,
-        features: [
-          'Filter cleaning',
-          'Basic inspection',
-          'Gas pressure check',
-          'Performance test'
-        ]
-      },
-      {
-        name: 'Standard Servicing',
-        price: 899,
-        originalPrice: 1199,
-        popular: true,
-        features: [
-          'Complete filter cleaning',
-          'Indoor coil cleaning',
-          'Outdoor unit cleaning',
-          'Gas pressure check',
-          'Thermostat calibration',
-          'Performance optimization',
-          '30-day warranty'
-        ]
-      },
-      {
-        name: 'Premium Servicing',
-        price: 1299,
-        originalPrice: 1699,
-        features: [
-          'Deep filter cleaning',
-          'Deep indoor coil cleaning',
-          'Deep outdoor coil cleaning',
-          'Complete gas check & refill',
-          'Electrical component check',
-          'Thermostat calibration',
-          'Anti-bacterial treatment',
-          '90-day warranty'
-        ]
-      }
-    ]
-  },
-  'home-cleaning': {
-    name: 'Home Cleaning',
-    category: 'Cleaning Services',
-    rating: 4.7,
-    reviewCount: 2100,
-    image: '/cleaning_service.jpg',
-    description: 'Professional home cleaning services to keep your space spotless. Our trained cleaning professionals use eco-friendly products and modern equipment.',
-    features: [
-      'Living room cleaning',
-      'Bedroom cleaning',
-      'Kitchen cleaning',
-      'Bathroom cleaning',
-      'Floor mopping & vacuuming',
-      'Dusting furniture',
-      'Eco-friendly products',
-      'Trained professionals'
-    ],
-    faqs: [
-      {
-        question: 'What areas do you clean?',
-        answer: 'We clean all rooms including living rooms, bedrooms, kitchens, bathrooms, and common areas. You can customize the service based on your needs.'
-      },
-      {
-        question: 'Do I need to provide cleaning supplies?',
-        answer: 'No, our professionals bring all necessary cleaning supplies and equipment.'
-      },
-      {
-        question: 'How long does cleaning take?',
-        answer: 'It depends on the size of your home. Typically, a 2-bedroom apartment takes 2-3 hours.'
-      }
-    ],
-    packages: [
-      {
-        name: 'Basic Cleaning',
-        price: 799,
-        features: [
-          '1 Bedroom cleaning',
-          '1 Bathroom cleaning',
-          'Living area cleaning',
-          'Dusting & sweeping'
-        ]
-      },
-      {
-        name: 'Standard Cleaning',
-        price: 1299,
-        popular: true,
-        features: [
-          '2 Bedroom cleaning',
-          '2 Bathroom cleaning',
-          'Kitchen cleaning',
-          'Living area cleaning',
-          'Mopping & vacuuming',
-          'Dusting all surfaces'
-        ]
-      },
-      {
-        name: 'Deep Cleaning',
-        price: 2499,
-        features: [
-          '3 Bedroom cleaning',
-          '3 Bathroom cleaning',
-          'Kitchen deep cleaning',
-          'All room cleaning',
-          'Window cleaning',
-          'Balcony cleaning',
-          'Cabinet cleaning'
-        ]
-      }
-    ]
-  }
+  processFlow?: string
+  videoUrl?: string
+  requiredDocuments?: string[]
+  whatsNotIncluded?: string
+  timeline?: string
+  additionalNotes?: string
 }
 
 export default function ServiceDetailsPage({ params }: { params: Promise<{ slug: string }> }) {
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null)
-  const [selectedPackage, setSelectedPackage] = useState(1)
+  const [selectedPackage, setSelectedPackage] = useState(0)
   const [activeTab, setActiveTab] = useState('overview')
   const [expandedThread, setExpandedThread] = useState<number | null>(null)
   const [faqQuery, setFaqQuery] = useState('')
@@ -189,25 +46,169 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
   const [serviceSortBy, setServiceSortBy] = useState<'rating' | 'date'>('rating')
   const [isInfoSourceExpanded, setIsInfoSourceExpanded] = useState(false)
   const [isMobilePackageExpanded, setIsMobilePackageExpanded] = useState(false)
+  const [service, setService] = useState<ServiceData | null>(null)
+  const [serviceId, setServiceId] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
   
   const { slug } = use(params)
-  const service = serviceData[slug]
-  console.log('serviceData', serviceData)
-  console.log('service', service)
 
   // Get current timestamp (calculated once on mount)
   const [now] = useState(() => typeof window !== 'undefined' ? Date.now() : 0)
 
-  if (!service) {
+  useEffect(() => {
+    const fetchService = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        const response = await fetch(`/api/services/slug/${slug}`)
+        
+        if (!response.ok) {
+          if (response.status === 404) {
+            setError('Service not found')
+          } else {
+            setError('Failed to load service')
+          }
+          setLoading(false)
+          return
+        }
+
+        const data = await response.json()
+        
+        if (!data.success || !data.service) {
+          setError('Service not found')
+          setLoading(false)
+          return
+        }
+
+        const apiService = data.service
+
+        // Store service ID for cart
+        setServiceId(apiService.id || null)
+
+        // Transform API response to match component's expected format
+        const transformedService: ServiceData = {
+          name: apiService.title,
+          category: apiService.categoryTitle || 'Services',
+          rating: parseFloat(apiService.rating) || 0,
+          reviewCount: 0, // Default review count if not in database
+          image: apiService.image || '/placeholder.svg',
+          description: apiService.description || apiService.shortDescription || '',
+          detailedDescription: apiService.detailedDescription || undefined,
+          features: apiService.whatsIncluded 
+            ? apiService.whatsIncluded.split('\n').filter((f: string) => f.trim())
+            : [],
+          faqs: Array.isArray(apiService.faqs) 
+            ? apiService.faqs.map((faq: any) => ({
+                question: faq.question || '',
+                answer: faq.answer || ''
+              }))
+            : [],
+          packages: Array.isArray(apiService.packages)
+            ? apiService.packages.map((pkg: any) => {
+                // Helper function to parse price values
+                const parsePrice = (value: any): number => {
+                  if (value === null || value === undefined) return 0
+                  if (typeof value === 'number') {
+                    return isNaN(value) ? 0 : value
+                  }
+                  if (typeof value === 'string') {
+                    const trimmed = value.trim()
+                    if (trimmed === '') return 0
+                    const cleaned = trimmed.replace(/[^\d.]/g, '')
+                    if (cleaned === '') return 0
+                    const parsed = parseFloat(cleaned)
+                    return isNaN(parsed) ? 0 : parsed
+                  }
+                  return 0
+                }
+
+                // Helper function to parse originalPrice (returns undefined if invalid)
+                const parseOriginalPrice = (value: any): number | undefined => {
+                  if (value === null || value === undefined) return undefined
+                  if (typeof value === 'number') {
+                    return isNaN(value) ? undefined : value
+                  }
+                  if (typeof value === 'string') {
+                    const trimmed = value.trim()
+                    if (trimmed === '') return undefined
+                    const cleaned = trimmed.replace(/[^\d.]/g, '')
+                    if (cleaned === '') return undefined
+                    const parsed = parseFloat(cleaned)
+                    return isNaN(parsed) ? undefined : parsed
+                  }
+                  return undefined
+                }
+
+                return {
+                  name: pkg.name || '',
+                  price: parsePrice(pkg.price),
+                  originalPrice: parseOriginalPrice(pkg.originalPrice),
+                  features: Array.isArray(pkg.features) ? pkg.features : [],
+                  popular: pkg.popular || false
+                }
+              })
+            : [],
+          processFlow: apiService.processFlow || undefined,
+          videoUrl: apiService.videoUrl || undefined,
+          requiredDocuments: Array.isArray(apiService.requiredDocuments) 
+            ? apiService.requiredDocuments 
+            : [],
+          whatsNotIncluded: apiService.whatsNotIncluded || undefined,
+          timeline: apiService.timeline || undefined,
+          additionalNotes: apiService.additionalNotes || undefined
+        }
+
+        setService(transformedService)
+        // Reset selectedPackage to 0 if it's out of bounds
+        if (transformedService.packages.length > 0) {
+          setSelectedPackage(0)
+        }
+      } catch (err) {
+        console.error('Error fetching service:', err)
+        setError('Failed to load service')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchService()
+  }, [slug])
+
+  if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Service Not Found</h1>
-          <Link href="/all-services" className="text-[var(--color-primary)] hover:underline">
-            Browse All Services
-          </Link>
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-primary)] mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading service...</p>
+            </div>
+          </div>
         </div>
+        <Footer />
+      </div>
+    )
+  }
+
+  if (error || !service) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <div className="text-center">
+              <h1 className="text-2xl font-bold mb-4">Service Not Found</h1>
+              <p className="text-gray-600 mb-4">{error || 'The service you are looking for does not exist.'}</p>
+              <Link href="/all-services" className="text-[var(--color-primary)] hover:underline">
+                Browse All Services
+              </Link>
+            </div>
+          </div>
+        </div>
+        <Footer />
       </div>
     )
   }
@@ -220,6 +221,77 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
           faq.answer.toLowerCase().includes(normalizedFaqQuery)
       )
     : service.faqs
+
+  // Function to handle adding item to cart
+  const handleAddToCart = () => {
+    if (!service || service.packages.length === 0 || !service.packages[selectedPackage]) {
+      return
+    }
+
+    const selectedPkg = service.packages[selectedPackage]
+    
+    // Get existing cart items from localStorage
+    const cartKey = 'snaplegal_cart'
+    interface CartItem {
+      id: string
+      serviceId?: string | null
+      serviceSlug?: string
+      serviceName: string
+      packageName?: string
+      image: string
+      price: number
+      originalPrice: number
+      quantity: number
+      tonnage?: string
+      date?: string
+      timeSlot?: string
+      selected?: boolean
+    }
+    let existingCart: CartItem[] = []
+    
+    try {
+      const storedCart = localStorage.getItem(cartKey)
+      if (storedCart) {
+        const parsed = JSON.parse(storedCart)
+        if (Array.isArray(parsed)) {
+          existingCart = parsed
+        }
+      }
+    } catch (error) {
+      console.error('Error reading cart from localStorage:', error)
+      existingCart = []
+    }
+
+    // Create new cart item
+    const newCartItem = {
+      id: `${serviceId || slug}-${selectedPackage}-${Date.now()}`,
+      serviceId: serviceId || null,
+      serviceSlug: slug,
+      serviceName: service.name,
+      packageName: selectedPkg.name,
+      image: service.image || '/placeholder.svg',
+      price: selectedPkg.price,
+      originalPrice: selectedPkg.originalPrice || selectedPkg.price,
+      quantity: 1,
+      tonnage: '1-2.5 Ton', // Default, can be changed later
+      date: '', // Will be set later
+      timeSlot: '', // Will be set later
+      selected: true,
+    }
+
+    // Add new item to cart
+    existingCart.push(newCartItem)
+
+    // Save to localStorage
+    try {
+      localStorage.setItem(cartKey, JSON.stringify(existingCart))
+    } catch (error) {
+      console.error('Error saving cart to localStorage:', error)
+    }
+
+    // Navigate to cart
+    router.push('/cart')
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -299,31 +371,23 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                   <div className="space-y-6">
                     <div>
                       <h3 className="text-lg font-bold text-gray-900 mb-3">Service Description</h3>
-                      <p className="text-gray-700 leading-relaxed">{service.description}</p>
+                      <p className="text-gray-700 leading-relaxed">{service.detailedDescription || service.description}</p>
                     </div>
 
                     {/* Required Documents */}
-                    <div>
-                      <h3 className="text-lg font-bold text-gray-900 mb-3">Required Documents</h3>
-                      <div className="space-y-2">
-                        <div className="flex items-start gap-2">
-                          <span className="text-gray-700">•</span>
-                          <span className="text-gray-700">Valid identification proof (NID/Passport)</span>
-                        </div>
-                        <div className="flex items-start gap-2">
-                          <span className="text-gray-700">•</span>
-                          <span className="text-gray-700">Property ownership documents or rental agreement (if applicable)</span>
-                        </div>
-                        <div className="flex items-start gap-2">
-                          <span className="text-gray-700">•</span>
-                          <span className="text-gray-700">Previous service records (if available)</span>
-                        </div>
-                        <div className="flex items-start gap-2">
-                          <span className="text-gray-700">•</span>
-                          <span className="text-gray-700">Any relevant warranty or guarantee documents</span>
+                    {service.requiredDocuments && service.requiredDocuments.length > 0 && (
+                      <div>
+                        <h3 className="text-lg font-bold text-gray-900 mb-3">Required Documents</h3>
+                        <div className="space-y-2">
+                          {service.requiredDocuments.map((doc, index) => (
+                            <div key={index} className="flex items-start gap-2">
+                              <span className="text-gray-700">•</span>
+                              <span className="text-gray-700">{doc}</span>
+                            </div>
+                          ))}
                         </div>
                       </div>
-                    </div>
+                    )}
 
                     <div>
                       <h3 className="text-lg font-bold text-gray-900 mb-3">What&apos;s Included</h3>
@@ -338,31 +402,19 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                     </div>
 
                     {/* What's Not Included */}
-                    <div>
-                      <h3 className="text-lg font-bold text-gray-900 mb-3">What&apos;s Not Included</h3>
-                      <div className="space-y-2">
-                        <div className="flex items-start gap-2">
-                          <span className="text-red-500 font-bold">×</span>
-                          <span className="text-gray-700">Major repairs or replacements requiring specialized parts</span>
-                        </div>
-                        <div className="flex items-start gap-2">
-                          <span className="text-red-500 font-bold">×</span>
-                          <span className="text-gray-700">Structural modifications or alterations</span>
-                        </div>
-                        <div className="flex items-start gap-2">
-                          <span className="text-red-500 font-bold">×</span>
-                          <span className="text-gray-700">Cost of replacement parts or materials (quoted separately)</span>
-                        </div>
-                        <div className="flex items-start gap-2">
-                          <span className="text-red-500 font-bold">×</span>
-                          <span className="text-gray-700">Services outside the scope of the selected package</span>
-                        </div>
-                        <div className="flex items-start gap-2">
-                          <span className="text-red-500 font-bold">×</span>
-                          <span className="text-gray-700">Emergency services outside regular business hours (additional charges apply)</span>
+                    {service.whatsNotIncluded && (
+                      <div>
+                        <h3 className="text-lg font-bold text-gray-900 mb-3">What&apos;s Not Included</h3>
+                        <div className="space-y-2">
+                          {service.whatsNotIncluded.split('\n').filter((item: string) => item.trim()).map((item: string, index: number) => (
+                            <div key={index} className="flex items-start gap-2">
+                              <span className="text-red-500 font-bold">×</span>
+                              <span className="text-gray-700">{item.trim()}</span>
+                            </div>
+                          ))}
                         </div>
                       </div>
-                    </div>
+                    )}
 
                     {/* Service Authority */}
                     <div>
@@ -373,78 +425,33 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                     </div>
 
                     {/* Timeline */}
-                    <div>
-                      <h3 className="text-lg font-bold text-gray-900 mb-3">Timeline</h3>
-                      <div className="bg-gradient-to-br from-[var(--color-neutral)] to-white rounded-lg p-6 border border-gray-200">
-                        <div className="space-y-4">
-                          <div className="flex items-start gap-4">
-                            <div className="flex-shrink-0 w-8 h-8 bg-[var(--color-primary)] text-white rounded-full flex items-center justify-center font-bold">
-                              1
-                            </div>
-                            <div>
-                              <h4 className="font-semibold text-gray-900 mb-1">Booking Confirmation</h4>
-                              <p className="text-sm text-gray-700">Within 24 hours of booking</p>
-                            </div>
-                          </div>
-                          <div className="flex items-start gap-4">
-                            <div className="flex-shrink-0 w-8 h-8 bg-[var(--color-primary)] text-white rounded-full flex items-center justify-center font-bold">
-                              2
-                            </div>
-                            <div>
-                              <h4 className="font-semibold text-gray-900 mb-1">Service Scheduling</h4>
-                              <p className="text-sm text-gray-700">Service scheduled within 2-3 business days</p>
-                            </div>
-                          </div>
-                          <div className="flex items-start gap-4">
-                            <div className="flex-shrink-0 w-8 h-8 bg-[var(--color-primary)] text-white rounded-full flex items-center justify-center font-bold">
-                              3
-                            </div>
-                            <div>
-                              <h4 className="font-semibold text-gray-900 mb-1">Service Completion</h4>
-                              <p className="text-sm text-gray-700">Typically completed within 1-3 hours depending on package selected</p>
-                            </div>
-                          </div>
-                          <div className="flex items-start gap-4">
-                            <div className="flex-shrink-0 w-8 h-8 bg-[var(--color-primary)] text-white rounded-full flex items-center justify-center font-bold">
-                              4
-                            </div>
-                            <div>
-                              <h4 className="font-semibold text-gray-900 mb-1">Follow-up & Support</h4>
-                              <p className="text-sm text-gray-700">Post-service support available for 7 days after completion</p>
-                            </div>
+                    {service.timeline && (
+                      <div>
+                        <h3 className="text-lg font-bold text-gray-900 mb-3">Timeline</h3>
+                        <div className="bg-gradient-to-br from-[var(--color-neutral)] to-white rounded-lg p-6 border border-gray-200">
+                          <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+                            {service.timeline}
                           </div>
                         </div>
                       </div>
-                    </div>
+                    )}
 
                     {/* Additional Notes */}
-                    <div>
-                      <h3 className="text-lg font-bold text-gray-900 mb-3">Additional Notes</h3>
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                        <ul className="space-y-2 text-gray-700 text-sm">
-                          <li className="flex items-start gap-2">
-                            <Info className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                            <span>Please ensure the service area is accessible and clear before the technician arrives.</span>
-                          </li>
-                          <li className="flex items-start gap-2">
-                            <Info className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                            <span>Our technicians will arrive with all necessary tools and equipment.</span>
-                          </li>
-                          <li className="flex items-start gap-2">
-                            <Info className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                            <span>Payment is due after service completion and your satisfaction confirmation.</span>
-                          </li>
-                          <li className="flex items-start gap-2">
-                            <Info className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                            <span>For any special requirements or concerns, please mention them during booking.</span>
-                          </li>
-                          <li className="flex items-start gap-2">
-                            <Info className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                            <span>We offer a satisfaction guarantee - if you&apos;re not happy, we&apos;ll make it right.</span>
-                          </li>
-                        </ul>
+                    {service.additionalNotes && (
+                      <div>
+                        <h3 className="text-lg font-bold text-gray-900 mb-3">Additional Notes</h3>
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                          <div className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">
+                            {service.additionalNotes.split('\n').filter((note: string) => note.trim()).map((note: string, index: number) => (
+                              <div key={index} className="flex items-start gap-2 mb-2 last:mb-0">
+                                <Info className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                                <span>{note.trim()}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
                       </div>
-                    </div>
+                    )}
 
                     {/* Info Source */}
                     <div className="border-t pt-6">
@@ -953,52 +960,105 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                         <h3 className="text-xl font-bold text-gray-900">How {service.name} Works</h3>
                       </div>
                       <div className="bg-gradient-to-br from-[var(--color-neutral)] to-white rounded-lg p-6 border border-gray-200">
-                        <div className="space-y-6">
-                          <div className="flex items-start gap-4">
-                            <div className="flex-shrink-0 w-10 h-10 bg-[var(--color-primary)] text-white rounded-full flex items-center justify-center font-bold text-lg">
-                              1
+                        {service.processFlow ? (
+                          <div className="space-y-6">
+                            {(() => {
+                              // Try to parse processFlow as JSON array
+                              try {
+                                const parsed = JSON.parse(service.processFlow)
+                                if (Array.isArray(parsed)) {
+                                  return parsed.map((step: any, index: number) => (
+                                    <div key={index} className="flex items-start gap-4">
+                                      <div className="flex-shrink-0 w-10 h-10 bg-[var(--color-primary)] text-white rounded-full flex items-center justify-center font-bold text-lg">
+                                        {index + 1}
+                                      </div>
+                                      <div className="flex-1">
+                                        <h4 className="font-semibold text-gray-900 mb-2">
+                                          {step.title || step.name || `Step ${index + 1}`}
+                                        </h4>
+                                        <p className="text-gray-700 leading-relaxed">
+                                          {step.description || step.content || step}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  ))
+                                }
+                              } catch {
+                                // Not JSON, treat as plain text
+                              }
+                              
+                              // Parse as plain text with newlines or display as-is
+                              const lines = service.processFlow.split('\n').filter((line: string) => line.trim())
+                              if (lines.length > 1) {
+                                return lines.map((line: string, index: number) => (
+                                  <div key={index} className="flex items-start gap-4">
+                                    <div className="flex-shrink-0 w-10 h-10 bg-[var(--color-primary)] text-white rounded-full flex items-center justify-center font-bold text-lg">
+                                      {index + 1}
+                                    </div>
+                                    <div className="flex-1">
+                                      <p className="text-gray-700 leading-relaxed">{line.trim()}</p>
+                                    </div>
+                                  </div>
+                                ))
+                              }
+                              
+                              // Single block of text
+                              return (
+                                <div className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                                  {service.processFlow}
+                                </div>
+                              )
+                            })()}
+                          </div>
+                        ) : (
+                          // Fallback to hardcoded content
+                          <div className="space-y-6">
+                            <div className="flex items-start gap-4">
+                              <div className="flex-shrink-0 w-10 h-10 bg-[var(--color-primary)] text-white rounded-full flex items-center justify-center font-bold text-lg">
+                                1
+                              </div>
+                              <div className="flex-1">
+                                <h4 className="font-semibold text-gray-900 mb-2">Initial Assessment</h4>
+                                <p className="text-gray-700 leading-relaxed">
+                                  Our professional technician arrives at your location and conducts a thorough assessment of your {service.name.toLowerCase()} needs. They will inspect the current condition, identify any issues, and discuss your requirements.
+                                </p>
+                              </div>
                             </div>
-                            <div className="flex-1">
-                              <h4 className="font-semibold text-gray-900 mb-2">Initial Assessment</h4>
-                              <p className="text-gray-700 leading-relaxed">
-                                Our professional technician arrives at your location and conducts a thorough assessment of your {service.name.toLowerCase()} needs. They will inspect the current condition, identify any issues, and discuss your requirements.
-                              </p>
+                            <div className="flex items-start gap-4">
+                              <div className="flex-shrink-0 w-10 h-10 bg-[var(--color-primary)] text-white rounded-full flex items-center justify-center font-bold text-lg">
+                                2
+                              </div>
+                              <div className="flex-1">
+                                <h4 className="font-semibold text-gray-900 mb-2">Service Execution</h4>
+                                <p className="text-gray-700 leading-relaxed">
+                                  Using professional-grade tools and equipment, our expert performs the service with attention to detail. They follow industry best practices and safety protocols to ensure quality results.
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-start gap-4">
+                              <div className="flex-shrink-0 w-10 h-10 bg-[var(--color-primary)] text-white rounded-full flex items-center justify-center font-bold text-lg">
+                                3
+                              </div>
+                              <div className="flex-1">
+                                <h4 className="font-semibold text-gray-900 mb-2">Quality Check</h4>
+                                <p className="text-gray-700 leading-relaxed">
+                                  After completing the service, the technician performs a final quality check to ensure everything meets our high standards. They test all components and verify that the work is completed satisfactorily.
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-start gap-4">
+                              <div className="flex-shrink-0 w-10 h-10 bg-[var(--color-primary)] text-white rounded-full flex items-center justify-center font-bold text-lg">
+                                4
+                              </div>
+                              <div className="flex-1">
+                                <h4 className="font-semibold text-gray-900 mb-2">Final Handover</h4>
+                                <p className="text-gray-700 leading-relaxed">
+                                  The technician provides you with a detailed summary of the work completed, offers maintenance tips, and addresses any questions you may have. Payment is processed after you confirm satisfaction with the service.
+                                </p>
+                              </div>
                             </div>
                           </div>
-                          <div className="flex items-start gap-4">
-                            <div className="flex-shrink-0 w-10 h-10 bg-[var(--color-primary)] text-white rounded-full flex items-center justify-center font-bold text-lg">
-                              2
-                            </div>
-                            <div className="flex-1">
-                              <h4 className="font-semibold text-gray-900 mb-2">Service Execution</h4>
-                              <p className="text-gray-700 leading-relaxed">
-                                Using professional-grade tools and equipment, our expert performs the service with attention to detail. They follow industry best practices and safety protocols to ensure quality results.
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-start gap-4">
-                            <div className="flex-shrink-0 w-10 h-10 bg-[var(--color-primary)] text-white rounded-full flex items-center justify-center font-bold text-lg">
-                              3
-                            </div>
-                            <div className="flex-1">
-                              <h4 className="font-semibold text-gray-900 mb-2">Quality Check</h4>
-                              <p className="text-gray-700 leading-relaxed">
-                                After completing the service, the technician performs a final quality check to ensure everything meets our high standards. They test all components and verify that the work is completed satisfactorily.
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-start gap-4">
-                            <div className="flex-shrink-0 w-10 h-10 bg-[var(--color-primary)] text-white rounded-full flex items-center justify-center font-bold text-lg">
-                              4
-                            </div>
-                            <div className="flex-1">
-                              <h4 className="font-semibold text-gray-900 mb-2">Final Handover</h4>
-                              <p className="text-gray-700 leading-relaxed">
-                                The technician provides you with a detailed summary of the work completed, offers maintenance tips, and addresses any questions you may have. Payment is processed after you confirm satisfaction with the service.
-                              </p>
-                            </div>
-                          </div>
-                        </div>
+                        )}
                       </div>
                     </div>
 
@@ -1008,17 +1068,66 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                         <PlayCircle className="w-6 h-6 text-[var(--color-primary)]" />
                         <h3 className="text-xl font-bold text-gray-900">Video Tutorial</h3>
                       </div>
-                      <div className="bg-gray-900 rounded-lg overflow-hidden aspect-video relative">
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <button className="w-20 h-20 bg-white/90 hover:bg-white rounded-full flex items-center justify-center transition-all group">
-                            <PlayCircle className="w-12 h-12 text-[var(--color-primary)] ml-1 group-hover:scale-110 transition-transform" />
-                          </button>
+                      {service.videoUrl ? (
+                        <div className="bg-gray-900 rounded-lg overflow-hidden aspect-video relative">
+                          {(() => {
+                            // Check if it's a YouTube URL
+                            const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/
+                            const youtubeMatch = service.videoUrl.match(youtubeRegex)
+                            
+                            // Check if it's a Vimeo URL
+                            const vimeoRegex = /(?:vimeo\.com\/)(?:.*\/)?(\d+)/
+                            const vimeoMatch = service.videoUrl.match(vimeoRegex)
+                            
+                            if (youtubeMatch) {
+                              const videoId = youtubeMatch[1]
+                              return (
+                                <iframe
+                                  className="w-full h-full"
+                                  src={`https://www.youtube.com/embed/${videoId}`}
+                                  title={`${service.name} Video Tutorial`}
+                                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                  allowFullScreen
+                                />
+                              )
+                            } else if (vimeoMatch) {
+                              const videoId = vimeoMatch[1]
+                              return (
+                                <iframe
+                                  className="w-full h-full"
+                                  src={`https://player.vimeo.com/video/${videoId}`}
+                                  title={`${service.name} Video Tutorial`}
+                                  allow="autoplay; fullscreen; picture-in-picture"
+                                  allowFullScreen
+                                />
+                              )
+                            } else {
+                              // Direct video URL or other format
+                              return (
+                                <video
+                                  className="w-full h-full object-cover"
+                                  controls
+                                  src={service.videoUrl}
+                                >
+                                  Your browser does not support the video tag.
+                                </video>
+                              )
+                            }
+                          })()}
                         </div>
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-6">
-                          <h4 className="text-white font-semibold text-lg mb-1">Watch: {service.name} Service Process</h4>
-                          <p className="text-white/80 text-sm">Learn how our professionals deliver {service.name.toLowerCase()} with step-by-step visual guidance</p>
+                      ) : (
+                        <div className="bg-gray-900 rounded-lg overflow-hidden aspect-video relative">
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <button className="w-20 h-20 bg-white/90 hover:bg-white rounded-full flex items-center justify-center transition-all group">
+                              <PlayCircle className="w-12 h-12 text-[var(--color-primary)] ml-1 group-hover:scale-110 transition-transform" />
+                            </button>
+                          </div>
+                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-6">
+                            <h4 className="text-white font-semibold text-lg mb-1">Watch: {service.name} Service Process</h4>
+                            <p className="text-white/80 text-sm">Learn how our professionals deliver {service.name.toLowerCase()} with step-by-step visual guidance</p>
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </div>
 
                     {/* Community Discussion Section */}
@@ -1241,20 +1350,22 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
 
               {/* Fixed Book Now Button Section */}
               <div className="p-4 border-t border-gray-200 bg-white">
-                <div className="mb-3">
-                  <p className="text-xs text-gray-600 mb-1">Selected Package</p>
-                  <p className="font-semibold text-sm text-gray-900">{service.packages[selectedPackage].name}</p>
-                  <p className="text-xl font-bold text-[var(--color-primary)] mt-1">
-                    ৳{service.packages[selectedPackage].price}
-                    {service.packages[selectedPackage].originalPrice && (
-                      <span className="text-sm text-gray-400 line-through ml-2">
-                        ৳{service.packages[selectedPackage].originalPrice}
-                      </span>
-                    )}
-                  </p>
-                </div>
+                {service.packages.length > 0 && service.packages[selectedPackage] && (
+                  <div className="mb-3">
+                    <p className="text-xs text-gray-600 mb-1">Selected Package</p>
+                    <p className="font-semibold text-sm text-gray-900">{service.packages[selectedPackage].name}</p>
+                    <p className="text-xl font-bold text-[var(--color-primary)] mt-1">
+                      ৳{service.packages[selectedPackage].price}
+                      {service.packages[selectedPackage].originalPrice && (
+                        <span className="text-sm text-gray-400 line-through ml-2">
+                          ৳{service.packages[selectedPackage].originalPrice}
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                )}
                 <button 
-                  onClick={() => router.push('/cart')}
+                  onClick={handleAddToCart}
                   className="w-full bg-[var(--color-primary)] text-white py-3 rounded-lg font-bold hover:opacity-90 transition-colors shadow-md mb-2"
                 >
                   Book Now
@@ -1285,17 +1396,23 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
           >
             <div className="text-left">
               <p className="text-xs text-gray-600 mb-0.5">Selected Package</p>
-              <p className="text-sm font-semibold text-gray-900">{service.packages[selectedPackage].name}</p>
-              <div className="flex items-center gap-2 mt-1">
-                <p className="text-lg font-bold text-[var(--color-primary)]">
-                  ৳{service.packages[selectedPackage].price}
-                </p>
-                {service.packages[selectedPackage].originalPrice && (
-                  <span className="text-xs text-gray-400 line-through">
-                    ৳{service.packages[selectedPackage].originalPrice}
-                  </span>
-                )}
-              </div>
+              {service.packages.length > 0 && service.packages[selectedPackage] ? (
+                <>
+                  <p className="text-sm font-semibold text-gray-900">{service.packages[selectedPackage].name}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <p className="text-lg font-bold text-[var(--color-primary)]">
+                      ৳{service.packages[selectedPackage].price}
+                    </p>
+                    {service.packages[selectedPackage].originalPrice && (
+                      <span className="text-xs text-gray-400 line-through">
+                        ৳{service.packages[selectedPackage].originalPrice}
+                      </span>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <p className="text-sm text-gray-500">No packages available</p>
+              )}
             </div>
             {isMobilePackageExpanded ? (
               <ChevronUp className="w-5 h-5 text-gray-500" />
@@ -1370,7 +1487,7 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
         {/* Action Buttons */}
         <div className="p-4 space-y-2">
           <button 
-            onClick={() => router.push('/cart')}
+            onClick={handleAddToCart}
             className="w-full bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary)]/90 text-white py-3.5 rounded-lg font-bold hover:opacity-90 transition-all shadow-md"
           >
             Book Now

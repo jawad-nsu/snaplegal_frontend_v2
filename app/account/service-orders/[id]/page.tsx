@@ -1,58 +1,144 @@
 'use client'
 
-import { use, useState } from 'react'
+import { use, useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Home, MessageCircle, Phone, Upload, FileText, X, CheckCircle } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Home, MessageCircle, Phone, Upload, FileText, X, CheckCircle, Loader2 } from 'lucide-react'
 import Navbar from '@/components/navbar'
+
+interface OrderItem {
+  id: string
+  name: string
+  details: string
+  price: number
+  quantity: number
+}
+
+interface Order {
+  id: string
+  orderNumber: string
+  status: string
+  service: string
+  serviceImage: string
+  price: number
+  schedule: {
+    dateRange: string
+    day: string
+    timeSlot: string
+  }
+  customer: {
+    name: string
+    phone: string
+    address: string
+  }
+  items: OrderItem[]
+  subtotal: number
+  additionalCost: number
+  deliveryCharge: number
+  discount: number
+  total: number
+  paymentStatus: string
+  paymentMethod: string
+  timelineStages: Array<{ label: string; completed: boolean }>
+  requiredDocuments: Array<{ id: string; name: string; required: boolean }>
+}
 
 export default function OrderDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
-  
-  // Required documents list
-  const requiredDocuments = [
-    { id: '1', name: 'National ID Card', required: true },
-    { id: '2', name: 'Service Agreement', required: true },
-    { id: '3', name: 'Property Ownership Document', required: false },
-    { id: '4', name: 'Previous Service Receipt', required: false },
-  ]
-
+  const router = useRouter()
+  const [order, setOrder] = useState<Order | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [documentUploads, setDocumentUploads] = useState<Record<string, { name: string; size: string; date: string } | null>>({})
 
-  const order = {
-    id: 'D-1108041',
-    service: 'AC Servicing',
-    serviceImage: '/plumbing.jpg',
-    price: 765.25,
-    schedule: {
-      dateRange: '16 Nov - 20 Nov',
-      day: 'Today',
-      timeSlot: '9:00 AM - 10:00 AM',
-    },
-    customer: {
-      name: 'Sharif H',
-      phone: '+8801773241632',
-      address: '105,5,H,6,Gulshan',
-    },
-    items: [
-      { name: 'AC Check Up', details: '1 - 2.5 Ton - xl', price: 757.63 },
-      { name: 'AC Check Up', details: '1 - 2.5 Ton - xl', price: 757.63 },
-    ],
-    subtotal: 1515.25,
-    additionalCost: 0,
-    deliveryCharge: 0,
-    discount: 750,
-    total: 765.25,
+  useEffect(() => {
+    fetchOrder()
+  }, [id])
+
+  const fetchOrder = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      
+      const response = await fetch(`/api/orders/${id}`)
+      
+      if (!response.ok) {
+        if (response.status === 401) {
+          router.push('/signin')
+          return
+        }
+        if (response.status === 404) {
+          setError('Order not found')
+          setLoading(false)
+          return
+        }
+        throw new Error('Failed to fetch order')
+      }
+
+      const data = await response.json()
+      
+      if (data.success && data.order) {
+        setOrder(data.order)
+      } else {
+        setError(data.error || 'Failed to load order')
+      }
+    } catch (err) {
+      console.error('Error fetching order:', err)
+      setError(err instanceof Error ? err.message : 'Failed to load order')
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const timelineStages = [
-    { label: 'Submitted', completed: true },
-    { label: 'Confirmed', completed: true },
-    { label: 'Assigned', completed: true },
-    { label: 'In-Progress', completed: false },
-    { label: 'Review', completed: false },
-    { label: 'Delivered', completed: false },
-    { label: 'Closed', completed: false },
-  ]
+  const getPaymentStatusBadge = (status: string) => {
+    const statusMap: Record<string, { text: string; bg: string; color: string }> = {
+      Paid: { text: 'PAID', bg: 'bg-green-100', color: 'text-green-800' },
+      Pending: { text: 'PENDING', bg: 'bg-yellow-100', color: 'text-yellow-800' },
+      Refunded: { text: 'REFUNDED', bg: 'bg-red-100', color: 'text-red-800' },
+      Failed: { text: 'FAILED', bg: 'bg-red-100', color: 'text-red-800' },
+    }
+    
+    const badge = statusMap[status] || { text: status.toUpperCase(), bg: 'bg-gray-100', color: 'text-gray-800' }
+    
+    return (
+      <span className={`px-2 sm:px-3 py-1 ${badge.bg} ${badge.color} text-xs font-bold rounded`}>
+        {badge.text}
+      </span>
+    )
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8 max-w-7xl">
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin text-[var(--color-primary)]" />
+            <span className="ml-3 text-gray-600">Loading order details...</span>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (error || !order) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8 max-w-7xl">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+            <p className="text-red-800 text-sm">{error || 'Order not found'}</p>
+            <button
+              onClick={() => router.push('/account/service-orders')}
+              className="mt-2 text-red-600 hover:text-red-800 text-sm font-medium underline"
+            >
+              Back to Orders
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -81,7 +167,7 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="w-full sm:w-auto">
               <p className="text-xs sm:text-sm text-gray-600 mb-1">Order ID</p>
-              <p className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">{order.id}</p>
+              <p className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">{order.orderNumber}</p>
             </div>
             <div className="w-full sm:w-auto text-left sm:text-right">
               <p className="text-xs sm:text-sm text-gray-600 mb-1">Service</p>
@@ -106,21 +192,21 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
                 {/* Progress line - fills up to last completed stage */}
                 {(() => {
                   let lastCompletedIndex = -1
-                  for (let i = timelineStages.length - 1; i >= 0; i--) {
-                    if (timelineStages[i].completed) {
+                  for (let i = order.timelineStages.length - 1; i >= 0; i--) {
+                    if (order.timelineStages[i].completed) {
                       lastCompletedIndex = i
                       break
                     }
                   }
-                  if (lastCompletedIndex >= 0 && lastCompletedIndex < timelineStages.length - 1) {
-                    const progressPercent = (lastCompletedIndex / (timelineStages.length - 1)) * 100
+                  if (lastCompletedIndex >= 0 && lastCompletedIndex < order.timelineStages.length - 1) {
+                    const progressPercent = (lastCompletedIndex / (order.timelineStages.length - 1)) * 100
                     return (
                       <div 
                         className="absolute left-3 top-0 w-0.5 bg-[var(--color-primary)] transition-all duration-500"
                         style={{ height: `${progressPercent}%` }}
                       ></div>
                     )
-                  } else if (lastCompletedIndex === timelineStages.length - 1) {
+                  } else if (lastCompletedIndex === order.timelineStages.length - 1) {
                     return (
                       <div className="absolute left-3 top-0 bottom-0 w-0.5 bg-[var(--color-primary)]"></div>
                     )
@@ -128,7 +214,7 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
                   return null
                 })()}
                 
-                {timelineStages.map((stage, index) => (
+                {order.timelineStages.map((stage, index) => (
                   <div key={index} className="relative pb-5 last:pb-0">
                     <div className="absolute left-0 top-0 transform -translate-x-1/2 z-10">
                       <div
@@ -159,7 +245,7 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
 
             {/* Desktop: Horizontal Timeline */}
             <div className="hidden lg:flex items-center gap-1 flex-1">
-              {timelineStages.map((stage, index) => (
+              {order.timelineStages.map((stage, index) => (
                 <div key={index} className="flex items-center gap-1 flex-1">
                   <div className="flex flex-col items-center gap-2.5 flex-1 min-w-0">
                     <div
@@ -183,7 +269,7 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
                       {stage.label}
                     </span>
                   </div>
-                  {index < timelineStages.length - 1 && (
+                  {index < order.timelineStages.length - 1 && (
                     <div className={`flex-1 h-1 rounded-full transition-all ${
                       stage.completed 
                         ? 'bg-[var(--color-primary)]' 
@@ -207,9 +293,7 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
             <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-base sm:text-lg font-bold text-gray-900">Bill & Payment</h3>
-                <span className="px-2 sm:px-3 py-1 bg-green-100 text-green-800 text-xs font-bold rounded">
-                  PAID
-                </span>
+                {getPaymentStatusBadge(order.paymentStatus)}
               </div>
 
               {/* Itemized Breakdown */}
@@ -220,7 +304,7 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
                       <span className="text-gray-700 break-words flex-1">{item.name}</span>
                       <span className="text-gray-900 font-medium flex-shrink-0">৳{item.price.toFixed(2)}</span>
                     </div>
-                    <div className="text-gray-500 text-xs ml-0 sm:ml-2 break-words">{item.details}</div>
+                    <div className="text-gray-500 text-xs ml-0 sm:ml-2 break-words">{item.details?.replace(/1-2\.5\s*Ton/gi, '').trim()}</div>
                   </div>
                 ))}
               </div>
@@ -243,9 +327,15 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
                   <span className="font-medium text-green-600">৳{order.discount.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-base sm:text-lg font-bold pt-2 border-t">
-                  <span>Paid</span>
+                  <span>Total</span>
                   <span>৳{order.total.toFixed(2)}</span>
                 </div>
+                {order.paymentMethod && (
+                  <div className="flex justify-between text-xs sm:text-sm pt-2">
+                    <span className="text-gray-600">Payment Method</span>
+                    <span className="font-medium">{order.paymentMethod}</span>
+                  </div>
+                )}
               </div>
 
               <div className="text-xs text-gray-500 space-y-1 mb-4">
@@ -292,7 +382,8 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
               
               {/* Required Documents List */}
               <div className="space-y-3">
-                {requiredDocuments.map((doc) => {
+                {order.requiredDocuments && order.requiredDocuments.length > 0 ? (
+                  order.requiredDocuments.map((doc) => {
                   const uploadedFile = documentUploads[doc.id]
                   const isUploaded = !!uploadedFile
                   
@@ -394,7 +485,10 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
                       </div>
                     </div>
                   )
-                })}
+                  })
+                ) : (
+                  <p className="text-sm text-gray-500 text-center py-4">No documents required for this order</p>
+                )}
               </div>
             </div>
           </div>

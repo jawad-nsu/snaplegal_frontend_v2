@@ -513,157 +513,108 @@ export default function AdminDashboard() {
   const [showRejectModal, setShowRejectModal] = useState<string | null>(null)
   const [adminChatMessage, setAdminChatMessage] = useState('')
 
-  // Orders data
-  const [orders, setOrders] = useState<Order[]>([
-    {
-      id: '1',
-      orderNumber: 'ORD-001',
-      serviceName: 'AC Servicing',
-      vendorId: '1',
-      vendorName: 'AC Repair Pro',
-      clientId: '1',
-      clientName: 'Ahmed Rahman',
-      clientPhone: '+8801712345678',
-      clientEmail: 'ahmed@example.com',
-      clientAddress: '123 Main Street, Gulshan, Dhaka',
-      status: 'In-Progress',
-      orderDate: '2024-01-15',
-      scheduledDate: '2024-01-16',
-      scheduledTime: '9:00 AM - 10:00 AM',
-      subtotal: 800,
-      additionalCost: 0,
-      deliveryCharge: 0,
-      discount: 0,
-      total: 800,
-      paymentStatus: 'paid',
-      items: [
-        { name: 'AC Check Up', details: '1 - 2.5 Ton', price: 800 }
-      ]
-    },
-    {
-      id: '2',
-      orderNumber: 'ORD-002',
-      serviceName: 'Home Cleaning',
-      vendorId: '2',
-      vendorName: 'Home Cleaners BD',
-      clientId: '2',
-      clientName: 'Fatima Khan',
-      clientPhone: '+8801723456789',
-      clientEmail: 'fatima@example.com',
-      clientAddress: '456 Park Avenue, Chittagong',
-      status: 'Confirmed',
-      orderDate: '2024-01-16',
-      scheduledDate: '2024-01-17',
-      scheduledTime: '2:00 PM - 5:00 PM',
-      subtotal: 1500,
-      additionalCost: 200,
-      deliveryCharge: 0,
-      discount: 100,
-      total: 1600,
-      paymentStatus: 'paid',
-      items: [
-        { name: 'Deep Cleaning', details: '3 Bedroom Apartment', price: 1500 }
-      ]
-    },
-    {
-      id: '3',
-      orderNumber: 'ORD-003',
-      serviceName: 'Plumbing Services',
-      vendorId: '3',
-      vendorName: 'Plumbing Experts',
-      clientId: '3',
-      clientName: 'Karim Uddin',
-      clientPhone: '+8801734567890',
-      clientEmail: 'karim@example.com',
-      clientAddress: '789 Oak Road, Sylhet',
-      status: 'Assigned',
-      orderDate: '2024-01-17',
-      scheduledDate: '2024-01-18',
-      scheduledTime: '10:00 AM - 12:00 PM',
-      subtotal: 500,
-      additionalCost: 0,
-      deliveryCharge: 0,
-      discount: 0,
-      total: 500,
-      paymentStatus: 'pending',
-      items: [
-        { name: 'Pipe Repair', details: 'Kitchen Sink', price: 500 }
-      ]
-    },
-    {
-      id: '4',
-      orderNumber: 'ORD-004',
-      serviceName: 'Electrical Services',
-      vendorId: '1',
-      vendorName: 'AC Repair Pro',
-      clientId: '4',
-      clientName: 'Sadia Rahman',
-      clientPhone: '+8801745678901',
-      clientEmail: 'sadia@example.com',
-      clientAddress: '321 Elm Street, Dhaka',
-      status: 'Review',
-      orderDate: '2024-01-18',
-      scheduledDate: '2024-01-19',
-      scheduledTime: '11:00 AM - 1:00 PM',
-      subtotal: 1200,
-      additionalCost: 300,
-      deliveryCharge: 0,
-      discount: 150,
-      total: 1350,
-      paymentStatus: 'paid',
-      items: [
-        { name: 'Wiring Installation', details: 'Living Room', price: 1200 }
-      ]
-    },
-    {
-      id: '5',
-      orderNumber: 'ORD-005',
-      serviceName: 'House Shifting',
-      vendorId: '2',
-      vendorName: 'Home Cleaners BD',
-      clientId: '5',
-      clientName: 'Hasan Ali',
-      clientPhone: '+8801756789012',
-      clientEmail: 'hasan@example.com',
-      clientAddress: '654 Pine Avenue, Dhaka',
-      status: 'Delivered',
-      orderDate: '2024-01-19',
-      scheduledDate: '2024-01-20',
-      scheduledTime: '8:00 AM - 12:00 PM',
-      subtotal: 3000,
-      additionalCost: 500,
-      deliveryCharge: 0,
-      discount: 200,
-      total: 3300,
-      paymentStatus: 'paid',
-      items: [
-        { name: 'Full House Shifting', details: '3 Bedroom House', price: 3000 }
-      ]
-    },
-    {
-      id: '6',
-      orderNumber: 'ORD-006',
-      serviceName: 'Salon Care',
-      vendorId: '3',
-      vendorName: 'Plumbing Experts',
-      clientId: '6',
-      clientName: 'Nadia Islam',
-      clientPhone: '+8801767890123',
-      clientEmail: 'nadia@example.com',
-      clientAddress: '987 Maple Street, Chittagong',
-      status: 'Submitted',
-      orderDate: '2024-01-20',
-      subtotal: 1200,
-      additionalCost: 0,
-      deliveryCharge: 0,
-      discount: 0,
-      total: 1200,
-      paymentStatus: 'pending',
-      items: [
-        { name: 'Haircut & Styling', details: 'Women', price: 1200 }
-      ]
-    },
-  ])
+  // Orders data - Fetched from API
+  const [orders, setOrders] = useState<Order[]>([])
+  const [ordersLoading, setOrdersLoading] = useState(true)
+
+  // Fetch orders from API
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        setOrdersLoading(true)
+        const params = new URLSearchParams()
+        // For admin, fetch all orders (no status filter by default)
+        // Increase limit to get more orders
+        params.append('limit', '100')
+        params.append('page', '1')
+
+        const response = await fetch(`/api/orders?${params.toString()}`)
+        const data = await response.json()
+        
+        if (data.success && data.orders) {
+          // Transform API response to match Order interface
+          const transformedOrders: Order[] = data.orders.map((order: any) => {
+            // Map status from API format to admin page format
+            const statusMap: Record<string, OrderStatus> = {
+              'Initiated': 'Submitted',
+              'In Progress': 'In-Progress',
+              'Confirmed': 'Confirmed',
+              'Assigned': 'Assigned',
+              'Review': 'Review',
+              'Delivered': 'Delivered',
+              'Closed': 'Closed',
+              'Cancelled': 'Closed',
+            }
+            
+            const mappedStatus = statusMap[order.status] || order.statusEnum || 'Submitted'
+            
+            // Format order date
+            const orderDate = order.createdAt 
+              ? new Date(order.createdAt).toISOString().split('T')[0]
+              : new Date().toISOString().split('T')[0]
+            
+            // Format scheduled date
+            const scheduledDate = order.scheduledDate
+              ? new Date(order.scheduledDate).toISOString().split('T')[0]
+              : undefined
+            
+            // Get first item's service name
+            const serviceName = order.items && order.items.length > 0
+              ? order.items[0].serviceName || order.service || 'Service'
+              : order.service || 'Service'
+            
+            // Transform items
+            const transformedItems = order.items
+              ? order.items.map((item: any) => ({
+                  name: item.serviceName || 'Service',
+                  details: item.details || '',
+                  price: item.price * (item.quantity || 1),
+                }))
+              : []
+            
+            return {
+              id: order.id,
+              orderNumber: order.orderNumber,
+              serviceName: serviceName,
+              vendorId: order.vendor?.id || '',
+              vendorName: order.vendor?.name || 'Not Assigned',
+              clientId: order.customer?.id || '',
+              clientName: order.customer?.name || 'Unknown',
+              clientPhone: order.customer?.phone || 'N/A',
+              clientEmail: order.customer?.email || '',
+              clientAddress: order.customer?.address || order.address || 'N/A',
+              status: mappedStatus,
+              orderDate: orderDate,
+              scheduledDate: scheduledDate,
+              scheduledTime: order.scheduledTime || undefined,
+              subtotal: order.subtotal || 0,
+              additionalCost: order.additionalCost || 0,
+              deliveryCharge: order.deliveryCharge || 0,
+              discount: order.discount || 0,
+              total: order.total || 0,
+              paymentStatus: order.paymentStatus?.toLowerCase() || 'pending',
+              items: transformedItems,
+            }
+          })
+          
+          setOrders(transformedOrders)
+        } else {
+          console.error('Failed to fetch orders:', data.error)
+          setOrders([])
+        }
+      } catch (error) {
+        console.error('Error fetching orders:', error)
+        setOrders([])
+      } finally {
+        setOrdersLoading(false)
+      }
+    }
+
+    // Fetch orders when orders tab is active
+    if (activeTab === 'orders') {
+      fetchOrders()
+    }
+  }, [activeTab])
 
   // Order filters
   const [orderSearch, setOrderSearch] = useState('')
@@ -2504,32 +2455,44 @@ export default function AdminDashboard() {
 
       {/* Orders Table */}
       <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[1000px]">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order #</th>
-                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service</th>
-                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vendor</th>
-                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
-                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment</th>
-                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredOrders.length === 0 ? (
+        {ordersLoading ? (
+          <div className="text-center py-8 sm:py-12 px-4">
+            <p className="text-sm sm:text-base text-gray-600">Loading orders...</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[1000px]">
+              <thead className="bg-gray-50">
                 <tr>
-                  <td colSpan={9} className="px-3 md:px-6 py-8 text-center text-gray-500">
-                    No orders found matching the filters
-                  </td>
+                  <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order #</th>
+                  <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service</th>
+                  <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vendor</th>
+                  <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
+                  <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment</th>
+                  <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                  <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                  <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
-              ) : (
-                filteredOrders.map((order) => (
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredOrders.length === 0 ? (
+                  <tr>
+                    <td colSpan={9} className="px-3 md:px-6 py-8 text-center text-gray-500">
+                      No orders found matching the filters
+                    </td>
+                  </tr>
+                ) : (
+                  filteredOrders.map((order) => (
                   <tr key={order.id} className="hover:bg-gray-50">
-                    <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{order.orderNumber}</td>
+                    <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <Link 
+                        href={`/admin/orders/${order.id}`}
+                        className="text-blue-600 hover:text-blue-800 hover:underline"
+                      >
+                        {order.orderNumber}
+                      </Link>
+                    </td>
                     <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">{order.serviceName}</td>
                     <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-500">{order.vendorName}</td>
                     <td className="px-3 md:px-6 py-4 whitespace-nowrap">
@@ -2589,11 +2552,12 @@ export default function AdminDashboard() {
                       </div>
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* Assign Vendor Modal */}
