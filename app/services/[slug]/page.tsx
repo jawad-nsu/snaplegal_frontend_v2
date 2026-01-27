@@ -429,8 +429,13 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                       <div>
                         <h3 className="text-lg font-bold text-gray-900 mb-3">Timeline</h3>
                         <div className="bg-gradient-to-br from-[var(--color-neutral)] to-white rounded-lg p-6 border border-gray-200">
-                          <div className="text-gray-700 leading-relaxed whitespace-pre-line">
-                            {service.timeline}
+                          <div className="space-y-2">
+                            {service.timeline.split('\n').filter((line) => line.trim()).map((line, index) => (
+                              <div key={index} className="flex items-start gap-2">
+                                <span className="text-gray-700">•</span>
+                                <span className="text-gray-700">{line.trim()}</span>
+                              </div>
+                            ))}
                           </div>
                         </div>
                       </div>

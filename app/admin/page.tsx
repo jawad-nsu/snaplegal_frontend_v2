@@ -3397,8 +3397,15 @@ export default function AdminDashboard() {
                       <textarea value={serviceForm.whatsNotIncluded} onChange={(e) => setServiceForm({ ...serviceForm, whatsNotIncluded: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md" rows={3} placeholder="What must be done externally..." />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Timeline (Approximate)</label>
-                      <Input value={serviceForm.timeline} onChange={(e) => setServiceForm({ ...serviceForm, timeline: e.target.value })} placeholder="e.g., 15-30 days" />
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Timeline (One per line)</label>
+                      <textarea 
+                        value={serviceForm.timeline} 
+                        onChange={(e) => setServiceForm({ ...serviceForm, timeline: e.target.value })} 
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                        rows={4}
+                        placeholder="Timeline item 1&#10;Timeline item 2&#10;Timeline item 3"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">Enter each timeline item on a new line</p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Additional Notes</label>
