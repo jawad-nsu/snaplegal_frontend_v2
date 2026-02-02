@@ -83,7 +83,7 @@ const categories = [
       startingPrice: '৳1,500',
     },
     {
-      title: 'Gas Stove/Burner Services',
+      title: 'Gaz Stove/Burner Services',
       image: '/gas-cooker-repair.jpg',
       rating: '4.6',
       description: 'Expert gas stove and burner repair, installation, and maintenance services.',
