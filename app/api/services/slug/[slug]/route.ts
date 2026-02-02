@@ -39,6 +39,22 @@ export async function GET(
       )
     }
 
+    // Get review statistics
+    const serviceReviews = await prisma.review.findMany({
+      where: {
+        serviceId: service.id,
+        reviewType: 'service',
+      },
+      select: {
+        rating: true,
+      },
+    })
+
+    const reviewCount = serviceReviews.length
+    const calculatedRating = reviewCount > 0
+      ? (serviceReviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount).toFixed(1)
+      : '0'
+
     return NextResponse.json({
       success: true,
       service: {
@@ -46,7 +62,8 @@ export async function GET(
         title: service.title,
         slug: service.slug,
         image: service.image || '',
-        rating: service.rating || '0',
+        rating: calculatedRating,
+        reviewCount,
         description: service.description || '',
         deliveryTime: service.deliveryTime || '',
         startingPrice: service.startingPrice || '',
@@ -59,6 +76,7 @@ export async function GET(
         shortDescription: service.shortDescription || '',
         detailedDescription: service.detailedDescription || '',
         providerAuthority: service.providerAuthority || '',
+        infoSource: service.infoSource || '',
         requiredDocuments: service.requiredDocuments || [],
         whatsIncluded: service.whatsIncluded || '',
         whatsNotIncluded: service.whatsNotIncluded || '',

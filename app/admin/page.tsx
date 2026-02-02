@@ -105,6 +105,7 @@ interface Service {
   shortDescription?: string
   detailedDescription?: string
   providerAuthority?: string
+  infoSource?: string
   requiredDocuments?: string[]
   whatsIncluded?: string
   whatsNotIncluded?: string
@@ -128,6 +129,32 @@ interface Service {
   clientStamps?: string
   clientCourtFee?: string
   clientConsultantFee?: string
+}
+
+interface Review {
+  id: string
+  serviceId: string
+  service?: {
+    id: string
+    title: string
+    slug: string
+  }
+  userId?: string
+  user?: {
+    id: string
+    name: string
+    email: string
+  }
+  orderId?: string
+  reviewType: string
+  rating: number
+  comment?: string
+  reviewerName: string
+  images: string[]
+  helpfulCount: number
+  isVerified: boolean
+  createdAt: string
+  updatedAt: string
 }
 
 interface VendorServiceRequest {
@@ -233,7 +260,7 @@ interface Lead {
   createdAt: string
 }
 
-type TabType = 'leads' | 'users' | 'vendors' | 'categories' | 'subcategories' | 'services' | 'service-requests' | 'chats' | 'orders'
+type TabType = 'leads' | 'users' | 'vendors' | 'categories' | 'subcategories' | 'services' | 'service-requests' | 'chats' | 'orders' | 'reviews'
 
 // Helper function to sort categories: first by serialNumber (ascending), then by updatedAt (descending) for those without serial numbers
 const sortCategories = (categoriesToSort: ServiceCategory[]): ServiceCategory[] => {
@@ -280,7 +307,7 @@ const sortSubCategories = (subCategoriesToSort: SubCategory[]): SubCategory[] =>
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<TabType>('leads')
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [editingItem, setEditingItem] = useState<User | Vendor | ServiceCategory | SubCategory | Service | null>(null)
+  const [editingItem, setEditingItem] = useState<User | Vendor | ServiceCategory | SubCategory | Service | Review | null>(null)
 
   // Filter states for Users
   const [userSearch, setUserSearch] = useState('')
@@ -448,6 +475,58 @@ export default function AdminDashboard() {
     fetchServices()
   }, [])
 
+  // Reviews - Fetched from API
+  const [reviews, setReviews] = useState<Review[]>([])
+  const [reviewsLoading, setReviewsLoading] = useState(true)
+  const [reviewServiceFilter, setReviewServiceFilter] = useState<string>('all')
+  const [reviewTypeFilter, setReviewTypeFilter] = useState<string>('all')
+  const [reviewRatingFilter, setReviewRatingFilter] = useState<string>('all')
+
+  // Fetch reviews from API
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        setReviewsLoading(true)
+        const params = new URLSearchParams()
+        if (reviewServiceFilter !== 'all') params.append('serviceId', reviewServiceFilter)
+        if (reviewTypeFilter !== 'all') params.append('reviewType', reviewTypeFilter)
+        if (reviewRatingFilter !== 'all') params.append('rating', reviewRatingFilter)
+
+        const response = await fetch(`/api/reviews?${params.toString()}`)
+        const data = await response.json()
+        
+        if (data.success && data.reviews) {
+          setReviews(data.reviews)
+        } else {
+          console.error('Failed to fetch reviews:', data.error)
+          setReviews([])
+        }
+      } catch (error) {
+        console.error('Error fetching reviews:', error)
+        setReviews([])
+      } finally {
+        setReviewsLoading(false)
+      }
+    }
+
+    if (activeTab === 'reviews') {
+      fetchReviews()
+    }
+  }, [activeTab, reviewServiceFilter, reviewTypeFilter, reviewRatingFilter])
+
+  // Review form state
+  const [reviewForm, setReviewForm] = useState({
+    serviceId: '',
+    userId: '',
+    orderId: '',
+    reviewType: 'service',
+    rating: 5,
+    reviewerName: '',
+    comment: '',
+    images: [] as string[],
+    isVerified: false,
+  })
+
   // Vendor Service Requests
   const [serviceRequests, setServiceRequests] = useState<VendorServiceRequest[]>([
     { id: '1', vendorId: '1', vendorName: 'AC Repair Pro', serviceName: 'AC Deep Cleaning', category: 'AC Repair Services', description: 'Comprehensive deep cleaning service for all AC units', status: 'submitted', submittedDate: '2024-01-20' },
@@ -533,7 +612,27 @@ export default function AdminDashboard() {
         
         if (data.success && data.orders) {
           // Transform API response to match Order interface
-          const transformedOrders: Order[] = data.orders.map((order: any) => {
+          interface ApiOrder {
+            id: string
+            orderNumber: string
+            status: string
+            statusEnum?: string
+            customer?: { id: string; name: string; email: string; phone: string }
+            vendor?: { id: string; name: string }
+            items?: Array<{ serviceName?: string; details?: string; price: number; quantity: number }>
+            service?: string
+            createdAt?: string
+            scheduledDate?: string
+            subtotal: number
+            additionalCost: number
+            deliveryCharge: number
+            discount: number
+            total: number
+            paymentStatus: string
+            address?: string
+            scheduledTime?: string
+          }
+          const transformedOrders: Order[] = data.orders.map((order: ApiOrder) => {
             // Map status from API format to admin page format
             const statusMap: Record<string, OrderStatus> = {
               'Initiated': 'Submitted',
@@ -565,7 +664,7 @@ export default function AdminDashboard() {
             
             // Transform items
             const transformedItems = order.items
-              ? order.items.map((item: any) => ({
+              ? order.items.map((item: { serviceName?: string; details?: string; price: number; quantity: number }) => ({
                   name: item.serviceName || 'Service',
                   details: item.details || '',
                   price: item.price * (item.quantity || 1),
@@ -582,11 +681,11 @@ export default function AdminDashboard() {
               clientName: order.customer?.name || 'Unknown',
               clientPhone: order.customer?.phone || 'N/A',
               clientEmail: order.customer?.email || '',
-              clientAddress: order.customer?.address || order.address || 'N/A',
+              clientAddress: order.address || 'N/A',
               status: mappedStatus,
               orderDate: orderDate,
               scheduledDate: scheduledDate,
-              scheduledTime: order.scheduledTime || undefined,
+              scheduledTime: undefined,
               subtotal: order.subtotal || 0,
               additionalCost: order.additionalCost || 0,
               deliveryCharge: order.deliveryCharge || 0,
@@ -855,7 +954,7 @@ export default function AdminDashboard() {
   const [serviceForm, setServiceForm] = useState({
     title: '', slug: '', image: '', rating: '', description: '', deliveryTime: '', startingPrice: '', categoryId: '', subCategoryId: '',
     // Overview fields
-    shortDescription: '', detailedDescription: '', providerAuthority: '', requiredDocuments: [] as string[], whatsIncluded: '', whatsNotIncluded: '',
+    shortDescription: '', detailedDescription: '', providerAuthority: '', infoSource: '', requiredDocuments: [] as string[], whatsIncluded: '', whatsNotIncluded: '',
     timeline: '', additionalNotes: '',
     // Learning and Discussion
     processFlow: '', videoUrl: '',
@@ -886,9 +985,21 @@ export default function AdminDashboard() {
     } else if (activeTab === 'services') {
       setServiceForm({
         title: '', slug: '', image: '', rating: '', description: '', deliveryTime: '', startingPrice: '', categoryId: '', subCategoryId: '',
-        shortDescription: '', detailedDescription: '', providerAuthority: '', requiredDocuments: [], whatsIncluded: '', whatsNotIncluded: '',
+        shortDescription: '', detailedDescription: '', providerAuthority: '', infoSource: '', requiredDocuments: [], whatsIncluded: '', whatsNotIncluded: '',
         timeline: '', additionalNotes: '', processFlow: '', videoUrl: '', faqs: [], consultantQualifications: '', packages: [],
         coreFiling: '', coreStamps: '', coreCourtFee: '', clientFiling: '', clientStamps: '', clientCourtFee: '', clientConsultantFee: ''
+      })
+    } else if (activeTab === 'reviews') {
+      setReviewForm({
+        serviceId: '',
+        userId: '',
+        orderId: '',
+        reviewType: 'service',
+        rating: 5,
+        reviewerName: '',
+        comment: '',
+        images: [],
+        isVerified: false,
       })
     }
   }
@@ -924,13 +1035,26 @@ export default function AdminDashboard() {
       setServiceForm({
         title: serviceItem.title, slug: serviceItem.slug, image: serviceItem.image, rating: serviceItem.rating, description: serviceItem.description,
         deliveryTime: serviceItem.deliveryTime, startingPrice: serviceItem.startingPrice, categoryId: serviceItem.categoryId, subCategoryId: serviceItem.subCategoryId || '',
-        shortDescription: serviceItem.shortDescription || '', detailedDescription: serviceItem.detailedDescription || '', providerAuthority: serviceItem.providerAuthority || '',
+        shortDescription: serviceItem.shortDescription || '', detailedDescription: serviceItem.detailedDescription || '', providerAuthority: serviceItem.providerAuthority || '', infoSource: serviceItem.infoSource || '',
         requiredDocuments: serviceItem.requiredDocuments || [], whatsIncluded: serviceItem.whatsIncluded || '', whatsNotIncluded: serviceItem.whatsNotIncluded || '',
         timeline: serviceItem.timeline || '', additionalNotes: serviceItem.additionalNotes || '', processFlow: serviceItem.processFlow || '', videoUrl: serviceItem.videoUrl || '',
         faqs: serviceItem.faqs || [], consultantQualifications: serviceItem.consultantQualifications || '', packages: serviceItem.packages || [],
         coreFiling: serviceItem.coreFiling || '', coreStamps: serviceItem.coreStamps || '', coreCourtFee: serviceItem.coreCourtFee || '',
         clientFiling: serviceItem.clientFiling || '', clientStamps: serviceItem.clientStamps || '', clientCourtFee: serviceItem.clientCourtFee || '',
         clientConsultantFee: serviceItem.clientConsultantFee || ''
+      })
+    } else if (activeTab === 'reviews' && 'reviewType' in item && 'reviewerName' in item) {
+      const reviewItem = item as unknown as Review
+      setReviewForm({
+        serviceId: reviewItem.serviceId,
+        userId: reviewItem.userId || '',
+        orderId: reviewItem.orderId || '',
+        reviewType: reviewItem.reviewType,
+        rating: reviewItem.rating,
+        reviewerName: reviewItem.reviewerName,
+        comment: reviewItem.comment || '',
+        images: reviewItem.images || [],
+        isVerified: reviewItem.isVerified,
       })
     }
   }
@@ -1031,6 +1155,33 @@ export default function AdminDashboard() {
         } catch (error) {
           console.error('Error deleting service:', error)
           alert('Failed to delete service. Please try again.')
+        }
+      } else if (activeTab === 'reviews') {
+        try {
+          const response = await fetch(`/api/reviews/${id}`, {
+            method: 'DELETE',
+          })
+
+          const data = await response.json()
+
+          if (data.success) {
+            // Refresh reviews list
+            const params = new URLSearchParams()
+            if (reviewServiceFilter !== 'all') params.append('serviceId', reviewServiceFilter)
+            if (reviewTypeFilter !== 'all') params.append('reviewType', reviewTypeFilter)
+            if (reviewRatingFilter !== 'all') params.append('rating', reviewRatingFilter)
+
+            const refreshResponse = await fetch(`/api/reviews?${params.toString()}`)
+            const refreshData = await refreshResponse.json()
+            if (refreshData.success) {
+              setReviews(refreshData.reviews)
+            }
+          } else {
+            alert(`Failed to delete review: ${data.error}`)
+          }
+        } catch (error) {
+          console.error('Error deleting review:', error)
+          alert('Failed to delete review. Please try again.')
         }
       }
     }
@@ -1204,6 +1355,7 @@ export default function AdminDashboard() {
             shortDescription: serviceForm.shortDescription,
             detailedDescription: serviceForm.detailedDescription,
             providerAuthority: serviceForm.providerAuthority,
+            infoSource: serviceForm.infoSource,
             requiredDocuments: serviceForm.requiredDocuments,
             whatsIncluded: serviceForm.whatsIncluded,
             whatsNotIncluded: serviceForm.whatsNotIncluded,
@@ -1257,6 +1409,73 @@ export default function AdminDashboard() {
         console.error('Error saving service:', error)
         const errorMsg = error instanceof Error ? error.message : 'Network error or server unavailable'
         alert(`Failed to save service: ${errorMsg}`)
+      }
+    } else if (activeTab === 'reviews') {
+      try {
+        if (!reviewForm.serviceId) {
+          alert('Service is required')
+          return
+        }
+        if (!reviewForm.reviewerName.trim()) {
+          alert('Reviewer name is required')
+          return
+        }
+        if (reviewForm.rating < 1 || reviewForm.rating > 5) {
+          alert('Rating must be between 1 and 5')
+          return
+        }
+
+        const url = editingItem && 'reviewType' in editingItem ? `/api/reviews/${editingItem.id}` : '/api/reviews'
+        const method = editingItem ? 'PUT' : 'POST'
+
+        const response = await fetch(url, {
+          method,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            serviceId: reviewForm.serviceId,
+            userId: reviewForm.userId || null,
+            orderId: reviewForm.orderId || null,
+            reviewType: reviewForm.reviewType,
+            rating: reviewForm.rating,
+            reviewerName: reviewForm.reviewerName,
+            comment: reviewForm.comment || null,
+            images: reviewForm.images || [],
+            isVerified: reviewForm.isVerified,
+          }),
+        })
+
+        const data = await response.json()
+
+        if (!response.ok) {
+          const errorMsg = data.error || data.message || 'Unknown error'
+          alert(`Failed to save review: ${errorMsg}`)
+          return
+        }
+
+        if (data.success) {
+          // Refresh reviews list
+          const params = new URLSearchParams()
+          if (reviewServiceFilter !== 'all') params.append('serviceId', reviewServiceFilter)
+          if (reviewTypeFilter !== 'all') params.append('reviewType', reviewTypeFilter)
+          if (reviewRatingFilter !== 'all') params.append('rating', reviewRatingFilter)
+
+          const refreshResponse = await fetch(`/api/reviews?${params.toString()}`)
+          const refreshData = await refreshResponse.json()
+          if (refreshData.success) {
+            setReviews(refreshData.reviews)
+          }
+          setIsModalOpen(false)
+          setEditingItem(null)
+        } else {
+          const errorMsg = data.error || data.message || 'Unknown error'
+          alert(`Failed to save review: ${errorMsg}`)
+        }
+      } catch (error) {
+        console.error('Error saving review:', error)
+        const errorMsg = error instanceof Error ? error.message : 'Network error or server unavailable'
+        alert(`Failed to save review: ${errorMsg}`)
       }
     }
   }
@@ -2630,6 +2849,165 @@ export default function AdminDashboard() {
     </div>
   )
 
+  const renderReviewsTab = () => (
+    <div className="space-y-4">
+      {/* Filters */}
+      <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+        <div className="flex items-center gap-2 mb-4">
+          <Filter size={20} className="text-gray-500" />
+          <h3 className="font-semibold text-gray-700">Filters</h3>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Service</label>
+            <select
+              value={reviewServiceFilter}
+              onChange={(e) => setReviewServiceFilter(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            >
+              <option value="all">All Services</option>
+              {services.map((service) => (
+                <option key={service.id} value={service.id}>{service.title}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Review Type</label>
+            <select
+              value={reviewTypeFilter}
+              onChange={(e) => setReviewTypeFilter(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            >
+              <option value="all">All Types</option>
+              <option value="service">Service Reviews</option>
+              <option value="consultant">Consultant Reviews</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Rating</label>
+            <select
+              value={reviewRatingFilter}
+              onChange={(e) => setReviewRatingFilter(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            >
+              <option value="all">All Ratings</option>
+              <option value="5">5 Stars</option>
+              <option value="4">4 Stars</option>
+              <option value="3">3 Stars</option>
+              <option value="2">2 Stars</option>
+              <option value="1">1 Star</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* Reviews List */}
+      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+        {reviewsLoading ? (
+          <div className="text-center py-8 sm:py-12 px-4">
+            <p className="text-sm sm:text-base text-gray-600">Loading reviews...</p>
+          </div>
+        ) : reviews.length === 0 ? (
+          <div className="text-center py-8 sm:py-12 px-4">
+            <p className="text-sm sm:text-base text-gray-600">No reviews found</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[800px]">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service</th>
+                  <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reviewer</th>
+                  <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                  <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rating</th>
+                  <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comment</th>
+                  <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                  <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {reviews.map((review) => (
+                  <tr key={review.id} className="hover:bg-gray-50">
+                    <td className="px-3 md:px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">
+                        {review.service?.title || 'Unknown Service'}
+                      </div>
+                    </td>
+                    <td className="px-3 md:px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{review.reviewerName}</div>
+                      {review.user && (
+                        <div className="text-xs text-gray-500">{review.user.email}</div>
+                      )}
+                    </td>
+                    <td className="px-3 md:px-6 py-4 whitespace-nowrap">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        review.reviewType === 'service' 
+                          ? 'bg-blue-100 text-blue-800' 
+                          : 'bg-purple-100 text-purple-800'
+                      }`}>
+                        {review.reviewType === 'service' ? 'Service' : 'Consultant'}
+                      </span>
+                    </td>
+                    <td className="px-3 md:px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center gap-1">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            size={14}
+                            className={i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
+                          />
+                        ))}
+                        <span className="ml-1 text-sm text-gray-600">{review.rating}</span>
+                      </div>
+                    </td>
+                    <td className="px-3 md:px-6 py-4">
+                      <div className="text-sm text-gray-900 max-w-xs truncate">
+                        {review.comment || '-'}
+                      </div>
+                    </td>
+                    <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {new Date(review.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => {
+                            setEditingItem(review as unknown as User | Vendor | ServiceCategory | SubCategory | Service | Review)
+                            setIsModalOpen(true)
+                            setReviewForm({
+                              serviceId: review.serviceId,
+                              userId: review.userId || '',
+                              orderId: review.orderId || '',
+                              reviewType: review.reviewType,
+                              rating: review.rating,
+                              reviewerName: review.reviewerName,
+                              comment: review.comment || '',
+                              images: review.images || [],
+                              isVerified: review.isVerified,
+                            })
+                          }}
+                          className="text-[var(--color-primary)] hover:text-[var(--color-primary)]/80"
+                        >
+                          <Edit size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(review.id)}
+                          className="text-red-600 hover:text-red-800"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+
   const renderChatsTab = () => {
     const handleSendMessage = (orderId: string) => {
       if (!adminChatMessage.trim()) return
@@ -3137,7 +3515,7 @@ export default function AdminDashboard() {
         <div className={`bg-white rounded-lg shadow-xl ${activeTab === 'services' ? 'max-w-6xl' : 'max-w-2xl'} w-full max-h-[90vh] overflow-y-auto`}>
           <div className="flex items-center justify-between p-4 md:p-6 border-b sticky top-0 bg-white z-10">
             <h2 className="text-lg md:text-xl font-bold">
-              {editingItem ? 'Edit' : 'Add New'} {activeTab === 'users' ? 'User' : activeTab === 'vendors' ? 'Vendor' : activeTab === 'categories' ? 'Category' : activeTab === 'subcategories' ? 'Sub-Category' : 'Service'}
+              {editingItem ? 'Edit' : 'Add New'} {activeTab === 'users' ? 'User' : activeTab === 'vendors' ? 'Vendor' : activeTab === 'categories' ? 'Category' : activeTab === 'subcategories' ? 'Sub-Category' : activeTab === 'services' ? 'Service' : activeTab === 'reviews' ? 'Review' : ''}
             </h2>
             <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
               <X size={24} />
@@ -3306,6 +3684,104 @@ export default function AdminDashboard() {
               </>
             )}
 
+            {activeTab === 'reviews' && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Service *</label>
+                  <select
+                    value={reviewForm.serviceId}
+                    onChange={(e) => setReviewForm({ ...reviewForm, serviceId: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    required
+                  >
+                    <option value="">Select Service</option>
+                    {services.map((service) => (
+                      <option key={service.id} value={service.id}>{service.title}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Review Type *</label>
+                  <select
+                    value={reviewForm.reviewType}
+                    onChange={(e) => setReviewForm({ ...reviewForm, reviewType: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    required
+                  >
+                    <option value="service">Service Review</option>
+                    <option value="consultant">Consultant Review</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Reviewer Name *</label>
+                  <Input
+                    value={reviewForm.reviewerName}
+                    onChange={(e) => setReviewForm({ ...reviewForm, reviewerName: e.target.value })}
+                    placeholder="Enter reviewer name"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">User (Optional)</label>
+                  <select
+                    value={reviewForm.userId}
+                    onChange={(e) => setReviewForm({ ...reviewForm, userId: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  >
+                    <option value="">None (Anonymous Review)</option>
+                    {users.map((user) => (
+                      <option key={user.id} value={user.id}>{user.name || user.email}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Rating *</label>
+                  <select
+                    value={reviewForm.rating}
+                    onChange={(e) => setReviewForm({ ...reviewForm, rating: parseInt(e.target.value) })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    required
+                  >
+                    <option value="5">5 Stars</option>
+                    <option value="4">4 Stars</option>
+                    <option value="3">3 Stars</option>
+                    <option value="2">2 Stars</option>
+                    <option value="1">1 Star</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Comment</label>
+                  <textarea
+                    value={reviewForm.comment}
+                    onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    rows={4}
+                    placeholder="Enter review comment..."
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Order ID (Optional - for verified purchase)</label>
+                  <Input
+                    value={reviewForm.orderId}
+                    onChange={(e) => setReviewForm({ ...reviewForm, orderId: e.target.value })}
+                    placeholder="Enter order ID if this is a verified purchase"
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="isVerified"
+                    checked={reviewForm.isVerified}
+                    onChange={(e) => setReviewForm({ ...reviewForm, isVerified: e.target.checked })}
+                    className="w-4 h-4 text-[var(--color-primary)] border-gray-300 rounded focus:ring-[var(--color-primary)]"
+                  />
+                  <label htmlFor="isVerified" className="text-sm font-medium text-gray-700">
+                    Mark as Verified Purchase
+                  </label>
+                </div>
+              </>
+            )}
+
             {activeTab === 'services' && (
               <div className="space-y-6">
                 {/* Basic Information */}
@@ -3376,6 +3852,16 @@ export default function AdminDashboard() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Service Provider Authority (Court/Council)</label>
                       <Input value={serviceForm.providerAuthority} onChange={(e) => setServiceForm({ ...serviceForm, providerAuthority: e.target.value })} placeholder="e.g., Supreme Court, High Court, District Council" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Info Source (Shown in service page)</label>
+                      <textarea
+                        value={serviceForm.infoSource}
+                        onChange={(e) => setServiceForm({ ...serviceForm, infoSource: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                        rows={4}
+                        placeholder="Describe where this information comes from, including any key URLs or references..."
+                      />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Required Documents (One per line)</label>
@@ -3714,6 +4200,15 @@ export default function AdminDashboard() {
               <ShoppingCart size={18} className="md:w-5 md:h-5" />
               <span className="hidden sm:inline">Orders</span>
             </button>
+            <button
+              onClick={() => setActiveTab('reviews')}
+              className={`px-4 md:px-6 py-3 md:py-4 font-medium text-xs md:text-sm flex items-center gap-1 md:gap-2 border-b-2 transition-colors whitespace-nowrap ${
+                activeTab === 'reviews' ? 'border-[var(--color-primary)] text-[var(--color-primary)]' : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <Star size={18} className="md:w-5 md:h-5" />
+              <span className="hidden sm:inline">Reviews</span>
+            </button>
           </div>
         </div>
 
@@ -3730,6 +4225,7 @@ export default function AdminDashboard() {
               {activeTab === 'service-requests' && 'Vendor Service Requests'}
               {activeTab === 'chats' && 'Vendor-Client Chats'}
               {activeTab === 'orders' && 'All Orders'}
+              {activeTab === 'reviews' && 'All Reviews'}
             </h2>
             {(activeTab !== 'leads' && activeTab !== 'service-requests' && activeTab !== 'chats' && activeTab !== 'orders') && (
               <Button onClick={handleAdd} className="bg-[var(--color-primary)] hover:opacity-90 w-full sm:w-auto">
@@ -3748,6 +4244,7 @@ export default function AdminDashboard() {
           {activeTab === 'service-requests' && renderServiceRequestsTab()}
           {activeTab === 'chats' && renderChatsTab()}
           {activeTab === 'orders' && renderOrdersTab()}
+          {activeTab === 'reviews' && renderReviewsTab()}
         </div>
       </div>
 

@@ -31,6 +31,8 @@ interface ServiceData {
   whatsNotIncluded?: string
   timeline?: string
   additionalNotes?: string
+  providerAuthority?: string
+  infoSource?: string
 }
 
 export default function ServiceDetailsPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -50,12 +52,20 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
   const [serviceId, setServiceId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  interface ReviewData {
+    id: string
+    reviewerName: string
+    rating: number
+    comment?: string
+    createdAt: string
+  }
+
+  const [serviceReviews, setServiceReviews] = useState<ReviewData[]>([])
+  const [consultantReviews, setConsultantReviews] = useState<ReviewData[]>([])
+  const [reviewsLoading, setReviewsLoading] = useState(false)
   const router = useRouter()
   
   const { slug } = use(params)
-
-  // Get current timestamp (calculated once on mount)
-  const [now] = useState(() => typeof window !== 'undefined' ? Date.now() : 0)
 
   useEffect(() => {
     const fetchService = async () => {
@@ -92,7 +102,7 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
           name: apiService.title,
           category: apiService.categoryTitle || 'Services',
           rating: parseFloat(apiService.rating) || 0,
-          reviewCount: 0, // Default review count if not in database
+          reviewCount: apiService.reviewCount || 0,
           image: apiService.image || '/placeholder.svg',
           description: apiService.description || apiService.shortDescription || '',
           detailedDescription: apiService.detailedDescription || undefined,
@@ -100,15 +110,15 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
             ? apiService.whatsIncluded.split('\n').filter((f: string) => f.trim())
             : [],
           faqs: Array.isArray(apiService.faqs) 
-            ? apiService.faqs.map((faq: any) => ({
+            ? apiService.faqs.map((faq: { question?: string; answer?: string }) => ({
                 question: faq.question || '',
                 answer: faq.answer || ''
               }))
             : [],
           packages: Array.isArray(apiService.packages)
-            ? apiService.packages.map((pkg: any) => {
+            ? apiService.packages.map((pkg: { name?: string; price?: string | number; originalPrice?: string | number; features?: string[]; popular?: boolean }) => {
                 // Helper function to parse price values
-                const parsePrice = (value: any): number => {
+                const parsePrice = (value: string | number | null | undefined): number => {
                   if (value === null || value === undefined) return 0
                   if (typeof value === 'number') {
                     return isNaN(value) ? 0 : value
@@ -125,7 +135,7 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                 }
 
                 // Helper function to parse originalPrice (returns undefined if invalid)
-                const parseOriginalPrice = (value: any): number | undefined => {
+                const parseOriginalPrice = (value: string | number | null | undefined): number | undefined => {
                   if (value === null || value === undefined) return undefined
                   if (typeof value === 'number') {
                     return isNaN(value) ? undefined : value
@@ -157,13 +167,20 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
             : [],
           whatsNotIncluded: apiService.whatsNotIncluded || undefined,
           timeline: apiService.timeline || undefined,
-          additionalNotes: apiService.additionalNotes || undefined
+          additionalNotes: apiService.additionalNotes || undefined,
+          providerAuthority: apiService.providerAuthority || undefined,
+          infoSource: apiService.infoSource || undefined
         }
 
         setService(transformedService)
         // Reset selectedPackage to 0 if it's out of bounds
         if (transformedService.packages.length > 0) {
           setSelectedPackage(0)
+        }
+
+        // Fetch reviews if service ID is available
+        if (apiService.id) {
+          fetchReviews(apiService.id)
         }
       } catch (err) {
         console.error('Error fetching service:', err)
@@ -175,6 +192,57 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
 
     fetchService()
   }, [slug])
+
+  // Function to fetch reviews for the service
+  const fetchReviews = async (id: string) => {
+    try {
+      setReviewsLoading(true)
+      
+      // Fetch service reviews
+      const serviceReviewsResponse = await fetch(`/api/reviews/service/${id}?reviewType=service`)
+      if (serviceReviewsResponse.ok) {
+        const serviceReviewsData = await serviceReviewsResponse.json()
+        if (serviceReviewsData.success) {
+          setServiceReviews(serviceReviewsData.reviews || [])
+        }
+      }
+
+      // Fetch consultant reviews
+      const consultantReviewsResponse = await fetch(`/api/reviews/service/${id}?reviewType=consultant`)
+      if (consultantReviewsResponse.ok) {
+        const consultantReviewsData = await consultantReviewsResponse.json()
+        if (consultantReviewsData.success) {
+          setConsultantReviews(consultantReviewsData.reviews || [])
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching reviews:', err)
+    } finally {
+      setReviewsLoading(false)
+    }
+  }
+
+  // Helper function to format time ago
+  const getTimeAgo = (date: Date): string => {
+    const now = Date.now()
+    const diff = now - date.getTime()
+    const seconds = Math.floor(diff / 1000)
+    const minutes = Math.floor(seconds / 60)
+    const hours = Math.floor(minutes / 60)
+    const days = Math.floor(hours / 24)
+    const weeks = Math.floor(days / 7)
+
+    if (weeks > 0) return `${weeks} week${weeks > 1 ? 's' : ''} ago`
+    if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`
+    if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`
+    if (minutes > 0) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`
+    return 'Just now'
+  }
+
+  // Helper function to get avatar initial
+  const getAvatarInitial = (name: string): string => {
+    return name.charAt(0).toUpperCase()
+  }
 
   if (loading) {
     return (
@@ -419,8 +487,10 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                     {/* Service Authority */}
                     <div>
                       <h3 className="text-lg font-bold text-gray-900 mb-3">Service Authority</h3>
-                      <p className="text-gray-700 leading-relaxed">
-                        Our service providers are licensed professionals with the necessary certifications and authority to perform {service.name.toLowerCase()} services. All consultants undergo thorough background checks and hold valid licenses from relevant regulatory bodies.
+                      <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                        {service.providerAuthority && service.providerAuthority.trim()
+                          ? service.providerAuthority
+                          : `Our service providers are licensed professionals with the necessary certifications and authority to perform ${service.name.toLowerCase()} services. All consultants undergo thorough background checks and hold valid licenses from relevant regulatory bodies.`}
                       </p>
                     </div>
 
@@ -475,61 +545,20 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                         {isInfoSourceExpanded && (
                           <div className="px-4 pb-4">
                             <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                              <p className="text-sm text-gray-600 leading-relaxed mb-3">
-                                The information provided on this page is based on industry standards, regulatory guidelines, and our service provider network. Details may vary based on specific service requirements, location, and individual circumstances. For the most accurate and up-to-date information, please contact our customer service team or consult with a service provider directly.
-                              </p>
-                              <div className="space-y-2">
-                                <p className="text-sm font-semibold text-gray-900">
-                                  Source{' '}
-                                  <a
-                                    href="https://www.example.com/service-information"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-[var(--color-primary)] hover:underline"
-                                  >
-                                    URL
-                                  </a>
-                                  :
+                              {service.infoSource && service.infoSource.trim() ? (
+                                <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">
+                                  {service.infoSource}
                                 </p>
-                                <ul className="space-y-1.5 ml-4">
-                                  <li className="flex items-start gap-2">
-                                    <span className="text-gray-700">•</span>
-                                    <a
-                                      href="https://www.example.com/service-information"
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-sm text-[var(--color-primary)] hover:underline"
-                                    >
-                                      Service Information Guide
-                                    </a>
-                                  </li>
-                                  <li className="flex items-start gap-2">
-                                    <span className="text-gray-700">•</span>
-                                    <a
-                                      href="https://www.regulatory-authority.gov/service-guidelines"
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-sm text-[var(--color-primary)] hover:underline"
-                                    >
-                                      Regulatory Service Guidelines
-                                    </a>
-                                  </li>
-                                  <li className="flex items-start gap-2">
-                                    <span className="text-gray-700">•</span>
-                                    <a
-                                      href="https://www.industry-standards.org/best-practices"
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-sm text-[var(--color-primary)] hover:underline"
-                                    >
-                                      Industry Best Practices
-                                    </a>
-                                  </li>
-                                </ul>
-                              </div>
-                              <p className="text-xs text-gray-500 mt-3">
-                                Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-                              </p>
+                              ) : (
+                                <>
+                                  <p className="text-sm text-gray-600 leading-relaxed mb-3">
+                                    The information provided on this page is based on industry standards, regulatory guidelines, and our service provider network. Details may vary based on specific service requirements, location, and individual circumstances. For the most accurate and up-to-date information, please contact our customer service team or consult with a service provider directly.
+                                  </p>
+                                  <p className="text-xs text-gray-500 mt-3">
+                                    Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                                  </p>
+                                </>
+                              )}
                             </div>
                           </div>
                         )}
@@ -629,62 +658,27 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                       </div>
 
                       <div className="space-y-4">
-                        {(() => {
-                          const serviceReviews = [
-                          {
-                              name: 'Sara Khan',
-                              avatar: 'S',
-                            rating: 5,
-                              review: 'Very satisfied with the quality of service. The team was clean, efficient, and respectful of my home. The service exceeded my expectations!',
-                              time: '3 days ago',
-                              date: new Date(now - 3 * 24 * 60 * 60 * 1000)
-                            },
-                            {
-                              name: 'Hasan Ali',
-                              avatar: 'H',
-                              rating: 4,
-                              review: 'Good service overall. The technician was professional and the work was done well. Would use this service again in the future.',
-                              time: '1 week ago',
-                              date: new Date(now - 7 * 24 * 60 * 60 * 1000)
-                            },
-                            {
-                              name: 'Nadia Islam',
-                              avatar: 'N',
-                              rating: 5,
-                              review: 'Amazing experience! The service was thorough and the technician was very helpful. Everything was explained clearly and the results were perfect.',
-                              time: '2 weeks ago',
-                              date: new Date(now - 14 * 24 * 60 * 60 * 1000)
-                            },
-                            {
-                              name: 'Rashid Ahmed',
-                              avatar: 'R',
-                              rating: 4,
-                              review: 'Professional service. The technician was knowledgeable and completed the work on time. Very pleased with the results.',
-                              time: '4 days ago',
-                              date: new Date(now - 4 * 24 * 60 * 60 * 1000)
-                          },
-                          {
-                            name: 'Fatima Khan',
-                            avatar: 'F',
-                            rating: 5,
-                              review: 'Excellent service! Everything was done perfectly and the technician was very courteous. Highly recommend!',
-                              time: '1 day ago',
-                              date: new Date(now - 1 * 24 * 60 * 60 * 1000)
-                          },
-                          {
-                            name: 'Karim Uddin',
-                            avatar: 'K',
-                              rating: 3,
-                              review: 'Service was decent but could have been better. The technician was okay but took longer than expected.',
-                              time: '10 days ago',
-                              date: new Date(now - 10 * 24 * 60 * 60 * 1000)
-                            }
-                          ]
+                        {reviewsLoading ? (
+                          <div className="text-center py-8">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--color-primary)] mx-auto mb-2"></div>
+                            <p className="text-gray-600 text-sm">Loading reviews...</p>
+                          </div>
+                        ) : (() => {
+                          // Transform API reviews to match display format
+                          const transformedReviews = serviceReviews.map((review) => ({
+                            id: review.id,
+                            name: review.reviewerName,
+                            avatar: getAvatarInitial(review.reviewerName),
+                            rating: review.rating,
+                            review: review.comment || '',
+                            time: getTimeAgo(new Date(review.createdAt)),
+                            date: new Date(review.createdAt),
+                          }))
 
                           // Filter by star rating
                           let filtered = serviceFilterStar 
-                            ? serviceReviews.filter(r => r.rating === serviceFilterStar)
-                            : serviceReviews
+                            ? transformedReviews.filter(r => r.rating === serviceFilterStar)
+                            : transformedReviews
 
                           // Sort
                           filtered = [...filtered].sort((a, b) => {
@@ -695,29 +689,39 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                             }
                           })
 
-                          return filtered.map((review, index) => (
-                          <div key={index} className="bg-white border border-gray-200 rounded-lg p-5 hover:shadow-md transition-shadow">
-                            <div className="flex items-start gap-4">
-                              <div className="w-12 h-12 bg-[var(--color-primary)]/10 text-[var(--color-primary)] rounded-full flex items-center justify-center font-semibold flex-shrink-0">
-                                {review.avatar}
+                          if (filtered.length === 0) {
+                            return (
+                              <div className="text-center py-8 text-gray-500">
+                                <p>No reviews found{serviceFilterStar ? ` with ${serviceFilterStar} stars` : ''}.</p>
                               </div>
-                              <div className="flex-1">
-                                <div className="flex items-center justify-between mb-2">
+                            )
+                          }
+
+                          return filtered.map((review) => (
+                            <div key={review.id} className="bg-white border border-gray-200 rounded-lg p-5 hover:shadow-md transition-shadow">
+                              <div className="flex items-start gap-4">
+                                <div className="w-12 h-12 bg-[var(--color-primary)]/10 text-[var(--color-primary)] rounded-full flex items-center justify-center font-semibold flex-shrink-0">
+                                  {review.avatar}
+                                </div>
+                                <div className="flex-1">
+                                  <div className="flex items-center justify-between mb-2">
                                     <p className="font-semibold text-gray-900">{review.name}</p>
                                     <span className="text-sm text-gray-500">{review.time}</span>
+                                  </div>
+                                  <div className="flex items-center gap-1 mb-3">
+                                    {[...Array(5)].map((_, i) => (
+                                      <Star
+                                        key={i}
+                                        className={`w-4 h-4 ${i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                                      />
+                                    ))}
+                                  </div>
+                                  {review.review && (
+                                    <p className="text-gray-700 leading-relaxed">{review.review}</p>
+                                  )}
                                 </div>
-                                <div className="flex items-center gap-1 mb-3">
-                                  {[...Array(5)].map((_, i) => (
-                                    <Star
-                                      key={i}
-                                      className={`w-4 h-4 ${i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
-                                    />
-                                  ))}
-                                </div>
-                                <p className="text-gray-700 leading-relaxed">{review.review}</p>
                               </div>
                             </div>
-                          </div>
                           ))
                         })()}
                       </div>
@@ -845,68 +849,30 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                       </div>
 
                       <div className="space-y-4">
-                        {(() => {
-                          const providerReviews = [
-                            {
-                              name: 'Ahmed Rahman',
-                              avatar: 'A',
-                              providerName: 'TechPro Services',
-                            rating: 5,
-                              review: 'Excellent service! The technician was professional, punctual, and very knowledgeable. He explained everything clearly and completed the work efficiently.',
-                              time: '2 days ago',
-                              date: new Date(now - 2 * 24 * 60 * 60 * 1000)
-                            },
-                            {
-                              name: 'Fatima Khan',
-                              avatar: 'F',
-                              providerName: 'Elite Home Solutions',
-                              rating: 5,
-                              review: 'Outstanding service provider! Very courteous and respectful. The technician arrived on time and did a thorough job. Highly recommend!',
-                              time: '5 days ago',
-                              date: new Date(now - 5 * 24 * 60 * 60 * 1000)
-                            },
-                            {
-                              name: 'Karim Uddin',
-                              avatar: 'K',
-                              providerName: 'QuickFix Experts',
-                            rating: 4,
-                              review: 'Great service overall. The provider was professional and the work quality was excellent. Minor delay in arrival but made up for it with quality work.',
-                              time: '1 week ago',
-                              date: new Date(now - 7 * 24 * 60 * 60 * 1000)
-                          },
-                          {
-                              name: 'Rashid Ahmed',
-                              avatar: 'R',
-                              providerName: 'ProFix Solutions',
-                            rating: 5,
-                              review: 'Amazing experience! The service provider was extremely professional and completed the job perfectly. Highly satisfied!',
-                              time: '3 days ago',
-                              date: new Date(now - 3 * 24 * 60 * 60 * 1000)
-                            },
-                            {
-                              name: 'Sadia Rahman',
-                              avatar: 'S',
-                              providerName: 'Expert Services',
-                              rating: 3,
-                              review: 'Service was okay. The provider did the job but took longer than expected. Could be improved.',
-                              time: '2 weeks ago',
-                              date: new Date(now - 14 * 24 * 60 * 60 * 1000)
-                            },
-                            {
-                              name: 'Hasan Ali',
-                              avatar: 'H',
-                              providerName: 'Quality Care Services',
-                              rating: 4,
-                              review: 'Good service provider. Professional and efficient. Would recommend to others.',
-                              time: '6 days ago',
-                              date: new Date(now - 6 * 24 * 60 * 60 * 1000)
-                            }
-                          ]
+                        {reviewsLoading ? (
+                          <div className="text-center py-8">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--color-primary)] mx-auto mb-2"></div>
+                            <p className="text-gray-600 text-sm">Loading reviews...</p>
+                          </div>
+                        ) : (() => {
+                          // Transform API reviews to match display format
+                          // Note: Consultant reviews don't have providerName in the current schema
+                          // We'll use a placeholder or extract from comment if needed
+                          const transformedReviews = consultantReviews.map((review) => ({
+                            id: review.id,
+                            name: review.reviewerName,
+                            avatar: getAvatarInitial(review.reviewerName),
+                            providerName: 'Service Provider', // Placeholder - can be enhanced later
+                            rating: review.rating,
+                            review: review.comment || '',
+                            time: getTimeAgo(new Date(review.createdAt)),
+                            date: new Date(review.createdAt),
+                          }))
 
                           // Filter by star rating
                           let filtered = providerFilterStar 
-                            ? providerReviews.filter(r => r.rating === providerFilterStar)
-                            : providerReviews
+                            ? transformedReviews.filter(r => r.rating === providerFilterStar)
+                            : transformedReviews
 
                           // Sort
                           filtered = [...filtered].sort((a, b) => {
@@ -917,37 +883,46 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                             }
                           })
 
-                          return filtered.map((review, index) => (
-                          <div key={index} className="bg-white border border-gray-200 rounded-lg p-5 hover:shadow-md transition-shadow">
-                            <div className="flex items-start gap-4">
-                              <div className="w-12 h-12 bg-[var(--color-primary)]/10 text-[var(--color-primary)] rounded-full flex items-center justify-center font-semibold flex-shrink-0">
-                                {review.avatar}
+                          if (filtered.length === 0) {
+                            return (
+                              <div className="text-center py-8 text-gray-500">
+                                <p>No consultant reviews found{providerFilterStar ? ` with ${providerFilterStar} stars` : ''}.</p>
                               </div>
-                              <div className="flex-1">
-                                <div className="flex items-start justify-between mb-2">
-                                  <div>
-                                  <p className="font-semibold text-gray-900">{review.name}</p>
-                                  <span className="text-sm text-gray-500">{review.time}</span>
-                                  </div>
-                                  <div className="text-right">
-                                    <div className="inline-flex items-center gap-2 bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 rounded-full px-4 py-1.5">
-                                      {/* <p className="text-xs font-medium text-[var(--color-primary)]">Service Provider</p> */}
-                                      <p className="text-sm font-bold text-gray-900">{review.providerName}</p>
+                            )
+                          }
+
+                          return filtered.map((review) => (
+                            <div key={review.id} className="bg-white border border-gray-200 rounded-lg p-5 hover:shadow-md transition-shadow">
+                              <div className="flex items-start gap-4">
+                                <div className="w-12 h-12 bg-[var(--color-primary)]/10 text-[var(--color-primary)] rounded-full flex items-center justify-center font-semibold flex-shrink-0">
+                                  {review.avatar}
+                                </div>
+                                <div className="flex-1">
+                                  <div className="flex items-start justify-between mb-2">
+                                    <div>
+                                      <p className="font-semibold text-gray-900">{review.name}</p>
+                                      <span className="text-sm text-gray-500">{review.time}</span>
+                                    </div>
+                                    <div className="text-right">
+                                      <div className="inline-flex items-center gap-2 bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 rounded-full px-4 py-1.5">
+                                        <p className="text-sm font-bold text-gray-900">{review.providerName}</p>
+                                      </div>
                                     </div>
                                   </div>
+                                  <div className="flex items-center gap-1 mb-3">
+                                    {[...Array(5)].map((_, i) => (
+                                      <Star
+                                        key={i}
+                                        className={`w-4 h-4 ${i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                                      />
+                                    ))}
+                                  </div>
+                                  {review.review && (
+                                    <p className="text-gray-700 leading-relaxed">{review.review}</p>
+                                  )}
                                 </div>
-                                <div className="flex items-center gap-1 mb-3">
-                                  {[...Array(5)].map((_, i) => (
-                                    <Star
-                                      key={i}
-                                      className={`w-4 h-4 ${i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
-                                    />
-                                  ))}
-                                </div>
-                                <p className="text-gray-700 leading-relaxed">{review.review}</p>
                               </div>
                             </div>
-                          </div>
                           ))
                         })()}
                       </div>
@@ -972,21 +947,24 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                               try {
                                 const parsed = JSON.parse(service.processFlow)
                                 if (Array.isArray(parsed)) {
-                                  return parsed.map((step: any, index: number) => (
-                                    <div key={index} className="flex items-start gap-4">
-                                      <div className="flex-shrink-0 w-10 h-10 bg-[var(--color-primary)] text-white rounded-full flex items-center justify-center font-bold text-lg">
-                                        {index + 1}
+                                  return parsed.map((step: { title?: string; name?: string; description?: string; content?: string } | string, index: number) => {
+                                    const stepObj = typeof step === 'string' ? { content: step } : step
+                                    return (
+                                      <div key={index} className="flex items-start gap-4">
+                                        <div className="flex-shrink-0 w-10 h-10 bg-[var(--color-primary)] text-white rounded-full flex items-center justify-center font-bold text-lg">
+                                          {index + 1}
+                                        </div>
+                                        <div className="flex-1">
+                                          <h4 className="font-semibold text-gray-900 mb-2">
+                                            {stepObj.title || stepObj.name || `Step ${index + 1}`}
+                                          </h4>
+                                          <p className="text-gray-700 leading-relaxed">
+                                            {stepObj.description || stepObj.content || (typeof step === 'string' ? step : '')}
+                                          </p>
+                                        </div>
                                       </div>
-                                      <div className="flex-1">
-                                        <h4 className="font-semibold text-gray-900 mb-2">
-                                          {step.title || step.name || `Step ${index + 1}`}
-                                        </h4>
-                                        <p className="text-gray-700 leading-relaxed">
-                                          {step.description || step.content || step}
-                                        </p>
-                                      </div>
-                                    </div>
-                                  ))
+                                    )
+                                  })
                                 }
                               } catch {
                                 // Not JSON, treat as plain text

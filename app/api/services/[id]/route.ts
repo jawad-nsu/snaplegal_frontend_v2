@@ -58,6 +58,7 @@ export async function GET(
         shortDescription: service.shortDescription || '',
         detailedDescription: service.detailedDescription || '',
         providerAuthority: service.providerAuthority || '',
+        infoSource: service.infoSource || '',
         requiredDocuments: service.requiredDocuments || [],
         whatsIncluded: service.whatsIncluded || '',
         whatsNotIncluded: service.whatsNotIncluded || '',
@@ -117,7 +118,7 @@ export async function PUT(
     const body = await request.json()
     const { 
       title, slug, image, rating, description, deliveryTime, startingPrice, categoryId, subCategoryId, status,
-      shortDescription, detailedDescription, providerAuthority, requiredDocuments, whatsIncluded, whatsNotIncluded,
+      shortDescription, detailedDescription, providerAuthority, infoSource, requiredDocuments, whatsIncluded, whatsNotIncluded,
       timeline, additionalNotes, processFlow, videoUrl, faqs, consultantQualifications, packages,
       coreFiling, coreStamps, coreCourtFee, clientFiling, clientStamps, clientCourtFee, clientConsultantFee
     } = body
@@ -226,6 +227,7 @@ export async function PUT(
         shortDescription: shortDescription !== undefined ? (shortDescription && shortDescription.trim() ? shortDescription.trim() : null) : existingService.shortDescription,
         detailedDescription: detailedDescription !== undefined ? (detailedDescription && detailedDescription.trim() ? detailedDescription.trim() : null) : existingService.detailedDescription,
         providerAuthority: providerAuthority !== undefined ? (providerAuthority && providerAuthority.trim() ? providerAuthority.trim() : null) : existingService.providerAuthority,
+        infoSource: infoSource !== undefined ? (infoSource && infoSource.trim() ? infoSource.trim() : null) : existingService.infoSource,
         requiredDocuments: requiredDocuments !== undefined ? (Array.isArray(requiredDocuments) ? requiredDocuments : []) : existingService.requiredDocuments,
         whatsIncluded: whatsIncluded !== undefined ? (whatsIncluded && whatsIncluded.trim() ? whatsIncluded.trim() : null) : existingService.whatsIncluded,
         whatsNotIncluded: whatsNotIncluded !== undefined ? (whatsNotIncluded && whatsNotIncluded.trim() ? whatsNotIncluded.trim() : null) : existingService.whatsNotIncluded,
@@ -292,6 +294,7 @@ export async function PUT(
         shortDescription: service.shortDescription || '',
         detailedDescription: service.detailedDescription || '',
         providerAuthority: service.providerAuthority || '',
+        infoSource: service.infoSource || '',
         requiredDocuments: service.requiredDocuments || [],
         whatsIncluded: service.whatsIncluded || '',
         whatsNotIncluded: service.whatsNotIncluded || '',

@@ -132,6 +132,16 @@ export async function PUT(
       }
     }
 
+    // Only set lastModifiedById if the user exists in the DB (avoids FK violation if session is stale)
+    let lastModifiedById: string | null = existingCategory.lastModifiedById
+    const existingUser = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { id: true },
+    })
+    if (existingUser) {
+      lastModifiedById = session.user.id
+    }
+
     // Update category with current user as lastModifiedBy
     const category = await prisma.category.update({
       where: { id },
@@ -140,7 +150,7 @@ export async function PUT(
         icon: icon && icon.trim() ? icon.trim() : null,
         serialNumber: serialNumber !== undefined && serialNumber !== null ? Number(serialNumber) : existingCategory.serialNumber,
         status: status || existingCategory.status || 'active',
-        lastModifiedById: session.user.id,
+        lastModifiedById,
       },
       include: {
         lastModifiedBy: {

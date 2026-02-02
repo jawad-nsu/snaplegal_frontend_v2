@@ -1,6 +1,10 @@
 import { NextRequest } from 'next/server'
-import { UserType } from '@prisma/client'
 import { getToken } from 'next-auth/jwt'
+
+// Keep this in sync with the Prisma UserType enum, but as a local
+// TypeScript-only type so we don't import `@prisma/client` in middleware
+// (Prisma is not compatible with the Edge runtime).
+type UserType = 'USER' | 'PARTNER' | 'ADMIN' | 'EMPLOYEE'
 
 /**
  * Lightweight session decoder for Edge middleware
@@ -24,8 +28,7 @@ export async function getSessionFromRequest(request: NextRequest) {
     if (!id) return null
 
     const rawType = (token as any).type as UserType | string | undefined
-    const userType: UserType =
-      rawType && Object.values(UserType).includes(rawType as UserType) ? (rawType as UserType) : UserType.USER
+    const userType: UserType = (rawType as UserType) || 'USER'
 
     return {
       user: {

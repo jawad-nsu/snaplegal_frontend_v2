@@ -49,6 +49,7 @@ export async function GET(request: NextRequest) {
         shortDescription: service.shortDescription || '',
         detailedDescription: service.detailedDescription || '',
         providerAuthority: service.providerAuthority || '',
+        infoSource: service.infoSource || '',
         requiredDocuments: service.requiredDocuments || [],
         whatsIncluded: service.whatsIncluded || '',
         whatsNotIncluded: service.whatsNotIncluded || '',
@@ -104,7 +105,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { 
       title, slug, image, rating, description, deliveryTime, startingPrice, categoryId, subCategoryId, status,
-      shortDescription, detailedDescription, providerAuthority, requiredDocuments, whatsIncluded, whatsNotIncluded,
+      shortDescription, detailedDescription, providerAuthority, infoSource, requiredDocuments, whatsIncluded, whatsNotIncluded,
       timeline, additionalNotes, processFlow, videoUrl, faqs, consultantQualifications, packages,
       coreFiling, coreStamps, coreCourtFee, clientFiling, clientStamps, clientCourtFee, clientConsultantFee
     } = body
@@ -202,6 +203,7 @@ export async function POST(request: NextRequest) {
         shortDescription: shortDescription && shortDescription.trim() ? shortDescription.trim() : null,
         detailedDescription: detailedDescription && detailedDescription.trim() ? detailedDescription.trim() : null,
         providerAuthority: providerAuthority && providerAuthority.trim() ? providerAuthority.trim() : null,
+        infoSource: infoSource && infoSource.trim() ? infoSource.trim() : null,
         requiredDocuments: Array.isArray(requiredDocuments) ? requiredDocuments : [],
         whatsIncluded: whatsIncluded && whatsIncluded.trim() ? whatsIncluded.trim() : null,
         whatsNotIncluded: whatsNotIncluded && whatsNotIncluded.trim() ? whatsNotIncluded.trim() : null,
@@ -268,6 +270,7 @@ export async function POST(request: NextRequest) {
         shortDescription: service.shortDescription || '',
         detailedDescription: service.detailedDescription || '',
         providerAuthority: service.providerAuthority || '',
+        infoSource: service.infoSource || '',
         requiredDocuments: service.requiredDocuments || [],
         whatsIncluded: service.whatsIncluded || '',
         whatsNotIncluded: service.whatsNotIncluded || '',

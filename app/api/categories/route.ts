@@ -101,6 +101,16 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Only set lastModifiedById if the user exists in the DB (avoids FK violation if session is stale)
+    let lastModifiedById: string | null = null
+    const existingUser = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { id: true },
+    })
+    if (existingUser) {
+      lastModifiedById = session.user.id
+    }
+
     // Create category with current user as lastModifiedBy
     const category = await prisma.category.create({
       data: {
@@ -108,7 +118,7 @@ export async function POST(request: NextRequest) {
         icon: icon && icon.trim() ? icon.trim() : null,
         serialNumber: serialNumber !== undefined && serialNumber !== null ? Number(serialNumber) : null,
         status: (status || 'active') as string,
-        lastModifiedById: session.user.id,
+        lastModifiedById,
       },
       include: {
         lastModifiedBy: {

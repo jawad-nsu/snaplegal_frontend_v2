@@ -102,6 +102,7 @@ model User {
   customerOrders        Order[]       @relation("CustomerOrders")
   vendorOrders          Order[]       @relation("VendorOrders")
   assignedOrders        Order[]       @relation("AssignedOrders")
+  reviews               Review[]
 
   @@map("users")
 }
@@ -225,7 +226,8 @@ model Service {
   // Overview fields
   shortDescription    String?  @db.Text
   detailedDescription String?  @db.Text // acts, laws, orders, rules, with years
-  providerAuthority   String? // court/council
+  providerAuthority   String? // court/council (who provides the service)
+  infoSource          String?  @db.Text // where the service information comes from (for Info Source section)
   requiredDocuments   String[] @default([]) // needed from the client
   whatsIncluded       String?  @db.Text // what will we do
   whatsNotIncluded    String?  @db.Text // what must be done externally
@@ -261,6 +263,7 @@ model Service {
   createdAt        DateTime    @default(now())
   updatedAt        DateTime    @updatedAt
   orderItems       OrderItem[]
+  reviews          Review[]
 
   @@map("services")
 }
@@ -307,4 +310,24 @@ model OrderItem {
   createdAt     DateTime @default(now())
 
   @@map("order_items")
+}
+
+model Review {
+  id              String   @id @default(uuid())
+  serviceId       String
+  service         Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  userId          String?
+  user            User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  orderId         String?  // Link to order if available (verified purchase)
+  reviewType      String   @default("service") // "service" or "consultant"
+  rating          Int      // 1-5
+  comment         String?  @db.Text
+  reviewerName    String   // Name of reviewer (can be from user or custom)
+  images          String[] @default([]) // URLs
+  helpfulCount    Int      @default(0)
+  isVerified      Boolean  @default(false) // Verified purchase
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("reviews")
 }
