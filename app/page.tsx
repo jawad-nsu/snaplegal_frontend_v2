@@ -18,7 +18,7 @@ export default function HomePage() {
   // Helper function to convert service title to slug
   const getServiceSlug = (title: string): string => {
     const slugMap: Record<string, string> = {
-      'AC Servicing': 'ac-servicing',
+      'AC Servicings': 'ac-servicing',
       'Home Cleaning': 'home-cleaning',
       'Plumbing & Sanitary Services': 'plumbing-sanitary-services',
       'House Shifting Services': 'house-shifting-services',
