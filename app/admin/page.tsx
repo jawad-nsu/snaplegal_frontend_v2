@@ -118,6 +118,8 @@ interface Service {
   faqs?: Array<{ question: string; answer: string }>
   // Consultants
   consultantQualifications?: string
+  whyChooseConsultants?: Array<{ title: string; description: string }>
+  howWeSelectConsultants?: Array<{ title: string; description: string }>
   // Price Packages
   packages?: Array<{ name: string; price: string; features: string[]; description?: string }>
   // Core cost breakdown
@@ -962,6 +964,8 @@ export default function AdminDashboard() {
     faqs: [] as Array<{ question: string; answer: string }>,
     // Consultants
     consultantQualifications: '',
+    whyChooseConsultants: [] as Array<{ title: string; description: string }>,
+    howWeSelectConsultants: [] as Array<{ title: string; description: string }>,
     // Price Packages
     packages: [] as Array<{ name: string; price: string; features: string[]; description?: string }>,
     // Core cost breakdown
@@ -986,7 +990,7 @@ export default function AdminDashboard() {
       setServiceForm({
         title: '', slug: '', image: '', rating: '', description: '', deliveryTime: '', startingPrice: '', categoryId: '', subCategoryId: '',
         shortDescription: '', detailedDescription: '', providerAuthority: '', infoSource: '', requiredDocuments: [], whatsIncluded: '', whatsNotIncluded: '',
-        timeline: '', additionalNotes: '', processFlow: '', videoUrl: '', faqs: [], consultantQualifications: '', packages: [],
+        timeline: '', additionalNotes: '', processFlow: '', videoUrl: '', faqs: [], consultantQualifications: '', whyChooseConsultants: [], howWeSelectConsultants: [], packages: [],
         coreFiling: '', coreStamps: '', coreCourtFee: '', clientFiling: '', clientStamps: '', clientCourtFee: '', clientConsultantFee: ''
       })
     } else if (activeTab === 'reviews') {
@@ -1038,7 +1042,7 @@ export default function AdminDashboard() {
         shortDescription: serviceItem.shortDescription || '', detailedDescription: serviceItem.detailedDescription || '', providerAuthority: serviceItem.providerAuthority || '', infoSource: serviceItem.infoSource || '',
         requiredDocuments: serviceItem.requiredDocuments || [], whatsIncluded: serviceItem.whatsIncluded || '', whatsNotIncluded: serviceItem.whatsNotIncluded || '',
         timeline: serviceItem.timeline || '', additionalNotes: serviceItem.additionalNotes || '', processFlow: serviceItem.processFlow || '', videoUrl: serviceItem.videoUrl || '',
-        faqs: serviceItem.faqs || [], consultantQualifications: serviceItem.consultantQualifications || '', packages: serviceItem.packages || [],
+        faqs: serviceItem.faqs || [], consultantQualifications: serviceItem.consultantQualifications || '', whyChooseConsultants: serviceItem.whyChooseConsultants ?? [], howWeSelectConsultants: serviceItem.howWeSelectConsultants ?? [], packages: serviceItem.packages || [],
         coreFiling: serviceItem.coreFiling || '', coreStamps: serviceItem.coreStamps || '', coreCourtFee: serviceItem.coreCourtFee || '',
         clientFiling: serviceItem.clientFiling || '', clientStamps: serviceItem.clientStamps || '', clientCourtFee: serviceItem.clientCourtFee || '',
         clientConsultantFee: serviceItem.clientConsultantFee || ''
@@ -1368,6 +1372,8 @@ export default function AdminDashboard() {
             faqs: serviceForm.faqs,
             // Consultants
             consultantQualifications: serviceForm.consultantQualifications,
+            whyChooseConsultants: serviceForm.whyChooseConsultants,
+            howWeSelectConsultants: serviceForm.howWeSelectConsultants,
             // Price Packages
             packages: serviceForm.packages,
             // Core cost breakdown
@@ -3963,6 +3969,110 @@ export default function AdminDashboard() {
                       className="text-sm text-blue-600 hover:text-blue-800"
                     >
                       + Add FAQ
+                    </button>
+                  </div>
+                </div>
+
+                {/* Why Choose Our Consultants */}
+                <div className="border-b pb-4">
+                  <h3 className="text-lg font-semibold mb-4">3b. Why Choose Our Consultants</h3>
+                  <div className="space-y-4">
+                    {serviceForm.whyChooseConsultants.map((item, index) => (
+                      <div key={index} className="border p-4 rounded-lg">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-sm font-medium text-gray-700">Item {index + 1}</span>
+                          <button
+                            type="button"
+                            onClick={() => setServiceForm({ ...serviceForm, whyChooseConsultants: serviceForm.whyChooseConsultants.filter((_, i) => i !== index) })}
+                            className="text-red-600 hover:text-red-800 text-sm"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                        <div className="mb-2">
+                          <Input
+                            value={item.title}
+                            onChange={(e) => {
+                              const newItems = [...serviceForm.whyChooseConsultants]
+                              newItems[index].title = e.target.value
+                              setServiceForm({ ...serviceForm, whyChooseConsultants: newItems })
+                            }}
+                            placeholder="Title"
+                          />
+                        </div>
+                        <div>
+                          <textarea
+                            value={item.description}
+                            onChange={(e) => {
+                              const newItems = [...serviceForm.whyChooseConsultants]
+                              newItems[index].description = e.target.value
+                              setServiceForm({ ...serviceForm, whyChooseConsultants: newItems })
+                            }}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                            rows={2}
+                            placeholder="Subtitle / Description"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => setServiceForm({ ...serviceForm, whyChooseConsultants: [...serviceForm.whyChooseConsultants, { title: '', description: '' }] })}
+                      className="text-sm text-blue-600 hover:text-blue-800"
+                    >
+                      + Add item
+                    </button>
+                  </div>
+                </div>
+
+                {/* How We Select Our Consultants */}
+                <div className="border-b pb-4">
+                  <h3 className="text-lg font-semibold mb-4">3c. How We Select Our Consultants</h3>
+                  <div className="space-y-4">
+                    {serviceForm.howWeSelectConsultants.map((item, index) => (
+                      <div key={index} className="border p-4 rounded-lg">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-sm font-medium text-gray-700">Step {index + 1}</span>
+                          <button
+                            type="button"
+                            onClick={() => setServiceForm({ ...serviceForm, howWeSelectConsultants: serviceForm.howWeSelectConsultants.filter((_, i) => i !== index) })}
+                            className="text-red-600 hover:text-red-800 text-sm"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                        <div className="mb-2">
+                          <Input
+                            value={item.title}
+                            onChange={(e) => {
+                              const newItems = [...serviceForm.howWeSelectConsultants]
+                              newItems[index].title = e.target.value
+                              setServiceForm({ ...serviceForm, howWeSelectConsultants: newItems })
+                            }}
+                            placeholder="Title"
+                          />
+                        </div>
+                        <div>
+                          <textarea
+                            value={item.description}
+                            onChange={(e) => {
+                              const newItems = [...serviceForm.howWeSelectConsultants]
+                              newItems[index].description = e.target.value
+                              setServiceForm({ ...serviceForm, howWeSelectConsultants: newItems })
+                            }}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                            rows={2}
+                            placeholder="Subtitle / Description"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => setServiceForm({ ...serviceForm, howWeSelectConsultants: [...serviceForm.howWeSelectConsultants, { title: '', description: '' }] })}
+                      className="text-sm text-blue-600 hover:text-blue-800"
+                    >
+                      + Add item
                     </button>
                   </div>
                 </div>

@@ -71,6 +71,8 @@ export async function GET(
         faqs: service.faqs || [],
         // Consultants
         consultantQualifications: service.consultantQualifications || '',
+        whyChooseConsultants: service.whyChooseConsultants ?? [],
+        howWeSelectConsultants: service.howWeSelectConsultants ?? [],
         // Price Packages
         packages: service.packages || [],
         // Core cost breakdown
@@ -119,7 +121,7 @@ export async function PUT(
     const { 
       title, slug, image, rating, description, deliveryTime, startingPrice, categoryId, subCategoryId, status,
       shortDescription, detailedDescription, providerAuthority, infoSource, requiredDocuments, whatsIncluded, whatsNotIncluded,
-      timeline, additionalNotes, processFlow, videoUrl, faqs, consultantQualifications, packages,
+      timeline, additionalNotes, processFlow, videoUrl, faqs, consultantQualifications, whyChooseConsultants, howWeSelectConsultants, packages,
       coreFiling, coreStamps, coreCourtFee, clientFiling, clientStamps, clientCourtFee, clientConsultantFee
     } = body
 
@@ -240,6 +242,8 @@ export async function PUT(
         faqs: faqs !== undefined ? faqs : existingService.faqs,
         // Consultants
         consultantQualifications: consultantQualifications !== undefined ? (consultantQualifications && consultantQualifications.trim() ? consultantQualifications.trim() : null) : existingService.consultantQualifications,
+        whyChooseConsultants: whyChooseConsultants !== undefined ? whyChooseConsultants : existingService.whyChooseConsultants,
+        howWeSelectConsultants: howWeSelectConsultants !== undefined ? howWeSelectConsultants : existingService.howWeSelectConsultants,
         // Price Packages
         packages: packages !== undefined ? packages : existingService.packages,
         // Core cost breakdown
@@ -307,6 +311,8 @@ export async function PUT(
         faqs: service.faqs || [],
         // Consultants
         consultantQualifications: service.consultantQualifications || '',
+        whyChooseConsultants: service.whyChooseConsultants ?? [],
+        howWeSelectConsultants: service.howWeSelectConsultants ?? [],
         // Price Packages
         packages: service.packages || [],
         // Core cost breakdown

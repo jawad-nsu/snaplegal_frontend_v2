@@ -89,6 +89,8 @@ export async function GET(
         faqs: service.faqs || [],
         // Consultants
         consultantQualifications: service.consultantQualifications || '',
+        whyChooseConsultants: service.whyChooseConsultants ?? [],
+        howWeSelectConsultants: service.howWeSelectConsultants ?? [],
         // Price Packages
         packages: service.packages || [],
         // Core cost breakdown

@@ -62,6 +62,8 @@ export async function GET(request: NextRequest) {
         faqs: service.faqs || [],
         // Consultants
         consultantQualifications: service.consultantQualifications || '',
+        whyChooseConsultants: service.whyChooseConsultants ?? [],
+        howWeSelectConsultants: service.howWeSelectConsultants ?? [],
         // Price Packages
         packages: service.packages || [],
         // Core cost breakdown
@@ -106,7 +108,7 @@ export async function POST(request: NextRequest) {
     const { 
       title, slug, image, rating, description, deliveryTime, startingPrice, categoryId, subCategoryId, status,
       shortDescription, detailedDescription, providerAuthority, infoSource, requiredDocuments, whatsIncluded, whatsNotIncluded,
-      timeline, additionalNotes, processFlow, videoUrl, faqs, consultantQualifications, packages,
+      timeline, additionalNotes, processFlow, videoUrl, faqs, consultantQualifications, whyChooseConsultants, howWeSelectConsultants, packages,
       coreFiling, coreStamps, coreCourtFee, clientFiling, clientStamps, clientCourtFee, clientConsultantFee
     } = body
 
@@ -216,6 +218,8 @@ export async function POST(request: NextRequest) {
         faqs: faqs ? faqs : null,
         // Consultants
         consultantQualifications: consultantQualifications && consultantQualifications.trim() ? consultantQualifications.trim() : null,
+        whyChooseConsultants: whyChooseConsultants ?? null,
+        howWeSelectConsultants: howWeSelectConsultants ?? null,
         // Price Packages
         packages: packages ? packages : null,
         // Core cost breakdown
@@ -283,6 +287,8 @@ export async function POST(request: NextRequest) {
         faqs: service.faqs || [],
         // Consultants
         consultantQualifications: service.consultantQualifications || '',
+        whyChooseConsultants: service.whyChooseConsultants ?? [],
+        howWeSelectConsultants: service.howWeSelectConsultants ?? [],
         // Price Packages
         packages: service.packages || [],
         // Core cost breakdown

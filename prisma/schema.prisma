@@ -243,6 +243,8 @@ model Service {
 
   // Consultants
   consultantQualifications String? @db.Text
+  whyChooseConsultants      Json?   // array of {title: string, description: string}
+  howWeSelectConsultants   Json?   // array of {title: string, description: string}
 
   // Price Packages
   packages Json? // array of {name: string, price: string, features: string[], description?: string}

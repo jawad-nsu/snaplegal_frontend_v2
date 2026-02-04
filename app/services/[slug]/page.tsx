@@ -33,7 +33,23 @@ interface ServiceData {
   additionalNotes?: string
   providerAuthority?: string
   infoSource?: string
+  whyChooseConsultants?: { title: string; description: string }[]
+  howWeSelectConsultants?: { title: string; description: string }[]
 }
+
+const DEFAULT_WHY_CHOOSE: { title: string; description: string }[] = [
+  { title: 'Verified & Certified', description: 'All our consultants undergo thorough background checks and hold relevant certifications for their expertise.' },
+  { title: 'Experienced Professionals', description: 'Our consultants have years of hands-on experience and are trained in the latest industry practices.' },
+  { title: 'Customer-Focused', description: 'We prioritize your satisfaction and ensure our consultants provide excellent customer service.' },
+  { title: 'Reliable & Punctual', description: 'Our consultants arrive on time and complete work efficiently without compromising on quality.' }
+]
+
+const DEFAULT_HOW_SELECT: { title: string; description: string }[] = [
+  { title: 'Application & Screening', description: 'We review applications and verify qualifications, certifications, and work history.' },
+  { title: 'Skills Assessment', description: 'Candidates undergo practical tests and interviews to assess their technical skills and knowledge.' },
+  { title: 'Training & Certification', description: 'Selected consultants complete our comprehensive training program and certification process.' },
+  { title: 'Ongoing Monitoring', description: 'We continuously monitor performance and customer feedback to maintain our high standards.' }
+]
 
 export default function ServiceDetailsPage({ params }: { params: Promise<{ slug: string }> }) {
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null)
@@ -169,7 +185,9 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
           timeline: apiService.timeline || undefined,
           additionalNotes: apiService.additionalNotes || undefined,
           providerAuthority: apiService.providerAuthority || undefined,
-          infoSource: apiService.infoSource || undefined
+          infoSource: apiService.infoSource || undefined,
+          whyChooseConsultants: Array.isArray(apiService.whyChooseConsultants) ? apiService.whyChooseConsultants : [],
+          howWeSelectConsultants: Array.isArray(apiService.howWeSelectConsultants) ? apiService.howWeSelectConsultants : []
         }
 
         setService(transformedService)
@@ -739,24 +757,7 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                     <div>
                       <h3 className="text-xl font-bold text-gray-900 mb-4">Why Choose Our Consultants?</h3>
                       <div className="grid sm:grid-cols-2 gap-4">
-                        {[
-                          {
-                            title: 'Verified & Certified',
-                            description: 'All our consultants undergo thorough background checks and hold relevant certifications for their expertise.'
-                          },
-                          {
-                            title: 'Experienced Professionals',
-                            description: 'Our consultants have years of hands-on experience and are trained in the latest industry practices.'
-                          },
-                          {
-                            title: 'Customer-Focused',
-                            description: 'We prioritize your satisfaction and ensure our consultants provide excellent customer service.'
-                          },
-                          {
-                            title: 'Reliable & Punctual',
-                            description: 'Our consultants arrive on time and complete work efficiently without compromising on quality.'
-                          }
-                        ].map((feature, index) => (
+                        {(service.whyChooseConsultants?.length ? service.whyChooseConsultants : DEFAULT_WHY_CHOOSE).map((feature, index) => (
                           <div key={index} className="flex items-start gap-3">
                             <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
                             <div>
@@ -773,42 +774,17 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                       <h3 className="text-xl font-bold text-gray-900 mb-4">How We Select Our Consultants</h3>
                       <div className="bg-gradient-to-br from-[var(--color-neutral)] to-white rounded-lg p-6 border border-gray-200">
                         <div className="space-y-4">
-                          <div className="flex items-start gap-4">
-                            <div className="flex-shrink-0 w-8 h-8 bg-[var(--color-primary)] text-white rounded-full flex items-center justify-center font-bold">
-                              1
+                          {(service.howWeSelectConsultants?.length ? service.howWeSelectConsultants : DEFAULT_HOW_SELECT).map((step, index) => (
+                            <div key={index} className="flex items-start gap-4">
+                              <div className="flex-shrink-0 w-8 h-8 bg-[var(--color-primary)] text-white rounded-full flex items-center justify-center font-bold">
+                                {index + 1}
+                              </div>
+                              <div>
+                                <h4 className="font-semibold text-gray-900 mb-1">{step.title}</h4>
+                                <p className="text-sm text-gray-700">{step.description}</p>
+                              </div>
                             </div>
-                            <div>
-                              <h4 className="font-semibold text-gray-900 mb-1">Application & Screening</h4>
-                              <p className="text-sm text-gray-700">We review applications and verify qualifications, certifications, and work history.</p>
-                            </div>
-                          </div>
-                          <div className="flex items-start gap-4">
-                            <div className="flex-shrink-0 w-8 h-8 bg-[var(--color-primary)] text-white rounded-full flex items-center justify-center font-bold">
-                              2
-                            </div>
-                            <div>
-                              <h4 className="font-semibold text-gray-900 mb-1">Skills Assessment</h4>
-                              <p className="text-sm text-gray-700">Candidates undergo practical tests and interviews to assess their technical skills and knowledge.</p>
-                            </div>
-                          </div>
-                          <div className="flex items-start gap-4">
-                            <div className="flex-shrink-0 w-8 h-8 bg-[var(--color-primary)] text-white rounded-full flex items-center justify-center font-bold">
-                              3
-                            </div>
-                            <div>
-                              <h4 className="font-semibold text-gray-900 mb-1">Training & Certification</h4>
-                              <p className="text-sm text-gray-700">Selected consultants complete our comprehensive training program and certification process.</p>
-                            </div>
-                          </div>
-                          <div className="flex items-start gap-4">
-                            <div className="flex-shrink-0 w-8 h-8 bg-[var(--color-primary)] text-white rounded-full flex items-center justify-center font-bold">
-                              4
-                            </div>
-                            <div>
-                              <h4 className="font-semibold text-gray-900 mb-1">Ongoing Monitoring</h4>
-                              <p className="text-sm text-gray-700">We continuously monitor performance and customer feedback to maintain our high standards.</p>
-                            </div>
-                          </div>
+                          ))}
                         </div>
                       </div>
                     </div>
