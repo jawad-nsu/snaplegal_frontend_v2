@@ -135,4 +135,34 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;  /* Chrome, Safari and Opera */
   }
+
+  /* Admin: resizable textareas with comfortable min height */
+  .admin-textarea {
+    min-height: 140px;
+    resize: vertical;
+  }
+
+  /* Rich text editor (TipTap) in admin */
+  .rich-text-editor-admin .ProseMirror {
+    min-height: 200px;
+  }
+  .rich-text-editor-admin .ProseMirror p.is-editor-empty:first-child::before {
+    color: #9ca3af;
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    pointer-events: none;
+  }
 }
+
+/* Rich text (HTML) description on service page */
+.service-description-html p { margin-top: 0.5em; margin-bottom: 0.5em; }
+.service-description-html p:first-child { margin-top: 0; }
+.service-description-html ul, .service-description-html ol { margin: 0.5em 0; padding-left: 1.5em; }
+.service-description-html li { margin: 0.25em 0; }
+.service-description-html strong { font-weight: 600; }
+.service-description-html a { color: var(--color-primary, #17236a); text-decoration: underline; }
+.service-description-html h1, .service-description-html h2, .service-description-html h3 { font-weight: 700; margin-top: 0.75em; margin-bottom: 0.5em; }
+.service-description-html h1 { font-size: 1.25rem; }
+.service-description-html h2 { font-size: 1.125rem; }
+.service-description-html h3 { font-size: 1rem; }

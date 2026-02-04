@@ -31,6 +31,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { RichTextEditor } from '@/components/ui/rich-text-editor'
 import Image from 'next/image'
 import Navbar from '@/components/navbar'
 import Link from 'next/link'
@@ -2462,7 +2463,7 @@ export default function AdminDashboard() {
                 <textarea
                   value={rejectionReason[showRejectModal] || ''}
                   onChange={(e) => setRejectionReason({ ...rejectionReason, [showRejectModal]: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea"
                   rows={4}
                   placeholder="Enter the reason for rejection..."
                 />
@@ -2620,7 +2621,7 @@ export default function AdminDashboard() {
             <select
               value={orderStatusFilter}
               onChange={(e) => setOrderStatusFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea"
             >
               <option value="all">All Status</option>
               <option value="Submitted">Submitted</option>
@@ -2637,7 +2638,7 @@ export default function AdminDashboard() {
             <select
               value={orderPaymentStatusFilter}
               onChange={(e) => setOrderPaymentStatusFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea"
             >
               <option value="all">All Payment</option>
               <option value="pending">Pending</option>
@@ -2816,7 +2817,7 @@ export default function AdminDashboard() {
                 <select
                   value={selectedVendorId}
                   onChange={(e) => setSelectedVendorId(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea"
                 >
                   <option value="">Select a vendor...</option>
                   {vendors
@@ -2869,7 +2870,7 @@ export default function AdminDashboard() {
             <select
               value={reviewServiceFilter}
               onChange={(e) => setReviewServiceFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea"
             >
               <option value="all">All Services</option>
               {services.map((service) => (
@@ -2882,7 +2883,7 @@ export default function AdminDashboard() {
             <select
               value={reviewTypeFilter}
               onChange={(e) => setReviewTypeFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea"
             >
               <option value="all">All Types</option>
               <option value="service">Service Reviews</option>
@@ -2894,7 +2895,7 @@ export default function AdminDashboard() {
             <select
               value={reviewRatingFilter}
               onChange={(e) => setReviewRatingFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea"
             >
               <option value="all">All Ratings</option>
               <option value="5">5 Stars</option>
@@ -3362,7 +3363,7 @@ export default function AdminDashboard() {
                 <textarea 
                   value={leadForm.initialDiscussion || ''} 
                   onChange={(e) => setLeadForm({ ...leadForm, initialDiscussion: e.target.value })} 
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea" 
                   rows={3}
                 />
               </div>
@@ -3375,7 +3376,7 @@ export default function AdminDashboard() {
                 <select 
                   value={leadForm.stage || 'New'} 
                   onChange={(e) => setLeadForm({ ...leadForm, stage: e.target.value as LeadStage })} 
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea"
                 >
                   <option value="New">New</option>
                   <option value="Qualified">Qualified</option>
@@ -3390,7 +3391,7 @@ export default function AdminDashboard() {
                     <select 
                       value={leadForm.closedReason || ''} 
                       onChange={(e) => setLeadForm({ ...leadForm, closedReason: e.target.value as ClosedReason | undefined })} 
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea"
                     >
                       <option value="">Select reason...</option>
                       <option value="Won">Won</option>
@@ -3404,7 +3405,7 @@ export default function AdminDashboard() {
                       <textarea 
                         value={leadForm.closedReasonText || ''} 
                         onChange={(e) => setLeadForm({ ...leadForm, closedReasonText: e.target.value })} 
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea" 
                         rows={2}
                       />
                     </div>
@@ -3420,7 +3421,7 @@ export default function AdminDashboard() {
                 <select 
                   value={leadForm.leadSource || 'Website'} 
                   onChange={(e) => setLeadForm({ ...leadForm, leadSource: e.target.value as LeadSource })} 
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea"
                   required
                 >
                   <option value="Website">Website</option>
@@ -3436,7 +3437,7 @@ export default function AdminDashboard() {
                 <select 
                   value={leadForm.leadSubSource || ''} 
                   onChange={(e) => setLeadForm({ ...leadForm, leadSubSource: e.target.value as LeadSubSource | undefined })} 
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea"
                 >
                   <option value="">Select sub-source...</option>
                   <option value="Facebook Ads">Facebook Ads</option>
@@ -3456,7 +3457,7 @@ export default function AdminDashboard() {
               <select 
                 value={leadForm.leadOwner || ''} 
                 onChange={(e) => setLeadForm({ ...leadForm, leadOwner: e.target.value })} 
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea"
                 required
                 disabled={employeesLoading}
               >
@@ -3483,7 +3484,7 @@ export default function AdminDashboard() {
               <textarea 
                 value={leadForm.comment || ''} 
                 onChange={(e) => setLeadForm({ ...leadForm, comment: e.target.value })} 
-                className="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea" 
                 rows={3}
                 placeholder="Additional notes or comments..."
               />
@@ -3544,7 +3545,7 @@ export default function AdminDashboard() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
-                  <select value={userForm.type} onChange={(e) => setUserForm({ ...userForm, type: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md">
+                  <select value={userForm.type} onChange={(e) => setUserForm({ ...userForm, type: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea">
                     <option value="USER">USER</option>
                     <option value="PARTNER">PARTNER</option>
                     <option value="ADMIN">ADMIN</option>
@@ -3553,7 +3554,7 @@ export default function AdminDashboard() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                  <select value={userForm.status} onChange={(e) => setUserForm({ ...userForm, status: e.target.value as 'active' | 'inactive' })} className="w-full px-3 py-2 border border-gray-300 rounded-md">
+                  <select value={userForm.status} onChange={(e) => setUserForm({ ...userForm, status: e.target.value as 'active' | 'inactive' })} className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea">
                     <option value="active">Active</option>
                     <option value="inactive">Inactive</option>
                   </select>
@@ -3606,7 +3607,7 @@ export default function AdminDashboard() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                  <select value={vendorForm.status} onChange={(e) => setVendorForm({ ...vendorForm, status: e.target.value as 'active' | 'inactive' | 'pending' })} className="w-full px-3 py-2 border border-gray-300 rounded-md">
+                  <select value={vendorForm.status} onChange={(e) => setVendorForm({ ...vendorForm, status: e.target.value as 'active' | 'inactive' | 'pending' })} className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea">
                     <option value="active">Active</option>
                     <option value="inactive">Inactive</option>
                     <option value="pending">Pending</option>
@@ -3639,7 +3640,7 @@ export default function AdminDashboard() {
                   <select 
                     value={categoryForm.status} 
                     onChange={(e) => setCategoryForm({ ...categoryForm, status: e.target.value as 'active' | 'inactive' })} 
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea"
                   >
                     <option value="active">Active</option>
                     <option value="inactive">Inactive</option>
@@ -3660,7 +3661,7 @@ export default function AdminDashboard() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Category *</label>
-                  <select value={subCategoryForm.categoryId} onChange={(e) => setSubCategoryForm({ ...subCategoryForm, categoryId: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                  <select value={subCategoryForm.categoryId} onChange={(e) => setSubCategoryForm({ ...subCategoryForm, categoryId: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea" required>
                     <option value="">Select Category</option>
                     {categories.map((cat) => (
                       <option key={cat.id} value={cat.id}>{cat.title}</option>
@@ -3681,7 +3682,7 @@ export default function AdminDashboard() {
                   <select 
                     value={subCategoryForm.status} 
                     onChange={(e) => setSubCategoryForm({ ...subCategoryForm, status: e.target.value as 'active' | 'inactive' })} 
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea"
                   >
                     <option value="active">Active</option>
                     <option value="inactive">Inactive</option>
@@ -3697,7 +3698,7 @@ export default function AdminDashboard() {
                   <select
                     value={reviewForm.serviceId}
                     onChange={(e) => setReviewForm({ ...reviewForm, serviceId: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea"
                     required
                   >
                     <option value="">Select Service</option>
@@ -3711,7 +3712,7 @@ export default function AdminDashboard() {
                   <select
                     value={reviewForm.reviewType}
                     onChange={(e) => setReviewForm({ ...reviewForm, reviewType: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea"
                     required
                   >
                     <option value="service">Service Review</option>
@@ -3732,7 +3733,7 @@ export default function AdminDashboard() {
                   <select
                     value={reviewForm.userId}
                     onChange={(e) => setReviewForm({ ...reviewForm, userId: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea"
                   >
                     <option value="">None (Anonymous Review)</option>
                     {users.map((user) => (
@@ -3745,7 +3746,7 @@ export default function AdminDashboard() {
                   <select
                     value={reviewForm.rating}
                     onChange={(e) => setReviewForm({ ...reviewForm, rating: parseInt(e.target.value) })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea"
                     required
                   >
                     <option value="5">5 Stars</option>
@@ -3760,7 +3761,7 @@ export default function AdminDashboard() {
                   <textarea
                     value={reviewForm.comment}
                     onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea"
                     rows={4}
                     placeholder="Enter review comment..."
                   />
@@ -3804,7 +3805,7 @@ export default function AdminDashboard() {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Category *</label>
-                      <select value={serviceForm.categoryId} onChange={(e) => setServiceForm({ ...serviceForm, categoryId: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                      <select value={serviceForm.categoryId} onChange={(e) => setServiceForm({ ...serviceForm, categoryId: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea" required>
                         <option value="">Select Category</option>
                         {categories.map((cat) => (
                           <option key={cat.id} value={cat.id}>{cat.title}</option>
@@ -3813,7 +3814,7 @@ export default function AdminDashboard() {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Sub-Category (Optional)</label>
-                      <select value={serviceForm.subCategoryId} onChange={(e) => setServiceForm({ ...serviceForm, subCategoryId: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md">
+                      <select value={serviceForm.subCategoryId} onChange={(e) => setServiceForm({ ...serviceForm, subCategoryId: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea">
                         <option value="">None</option>
                         {subCategories.filter(s => s.categoryId === serviceForm.categoryId).map((subCat) => (
                           <option key={subCat.id} value={subCat.id}>{subCat.title}</option>
@@ -3838,7 +3839,7 @@ export default function AdminDashboard() {
                     </div>
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                      <textarea value={serviceForm.description} onChange={(e) => setServiceForm({ ...serviceForm, description: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md" rows={3} />
+                      <textarea value={serviceForm.description} onChange={(e) => setServiceForm({ ...serviceForm, description: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea" rows={3} />
                     </div>
                   </div>
                 </div>
@@ -3853,7 +3854,12 @@ export default function AdminDashboard() {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Detailed Description (Acts, Laws, Orders, Rules with Years)</label>
-                      <textarea value={serviceForm.detailedDescription} onChange={(e) => setServiceForm({ ...serviceForm, detailedDescription: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md" rows={4} placeholder="Detailed description including relevant acts, laws, orders, rules with years..." />
+                      <RichTextEditor
+                        value={serviceForm.detailedDescription}
+                        onChange={(value) => setServiceForm({ ...serviceForm, detailedDescription: value })}
+                        placeholder="Detailed description including relevant acts, laws, orders, rules with years..."
+                        minHeight="280px"
+                      />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Service Provider Authority (Court/Council)</label>
@@ -3864,7 +3870,7 @@ export default function AdminDashboard() {
                       <textarea
                         value={serviceForm.infoSource}
                         onChange={(e) => setServiceForm({ ...serviceForm, infoSource: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea"
                         rows={4}
                         placeholder="Describe where this information comes from, including any key URLs or references..."
                       />
@@ -3874,7 +3880,7 @@ export default function AdminDashboard() {
                       <textarea 
                         value={serviceForm.requiredDocuments.join('\n')} 
                         onChange={(e) => setServiceForm({ ...serviceForm, requiredDocuments: e.target.value.split('\n').filter(doc => doc.trim()) })} 
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea" 
                         rows={4}
                         placeholder="Document 1&#10;Document 2&#10;Document 3"
                       />
@@ -3882,18 +3888,18 @@ export default function AdminDashboard() {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">What&apos;s Included?</label>
-                      <textarea value={serviceForm.whatsIncluded} onChange={(e) => setServiceForm({ ...serviceForm, whatsIncluded: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md" rows={3} placeholder="What will we do for the client..." />
+                      <textarea value={serviceForm.whatsIncluded} onChange={(e) => setServiceForm({ ...serviceForm, whatsIncluded: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea" rows={3} placeholder="What will we do for the client..." />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">What&apos;s Not Included?</label>
-                      <textarea value={serviceForm.whatsNotIncluded} onChange={(e) => setServiceForm({ ...serviceForm, whatsNotIncluded: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md" rows={3} placeholder="What must be done externally..." />
+                      <textarea value={serviceForm.whatsNotIncluded} onChange={(e) => setServiceForm({ ...serviceForm, whatsNotIncluded: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea" rows={3} placeholder="What must be done externally..." />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Timeline (One per line)</label>
                       <textarea 
                         value={serviceForm.timeline} 
                         onChange={(e) => setServiceForm({ ...serviceForm, timeline: e.target.value })} 
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea" 
                         rows={4}
                         placeholder="Timeline item 1&#10;Timeline item 2&#10;Timeline item 3"
                       />
@@ -3901,7 +3907,7 @@ export default function AdminDashboard() {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Additional Notes</label>
-                      <textarea value={serviceForm.additionalNotes} onChange={(e) => setServiceForm({ ...serviceForm, additionalNotes: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md" rows={3} placeholder="Additional comments or notes..." />
+                      <textarea value={serviceForm.additionalNotes} onChange={(e) => setServiceForm({ ...serviceForm, additionalNotes: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea" rows={3} placeholder="Additional comments or notes..." />
                     </div>
                   </div>
                 </div>
@@ -3912,7 +3918,7 @@ export default function AdminDashboard() {
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Process Flow</label>
-                      <textarea value={serviceForm.processFlow} onChange={(e) => setServiceForm({ ...serviceForm, processFlow: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md" rows={5} placeholder="Step-by-step process flow..." />
+                      <textarea value={serviceForm.processFlow} onChange={(e) => setServiceForm({ ...serviceForm, processFlow: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea" rows={5} placeholder="Step-by-step process flow..." />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Video URL (TBA)</label>
@@ -3956,7 +3962,7 @@ export default function AdminDashboard() {
                               newFaqs[index].answer = e.target.value
                               setServiceForm({ ...serviceForm, faqs: newFaqs })
                             }}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea"
                             rows={2}
                             placeholder="Answer"
                           />
@@ -4008,7 +4014,7 @@ export default function AdminDashboard() {
                               newItems[index].description = e.target.value
                               setServiceForm({ ...serviceForm, whyChooseConsultants: newItems })
                             }}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea"
                             rows={2}
                             placeholder="Subtitle / Description"
                           />
@@ -4060,7 +4066,7 @@ export default function AdminDashboard() {
                               newItems[index].description = e.target.value
                               setServiceForm({ ...serviceForm, howWeSelectConsultants: newItems })
                             }}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea"
                             rows={2}
                             placeholder="Subtitle / Description"
                           />
@@ -4082,7 +4088,7 @@ export default function AdminDashboard() {
                   <h3 className="text-lg font-semibold mb-4">4. Consultants</h3>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Consultant Qualifications and Expertise</label>
-                    <textarea value={serviceForm.consultantQualifications} onChange={(e) => setServiceForm({ ...serviceForm, consultantQualifications: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md" rows={4} placeholder="Describe consultant qualifications and expertise..." />
+                    <textarea value={serviceForm.consultantQualifications} onChange={(e) => setServiceForm({ ...serviceForm, consultantQualifications: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea" rows={4} placeholder="Describe consultant qualifications and expertise..." />
                   </div>
                 </div>
 
@@ -4131,7 +4137,7 @@ export default function AdminDashboard() {
                               newPackages[index].features = e.target.value.split('\n').filter(f => f.trim())
                               setServiceForm({ ...serviceForm, packages: newPackages })
                             }}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea"
                             rows={3}
                             placeholder="Feature 1&#10;Feature 2"
                           />
@@ -4144,7 +4150,7 @@ export default function AdminDashboard() {
                               newPackages[index].description = e.target.value
                               setServiceForm({ ...serviceForm, packages: newPackages })
                             }}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea"
                             rows={2}
                             placeholder="Package Description (Optional)"
                           />

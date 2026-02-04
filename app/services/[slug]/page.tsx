@@ -460,7 +460,19 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                   <div className="space-y-6">
                     <div>
                       <h3 className="text-lg font-bold text-gray-900 mb-3">Service Description</h3>
-                      <p className="text-gray-700 leading-relaxed">{service.detailedDescription || service.description}</p>
+                      {(() => {
+                        const content = service.detailedDescription || service.description || ''
+                        const isHtml = /<[a-z][\s\S]*>/i.test(content)
+                        if (isHtml) {
+                          return (
+                            <div
+                              className="service-description-html text-gray-700 leading-relaxed"
+                              dangerouslySetInnerHTML={{ __html: content }}
+                            />
+                          )
+                        }
+                        return <p className="text-gray-700 leading-relaxed">{content}</p>
+                      })()}
                     </div>
 
                     {/* Required Documents */}
