@@ -158,6 +158,9 @@ export default function CartPage() {
         } else {
           localStorage.removeItem(cartKey)
         }
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('snaplegal_cart_updated'))
+        }
       } catch (error) {
         console.error('Error saving cart to localStorage:', error)
       }

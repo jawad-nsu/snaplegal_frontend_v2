@@ -353,6 +353,9 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
     // Save to localStorage
     try {
       localStorage.setItem(cartKey, JSON.stringify(existingCart))
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('snaplegal_cart_updated'))
+      }
     } catch (error) {
       console.error('Error saving cart to localStorage:', error)
     }

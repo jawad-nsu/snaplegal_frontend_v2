@@ -23,7 +23,32 @@ export default function Navbar() {
 
   const [showProfileDropdown, setShowProfileDropdown] = useState(false)
   const [showMobileMenu, setShowMobileMenu] = useState(false)
+  const [cartCount, setCartCount] = useState(0)
   const mobileMenuRef = useRef<HTMLDivElement>(null)
+
+  // Sync cart count from localStorage (key matches cart/cart page)
+  const updateCartCount = () => {
+    if (typeof window === 'undefined') return
+    try {
+      const cartKey = 'snaplegal_cart'
+      const stored = localStorage.getItem(cartKey)
+      const count = stored ? (JSON.parse(stored) as unknown[]).length : 0
+      setCartCount(count)
+    } catch {
+      setCartCount(0)
+    }
+  }
+
+  useEffect(() => {
+    updateCartCount()
+    const onCartUpdate = () => updateCartCount()
+    window.addEventListener('snaplegal_cart_updated', onCartUpdate)
+    window.addEventListener('storage', onCartUpdate)
+    return () => {
+      window.removeEventListener('snaplegal_cart_updated', onCartUpdate)
+      window.removeEventListener('storage', onCartUpdate)
+    }
+  }, [])
 
   // Check if we're on sign in or sign up pages
   const isAuthPage = pathname === '/signin' || pathname === '/signup'
@@ -235,9 +260,11 @@ export default function Navbar() {
                     onClick={() => router.push('/cart')}
                   >
                     <ShoppingCart className="w-6 h-6 text-gray-700" />
-                    <span className="absolute -top-2 -right-2 bg-[var(--color-primary)] text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                      2
-                    </span>
+                    {cartCount > 0 && (
+                      <span className="absolute -top-2 -right-2 bg-[var(--color-primary)] text-white text-xs font-bold rounded-full min-w-[1.25rem] h-5 px-1 flex items-center justify-center">
+                        {cartCount > 99 ? '99+' : cartCount}
+                      </span>
+                    )}
                   </button>
                 )}
               </>
@@ -311,9 +338,11 @@ export default function Navbar() {
                     >
                       <ShoppingCart className="w-5 h-5 text-[var(--color-primary)] flex-shrink-0" />
                       <span className="font-medium">Cart</span>
-                      <span className="ml-auto bg-[var(--color-primary)] text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                        2
-                      </span>
+                      {cartCount > 0 && (
+                        <span className="ml-auto bg-[var(--color-primary)] text-white text-xs font-bold rounded-full min-w-[1.25rem] h-5 px-1 flex items-center justify-center">
+                          {cartCount > 99 ? '99+' : cartCount}
+                        </span>
+                      )}
                     </button>
                   </>
                 )}
