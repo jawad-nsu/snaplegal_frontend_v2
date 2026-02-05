@@ -35,6 +35,24 @@ interface ServiceData {
   infoSource?: string
   whyChooseConsultants?: { title: string; description: string }[]
   howWeSelectConsultants?: { title: string; description: string }[]
+  communityDiscussions?: CommunityDiscussionThread[]
+}
+
+export interface CommunityDiscussionReply {
+  author: string
+  avatar: string
+  reply: string
+  time: string
+}
+
+export interface CommunityDiscussionThread {
+  id: string | number
+  topic: string
+  author: string
+  avatar: string
+  question: string
+  replies: CommunityDiscussionReply[]
+  time: string
 }
 
 const DEFAULT_WHY_CHOOSE: { title: string; description: string }[] = [
@@ -55,7 +73,7 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null)
   const [selectedPackage, setSelectedPackage] = useState(0)
   const [activeTab, setActiveTab] = useState('overview')
-  const [expandedThread, setExpandedThread] = useState<number | null>(null)
+  const [expandedThread, setExpandedThread] = useState<string | number | null>(null)
   const [faqQuery, setFaqQuery] = useState('')
   const [comment, setComment] = useState('')
   const [providerFilterStar, setProviderFilterStar] = useState<number | null>(null)
@@ -187,7 +205,18 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
           providerAuthority: apiService.providerAuthority || undefined,
           infoSource: apiService.infoSource || undefined,
           whyChooseConsultants: Array.isArray(apiService.whyChooseConsultants) ? apiService.whyChooseConsultants : [],
-          howWeSelectConsultants: Array.isArray(apiService.howWeSelectConsultants) ? apiService.howWeSelectConsultants : []
+          howWeSelectConsultants: Array.isArray(apiService.howWeSelectConsultants) ? apiService.howWeSelectConsultants : [],
+          communityDiscussions: Array.isArray(apiService.communityDiscussions)
+            ? apiService.communityDiscussions.map((t: { id?: string | number; topic?: string; author?: string; avatar?: string; question?: string; replies?: { author?: string; avatar?: string; reply?: string; time?: string }[]; time?: string }, idx: number) => ({
+                id: t.id ?? idx,
+                topic: t.topic || 'general',
+                author: t.author || '',
+                avatar: t.avatar || '?',
+                question: t.question || '',
+                replies: Array.isArray(t.replies) ? t.replies.map((r) => ({ author: r.author || '', avatar: r.avatar || '?', reply: r.reply || '', time: r.time || '' })) : [],
+                time: t.time || ''
+              }))
+            : []
         }
 
         setService(transformedService)
@@ -1111,121 +1140,75 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                         <h3 className="text-xl font-bold text-gray-900">Community Discussion</h3>
                       </div>
 
-                      {/* Discussion Threads */}
+                      {/* Discussion Threads - from backend */}
                       <div className="space-y-4">
-                        {/* Sample Discussion Threads */}
-                        {[
-                          {
-                            id: 1,
-                            topic: 'tips',
-                            author: 'Rashid Ahmed',
-                            avatar: 'R',
-                            question: 'What are the best practices for maintaining my AC after servicing?',
-                            replies: [
-                              { author: 'Fatima Khan', avatar: 'F', reply: 'I recommend cleaning the filters monthly and scheduling regular check-ups every 3-4 months. Also, keep the outdoor unit clear of debris.', time: '2 hours ago' },
-                              { author: 'Hasan Ali', avatar: 'H', reply: 'Make sure to change the air filter regularly and keep the area around the AC unit clean. This helps maintain efficiency.', time: '5 hours ago' }
-                            ],
-                            time: '1 day ago',
-                            replyCount: 2
-                          },
-                          {
-                            id: 2,
-                            topic: 'troubleshooting',
-                            author: 'Sadia Rahman',
-                            avatar: 'S',
-                            question: 'My AC is not cooling properly even after servicing. What could be the issue?',
-                            replies: [
-                              { author: 'Tech Expert', avatar: 'T', reply: 'This could be due to low refrigerant levels, dirty coils, or a faulty compressor. I recommend calling a professional for diagnosis.', time: '3 hours ago' }
-                            ],
-                            time: '2 days ago',
-                            replyCount: 1
-                          },
-                          {
-                            id: 3,
-                            topic: 'maintenance',
-                            author: 'Karim Uddin',
-                            avatar: 'K',
-                            question: 'How often should I get professional AC servicing?',
-                            replies: [
-                              { author: 'Service Pro', avatar: 'P', reply: 'For optimal performance, professional servicing every 3-4 months is recommended, especially before and after peak seasons.', time: '1 day ago' },
-                              { author: 'Ahmed Hassan', avatar: 'A', reply: 'I do it quarterly and it keeps my AC running smoothly year-round.', time: '6 hours ago' }
-                            ],
-                            time: '3 days ago',
-                            replyCount: 2
-                          },
-                          {
-                            id: 4,
-                            topic: 'cost',
-                            author: 'Nadia Islam',
-                            avatar: 'N',
-                            question: 'What factors affect the cost of AC servicing?',
-                            replies: [
-                              { author: 'Cost Advisor', avatar: 'C', reply: 'Factors include AC unit size, condition, required repairs, location, and service package chosen. Premium packages offer more comprehensive service.', time: '4 hours ago' }
-                            ],
-                            time: '4 days ago',
-                            replyCount: 1
-                          }
-                        ]
-                          .map((thread) => (
-                            <div key={thread.id} className="bg-white border border-gray-200 rounded-lg p-5 hover:shadow-md transition-shadow">
-                              <div className="flex items-start gap-4">
-                                <div className="w-10 h-10 bg-[var(--color-primary)]/10 text-[var(--color-primary)] rounded-full flex items-center justify-center font-semibold flex-shrink-0">
-                                  {thread.avatar}
-                                </div>
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <span className="font-semibold text-gray-900">{thread.author}</span>
-                                    <span className="text-sm text-gray-500">•</span>
-                                    <span className="text-sm text-gray-500">{thread.time}</span>
+                        {(service?.communityDiscussions ?? []).length === 0 ? (
+                          <p className="text-gray-500 py-6 text-center">No discussion threads yet. Check back later or ask a question below.</p>
+                        ) : (
+                          (service?.communityDiscussions ?? []).map((thread) => {
+                            const replyCount = thread.replies?.length ?? 0
+                            return (
+                              <div key={String(thread.id)} className="bg-white border border-gray-200 rounded-lg p-5 hover:shadow-md transition-shadow">
+                                <div className="flex items-start gap-4">
+                                  <div className="w-10 h-10 bg-[var(--color-primary)]/10 text-[var(--color-primary)] rounded-full flex items-center justify-center font-semibold flex-shrink-0">
+                                    {thread.avatar}
                                   </div>
-                                  <p className="text-gray-900 font-medium mb-3">{thread.question}</p>
-                                  
-                                  {/* Replies */}
-                                  {thread.replies.length > 0 && (
-                                    <div className="ml-4 border-l-2 border-gray-200 pl-4 space-y-3">
-                                      {expandedThread === thread.id ? (
-                                        <>
-                                          {thread.replies.map((reply, replyIndex) => (
-                                            <div key={replyIndex} className="flex items-start gap-3">
-                                              <div className="w-8 h-8 bg-gray-100 text-gray-600 rounded-full flex items-center justify-center text-sm font-semibold flex-shrink-0">
-                                                {reply.avatar}
-                                              </div>
-                                              <div className="flex-1">
-                                                <div className="flex items-center gap-2 mb-1">
-                                                  <span className="font-medium text-gray-900 text-sm">{reply.author}</span>
-                                                  <span className="text-xs text-gray-500">{reply.time}</span>
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-2">
+                                      <span className="font-semibold text-gray-900">{thread.author}</span>
+                                      <span className="text-sm text-gray-500">•</span>
+                                      <span className="text-sm text-gray-500">{thread.time}</span>
+                                    </div>
+                                    <p className="text-gray-900 font-medium mb-3">{thread.question}</p>
+
+                                    {/* Replies */}
+                                    {replyCount > 0 && (
+                                      <div className="ml-4 border-l-2 border-gray-200 pl-4 space-y-3">
+                                        {expandedThread === thread.id ? (
+                                          <>
+                                            {thread.replies.map((reply, replyIndex) => (
+                                              <div key={replyIndex} className="flex items-start gap-3">
+                                                <div className="w-8 h-8 bg-gray-100 text-gray-600 rounded-full flex items-center justify-center text-sm font-semibold flex-shrink-0">
+                                                  {reply.avatar}
                                                 </div>
-                                                <p className="text-gray-700 text-sm">{reply.reply}</p>
+                                                <div className="flex-1">
+                                                  <div className="flex items-center gap-2 mb-1">
+                                                    <span className="font-medium text-gray-900 text-sm">{reply.author}</span>
+                                                    <span className="text-xs text-gray-500">{reply.time}</span>
+                                                  </div>
+                                                  <p className="text-gray-700 text-sm">{reply.reply}</p>
+                                                </div>
                                               </div>
-                                            </div>
-                                          ))}
+                                            ))}
+                                            <button
+                                              onClick={() => setExpandedThread(null)}
+                                              className="text-sm text-[var(--color-primary)] hover:underline font-medium"
+                                            >
+                                              Show less
+                                            </button>
+                                          </>
+                                        ) : (
                                           <button
-                                            onClick={() => setExpandedThread(null)}
+                                            onClick={() => setExpandedThread(thread.id)}
                                             className="text-sm text-[var(--color-primary)] hover:underline font-medium"
                                           >
-                                            Show less
+                                            View {replyCount} {replyCount === 1 ? 'reply' : 'replies'}
                                           </button>
-                                        </>
-                                      ) : (
-                                        <button
-                                          onClick={() => setExpandedThread(thread.id)}
-                                          className="text-sm text-[var(--color-primary)] hover:underline font-medium"
-                                        >
-                                          View {thread.replyCount} {thread.replyCount === 1 ? 'reply' : 'replies'}
-                                        </button>
-                                      )}
-                                    </div>
-                                  )}
+                                        )}
+                                      </div>
+                                    )}
 
-                                  {/* Reply Button */}
-                                  <button className="mt-3 flex items-center gap-2 text-sm text-[var(--color-primary)] hover:text-[var(--color-primary)]/80 font-medium">
-                                    <Reply className="w-4 h-4" />
-                                    Reply
-                                  </button>
+                                    {/* Reply Button */}
+                                    <button className="mt-3 flex items-center gap-2 text-sm text-[var(--color-primary)] hover:text-[var(--color-primary)]/80 font-medium">
+                                      <Reply className="w-4 h-4" />
+                                      Reply
+                                    </button>
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          ))}
+                            )
+                          })
+                        )}
                       </div>
 
                       {/* Comment Box Section */}

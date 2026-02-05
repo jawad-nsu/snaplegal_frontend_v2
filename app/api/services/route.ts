@@ -58,6 +58,7 @@ export async function GET(request: NextRequest) {
         // Learning and Discussion
         processFlow: service.processFlow || '',
         videoUrl: service.videoUrl || '',
+        communityDiscussions: service.communityDiscussions || [],
         // FAQ
         faqs: service.faqs || [],
         // Consultants
@@ -108,7 +109,7 @@ export async function POST(request: NextRequest) {
     const { 
       title, slug, image, rating, description, deliveryTime, startingPrice, categoryId, subCategoryId, status,
       shortDescription, detailedDescription, providerAuthority, infoSource, requiredDocuments, whatsIncluded, whatsNotIncluded,
-      timeline, additionalNotes, processFlow, videoUrl, faqs, consultantQualifications, whyChooseConsultants, howWeSelectConsultants, packages,
+      timeline, additionalNotes, processFlow, videoUrl, communityDiscussions, faqs, consultantQualifications, whyChooseConsultants, howWeSelectConsultants, packages,
       coreFiling, coreStamps, coreCourtFee, clientFiling, clientStamps, clientCourtFee, clientConsultantFee
     } = body
 
@@ -214,6 +215,7 @@ export async function POST(request: NextRequest) {
         // Learning and Discussion
         processFlow: processFlow && processFlow.trim() ? processFlow.trim() : null,
         videoUrl: videoUrl && videoUrl.trim() ? videoUrl.trim() : null,
+        communityDiscussions: communityDiscussions ?? null,
         // FAQ
         faqs: faqs ? faqs : null,
         // Consultants
@@ -283,6 +285,7 @@ export async function POST(request: NextRequest) {
         // Learning and Discussion
         processFlow: service.processFlow || '',
         videoUrl: service.videoUrl || '',
+        communityDiscussions: service.communityDiscussions || [],
         // FAQ
         faqs: service.faqs || [],
         // Consultants

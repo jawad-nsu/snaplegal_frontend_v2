@@ -115,6 +115,7 @@ interface Service {
   // Learning and Discussion
   processFlow?: string
   videoUrl?: string
+  communityDiscussions?: Array<{ id?: string | number; topic: string; author: string; avatar: string; question: string; replies: Array<{ author: string; avatar: string; reply: string; time: string }>; time: string }>
   // FAQ
   faqs?: Array<{ question: string; answer: string }>
   // Consultants
@@ -961,6 +962,7 @@ export default function AdminDashboard() {
     timeline: '', additionalNotes: '',
     // Learning and Discussion
     processFlow: '', videoUrl: '',
+    communityDiscussions: [] as Array<{ id?: string | number; topic: string; author: string; avatar: string; question: string; replies: Array<{ author: string; avatar: string; reply: string; time: string }>; time: string }>,
     // FAQ
     faqs: [] as Array<{ question: string; answer: string }>,
     // Consultants
@@ -991,7 +993,7 @@ export default function AdminDashboard() {
       setServiceForm({
         title: '', slug: '', image: '', rating: '', description: '', deliveryTime: '', startingPrice: '', categoryId: '', subCategoryId: '',
         shortDescription: '', detailedDescription: '', providerAuthority: '', infoSource: '', requiredDocuments: [], whatsIncluded: '', whatsNotIncluded: '',
-        timeline: '', additionalNotes: '', processFlow: '', videoUrl: '', faqs: [], consultantQualifications: '', whyChooseConsultants: [], howWeSelectConsultants: [], packages: [],
+        timeline: '', additionalNotes: '', processFlow: '', videoUrl: '', communityDiscussions: [], faqs: [], consultantQualifications: '', whyChooseConsultants: [], howWeSelectConsultants: [], packages: [],
         coreFiling: '', coreStamps: '', coreCourtFee: '', clientFiling: '', clientStamps: '', clientCourtFee: '', clientConsultantFee: ''
       })
     } else if (activeTab === 'reviews') {
@@ -1043,7 +1045,7 @@ export default function AdminDashboard() {
         shortDescription: serviceItem.shortDescription || '', detailedDescription: serviceItem.detailedDescription || '', providerAuthority: serviceItem.providerAuthority || '', infoSource: serviceItem.infoSource || '',
         requiredDocuments: serviceItem.requiredDocuments || [], whatsIncluded: serviceItem.whatsIncluded || '', whatsNotIncluded: serviceItem.whatsNotIncluded || '',
         timeline: serviceItem.timeline || '', additionalNotes: serviceItem.additionalNotes || '', processFlow: serviceItem.processFlow || '', videoUrl: serviceItem.videoUrl || '',
-        faqs: serviceItem.faqs || [], consultantQualifications: serviceItem.consultantQualifications || '', whyChooseConsultants: serviceItem.whyChooseConsultants ?? [], howWeSelectConsultants: serviceItem.howWeSelectConsultants ?? [], packages: serviceItem.packages || [],
+        communityDiscussions: serviceItem.communityDiscussions ?? [], faqs: serviceItem.faqs || [], consultantQualifications: serviceItem.consultantQualifications || '', whyChooseConsultants: serviceItem.whyChooseConsultants ?? [], howWeSelectConsultants: serviceItem.howWeSelectConsultants ?? [], packages: serviceItem.packages || [],
         coreFiling: serviceItem.coreFiling || '', coreStamps: serviceItem.coreStamps || '', coreCourtFee: serviceItem.coreCourtFee || '',
         clientFiling: serviceItem.clientFiling || '', clientStamps: serviceItem.clientStamps || '', clientCourtFee: serviceItem.clientCourtFee || '',
         clientConsultantFee: serviceItem.clientConsultantFee || ''
@@ -1369,6 +1371,7 @@ export default function AdminDashboard() {
             // Learning and Discussion
             processFlow: serviceForm.processFlow,
             videoUrl: serviceForm.videoUrl,
+            communityDiscussions: serviceForm.communityDiscussions,
             // FAQ
             faqs: serviceForm.faqs,
             // Consultants
@@ -3923,6 +3926,61 @@ export default function AdminDashboard() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Video URL (TBA)</label>
                       <Input value={serviceForm.videoUrl} onChange={(e) => setServiceForm({ ...serviceForm, videoUrl: e.target.value })} placeholder="https://youtube.com/..." />
+                    </div>
+                    {/* Community Discussion */}
+                    <div className="mt-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Community Discussion Threads</label>
+                      <p className="text-xs text-gray-500 mb-3">Add discussion threads shown in the Learning and Discussion tab on the service page.</p>
+                      <div className="space-y-4">
+                        {serviceForm.communityDiscussions.map((thread, threadIndex) => (
+                          <div key={threadIndex} className="border border-gray-300 rounded-lg p-4 bg-gray-50/50">
+                            <div className="flex justify-between items-center mb-3">
+                              <span className="text-sm font-medium text-gray-700">Thread {threadIndex + 1}</span>
+                              <button
+                                type="button"
+                                onClick={() => setServiceForm({ ...serviceForm, communityDiscussions: serviceForm.communityDiscussions.filter((_, i) => i !== threadIndex) })}
+                                className="text-red-600 hover:text-red-800 text-sm"
+                              >
+                                Remove thread
+                              </button>
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                              <Input value={thread.topic} onChange={(e) => { const next = [...serviceForm.communityDiscussions]; next[threadIndex] = { ...next[threadIndex], topic: e.target.value }; setServiceForm({ ...serviceForm, communityDiscussions: next }); }} placeholder="Topic (e.g. tips, troubleshooting)" />
+                              <Input value={thread.author} onChange={(e) => { const next = [...serviceForm.communityDiscussions]; next[threadIndex] = { ...next[threadIndex], author: e.target.value }; setServiceForm({ ...serviceForm, communityDiscussions: next }); }} placeholder="Author name" />
+                              <Input value={thread.avatar} onChange={(e) => { const next = [...serviceForm.communityDiscussions]; next[threadIndex] = { ...next[threadIndex], avatar: (e.target.value || '?').slice(0, 1) }; setServiceForm({ ...serviceForm, communityDiscussions: next }); }} placeholder="Avatar (1 letter)" maxLength={1} className="w-20" />
+                              <Input value={thread.time} onChange={(e) => { const next = [...serviceForm.communityDiscussions]; next[threadIndex] = { ...next[threadIndex], time: e.target.value }; setServiceForm({ ...serviceForm, communityDiscussions: next }); }} placeholder="Time (e.g. 1 day ago)" />
+                            </div>
+                            <div className="mb-3">
+                              <textarea value={thread.question} onChange={(e) => { const next = [...serviceForm.communityDiscussions]; next[threadIndex] = { ...next[threadIndex], question: e.target.value }; setServiceForm({ ...serviceForm, communityDiscussions: next }); }} className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea" rows={2} placeholder="Question" />
+                            </div>
+                            <div className="ml-2 border-l-2 border-gray-200 pl-3">
+                              <span className="text-xs font-medium text-gray-600 block mb-2">Replies</span>
+                              {thread.replies.map((reply, replyIndex) => (
+                                <div key={replyIndex} className="mb-3 p-2 bg-white rounded border border-gray-200">
+                                  <div className="flex justify-between items-center mb-1">
+                                    <span className="text-xs text-gray-500">Reply {replyIndex + 1}</span>
+                                    <button type="button" onClick={() => { const next = [...serviceForm.communityDiscussions]; next[threadIndex].replies = next[threadIndex].replies.filter((_, i) => i !== replyIndex); setServiceForm({ ...serviceForm, communityDiscussions: next }); }} className="text-red-500 hover:text-red-700 text-xs">Remove</button>
+                                  </div>
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
+                                    <Input value={reply.author} onChange={(e) => { const next = [...serviceForm.communityDiscussions]; next[threadIndex].replies = [...next[threadIndex].replies]; next[threadIndex].replies[replyIndex] = { ...next[threadIndex].replies[replyIndex], author: e.target.value }; setServiceForm({ ...serviceForm, communityDiscussions: next }); }} placeholder="Reply author" />
+                                    <Input value={reply.avatar} onChange={(e) => { const next = [...serviceForm.communityDiscussions]; next[threadIndex].replies = [...next[threadIndex].replies]; next[threadIndex].replies[replyIndex] = { ...next[threadIndex].replies[replyIndex], avatar: (e.target.value || '?').slice(0, 1) }; setServiceForm({ ...serviceForm, communityDiscussions: next }); }} placeholder="Avatar" maxLength={1} className="w-16" />
+                                    <Input value={reply.time} onChange={(e) => { const next = [...serviceForm.communityDiscussions]; next[threadIndex].replies = [...next[threadIndex].replies]; next[threadIndex].replies[replyIndex] = { ...next[threadIndex].replies[replyIndex], time: e.target.value }; setServiceForm({ ...serviceForm, communityDiscussions: next }); }} placeholder="Time" className="sm:col-span-2" />
+                                  </div>
+                                  <textarea value={reply.reply} onChange={(e) => { const next = [...serviceForm.communityDiscussions]; next[threadIndex].replies = [...next[threadIndex].replies]; next[threadIndex].replies[replyIndex] = { ...next[threadIndex].replies[replyIndex], reply: e.target.value }; setServiceForm({ ...serviceForm, communityDiscussions: next }); }} className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea text-sm" rows={2} placeholder="Reply text" />
+                                </div>
+                              ))}
+                              <button type="button" onClick={() => { const next = [...serviceForm.communityDiscussions]; next[threadIndex].replies = [...(next[threadIndex].replies || []), { author: '', avatar: '?', reply: '', time: '' }]; setServiceForm({ ...serviceForm, communityDiscussions: next }); }} className="text-sm text-blue-600 hover:text-blue-800">+ Add reply</button>
+                            </div>
+                          </div>
+                        ))}
+                        <button
+                          type="button"
+                          onClick={() => setServiceForm({ ...serviceForm, communityDiscussions: [...serviceForm.communityDiscussions, { topic: '', author: '', avatar: '?', question: '', replies: [], time: '' }] })}
+                          className="text-sm text-blue-600 hover:text-blue-800"
+                        >
+                          + Add discussion thread
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>

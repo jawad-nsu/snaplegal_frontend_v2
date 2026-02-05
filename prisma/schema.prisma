@@ -235,8 +235,9 @@ model Service {
   additionalNotes     String?  @db.Text // comments
 
   // Learning and Discussion
-  processFlow String? @db.Text
-  videoUrl    String? // TBA
+  processFlow           String? @db.Text
+  videoUrl              String? // TBA
+  communityDiscussions  Json?   // array of { topic, author, avatar, question, replies: [{ author, avatar, reply, time }], time }
 
   // FAQ
   faqs Json? // array of {question: string, answer: string}

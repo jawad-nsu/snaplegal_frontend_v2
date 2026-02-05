@@ -85,6 +85,7 @@ export async function GET(
         // Learning and Discussion
         processFlow: service.processFlow || '',
         videoUrl: service.videoUrl || '',
+        communityDiscussions: service.communityDiscussions || [],
         // FAQ
         faqs: service.faqs || [],
         // Consultants
