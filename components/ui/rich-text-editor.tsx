@@ -57,7 +57,7 @@ export function RichTextEditor({
     const current = normalizeEmptyHtml(editor.getHTML())
     const next = normalizeEmptyHtml(value ?? '')
     if (next !== current && next !== lastSentHtml.current) {
-      editor.commands.setContent(next || '<p></p>', false)
+      editor.commands.setContent(next || '<p></p>', { emitUpdate: false })
       lastSentHtml.current = next
     }
   }, [editor, value])
