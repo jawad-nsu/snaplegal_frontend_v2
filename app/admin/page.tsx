@@ -27,7 +27,10 @@ import {
   UserCircle,
   Upload,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Copy,
+  Home,
+  GripVertical
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -101,6 +104,7 @@ interface Service {
   startingPrice: string
   categoryId: string
   subCategoryId?: string
+  status?: string
   createdAt: string
   // Overview fields
   shortDescription?: string
@@ -264,7 +268,13 @@ interface Lead {
   createdAt: string
 }
 
-type TabType = 'leads' | 'users' | 'vendors' | 'categories' | 'subcategories' | 'services' | 'service-requests' | 'chats' | 'orders' | 'reviews'
+type TabType = 'leads' | 'users' | 'vendors' | 'categories' | 'subcategories' | 'services' | 'homepage' | 'service-requests' | 'chats' | 'orders' | 'reviews'
+
+interface HomepageTrendingRow {
+  categoryId: string
+  categoryTitle: string
+  serviceIds: string[]
+}
 
 // Helper function to sort categories: first by serialNumber (ascending), then by updatedAt (descending) for those without serial numbers
 const sortCategories = (categoriesToSort: ServiceCategory[]): ServiceCategory[] => {
@@ -312,6 +322,7 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<TabType>('leads')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<User | Vendor | ServiceCategory | SubCategory | Service | Review | null>(null)
+  const [isCloningService, setIsCloningService] = useState(false)
 
   // Filter states for Users
   const [userSearch, setUserSearch] = useState('')
@@ -530,6 +541,38 @@ export default function AdminDashboard() {
     images: [] as string[],
     isVerified: false,
   })
+
+  // Homepage (Trending & Recommended)
+  const [homepageTrendingRows, setHomepageTrendingRows] = useState<HomepageTrendingRow[]>([])
+  const [homepageRecommendedIds, setHomepageRecommendedIds] = useState<string[]>([])
+  const [homepageLoading, setHomepageLoading] = useState(false)
+  const [homepageSaving, setHomepageSaving] = useState(false)
+  const [homepageAddCategoryId, setHomepageAddCategoryId] = useState<string>('')
+  const [homepageAddServiceIds, setHomepageAddServiceIds] = useState<string[]>([])
+
+  useEffect(() => {
+    if (activeTab !== 'homepage') return
+    const fetchHomepage = async () => {
+      setHomepageLoading(true)
+      try {
+        const res = await fetch('/api/homepage-sections')
+        const data = await res.json()
+        if (data.success) {
+          setHomepageTrendingRows((data.trending || []).map((r: { categoryId: string; categoryTitle: string; services: { id: string }[] }) => ({
+            categoryId: r.categoryId,
+            categoryTitle: r.categoryTitle,
+            serviceIds: (r.services || []).map((s: { id: string }) => s.id),
+          })))
+          setHomepageRecommendedIds((data.recommended || []).map((s: { id: string }) => s.id))
+        }
+      } catch (e) {
+        console.error('Fetch homepage sections failed', e)
+      } finally {
+        setHomepageLoading(false)
+      }
+    }
+    fetchHomepage()
+  }, [activeTab])
 
   // Vendor Service Requests
   const [serviceRequests, setServiceRequests] = useState<VendorServiceRequest[]>([
@@ -990,6 +1033,7 @@ export default function AdminDashboard() {
     } else if (activeTab === 'subcategories') {
       setSubCategoryForm({ title: '', icon: '', categoryId: '', serialNumber: '', status: 'active' })
     } else if (activeTab === 'services') {
+      setIsCloningService(false)
       setServiceForm({
         title: '', slug: '', image: '', rating: '', description: '', deliveryTime: '', startingPrice: '', categoryId: '', subCategoryId: '',
         shortDescription: '', detailedDescription: '', providerAuthority: '', infoSource: '', requiredDocuments: [], whatsIncluded: '', whatsNotIncluded: '',
@@ -1064,6 +1108,49 @@ export default function AdminDashboard() {
         isVerified: reviewItem.isVerified,
       })
     }
+    setIsCloningService(false)
+  }
+
+  const handleCloneService = (service: Service) => {
+    setEditingItem(null)
+    setIsCloningService(true)
+    setIsModalOpen(true)
+    // Deep copy arrays so editing the clone doesn't mutate the original
+    setServiceForm({
+      title: `${service.title} (Copy)`,
+      slug: `${service.slug}-copy`,
+      image: service.image,
+      rating: service.rating,
+      description: service.description,
+      deliveryTime: service.deliveryTime,
+      startingPrice: service.startingPrice,
+      categoryId: service.categoryId,
+      subCategoryId: service.subCategoryId || '',
+      shortDescription: service.shortDescription || '',
+      detailedDescription: service.detailedDescription || '',
+      providerAuthority: service.providerAuthority || '',
+      infoSource: service.infoSource || '',
+      requiredDocuments: [...(service.requiredDocuments || [])],
+      whatsIncluded: service.whatsIncluded || '',
+      whatsNotIncluded: service.whatsNotIncluded || '',
+      timeline: service.timeline || '',
+      additionalNotes: service.additionalNotes || '',
+      processFlow: service.processFlow || '',
+      videoUrl: service.videoUrl || '',
+      communityDiscussions: JSON.parse(JSON.stringify(service.communityDiscussions ?? [])),
+      faqs: (service.faqs || []).map(f => ({ ...f })),
+      consultantQualifications: service.consultantQualifications || '',
+      whyChooseConsultants: (service.whyChooseConsultants ?? []).map(c => ({ ...c })),
+      howWeSelectConsultants: (service.howWeSelectConsultants ?? []).map(c => ({ ...c })),
+      packages: (service.packages || []).map(p => ({ ...p, features: [...(p.features || [])] })),
+      coreFiling: service.coreFiling || '',
+      coreStamps: service.coreStamps || '',
+      coreCourtFee: service.coreCourtFee || '',
+      clientFiling: service.clientFiling || '',
+      clientStamps: service.clientStamps || '',
+      clientCourtFee: service.clientCourtFee || '',
+      clientConsultantFee: service.clientConsultantFee || '',
+    })
   }
 
   const handleDelete = async (id: string) => {
@@ -1410,6 +1497,7 @@ export default function AdminDashboard() {
           }
           setIsModalOpen(false)
           setEditingItem(null)
+          setIsCloningService(false)
         } else {
           const errorMsg = data.error || data.message || 'Unknown error'
           const details = data.details ? ` (${data.details})` : ''
@@ -3018,6 +3106,152 @@ export default function AdminDashboard() {
     </div>
   )
 
+  const saveHomepageSections = async () => {
+    setHomepageSaving(true)
+    try {
+      const res = await fetch('/api/homepage-sections', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          trending: homepageTrendingRows.map((r) => ({ categoryId: r.categoryId, serviceIds: r.serviceIds })),
+          recommendedServiceIds: homepageRecommendedIds,
+        }),
+      })
+      const data = await res.json()
+      if (!data.success) throw new Error(data.error || 'Failed to save')
+    } catch (e) {
+      console.error('Save homepage sections failed', e)
+      alert('Failed to save. Check console.')
+    } finally {
+      setHomepageSaving(false)
+    }
+  }
+
+  const renderHomepageTab = () => {
+    const usedCategoryIds = new Set(homepageTrendingRows.map((r) => r.categoryId))
+    const availableCategories = categories.filter((c) => c.status === 'active' && !usedCategoryIds.has(c.id))
+    const getServiceTitle = (id: string) => services.find((s) => s.id === id)?.title || id
+    return (
+      <div className="space-y-8">
+        <p className="text-sm text-gray-600">Configure what appears in <strong>Trending</strong> (one row per category) and <strong>Recommended</strong> on the homepage.</p>
+        {/* Trending: one row per category */}
+        <div>
+          <h3 className="text-lg font-semibold mb-3">Trending (by category)</h3>
+          {homepageLoading ? (
+            <p className="text-gray-500">Loading…</p>
+          ) : (
+            <>
+              <div className="space-y-3 mb-4">
+                {homepageTrendingRows.map((row, idx) => (
+                  <div key={row.categoryId} className="flex items-start gap-2 p-3 border border-gray-200 rounded-lg bg-gray-50">
+                    <GripVertical className="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-gray-900">{row.categoryTitle}</p>
+                      <p className="text-sm text-gray-500">
+                        {row.serviceIds.length} service(s): {row.serviceIds.map(getServiceTitle).join(', ') || '—'}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setHomepageTrendingRows((prev) => prev.filter((_, i) => i !== idx))}
+                      className="text-red-600 hover:text-red-800 p-1"
+                      title="Remove row"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <div className="flex flex-wrap items-end gap-2 p-3 border border-dashed border-gray-300 rounded-lg bg-white">
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">Category</label>
+                  <select
+                    value={homepageAddCategoryId}
+                    onChange={(e) => setHomepageAddCategoryId(e.target.value)}
+                    className="border border-gray-300 rounded px-3 py-2 text-sm min-w-[180px]"
+                  >
+                    <option value="">Select category</option>
+                    {availableCategories.map((c) => (
+                      <option key={c.id} value={c.id}>{c.title}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">Services (order = display order)</label>
+                  <select
+                    multiple
+                    value={homepageAddServiceIds}
+                    onChange={(e) => setHomepageAddServiceIds(Array.from(e.target.selectedOptions, (o) => o.value))}
+                    className="border border-gray-300 rounded px-3 py-2 text-sm min-w-[200px] h-24"
+                  >
+                    {services.filter((s) => s.status === 'active').map((s) => (
+                      <option key={s.id} value={s.id}>{s.title}</option>
+                    ))}
+                  </select>
+                </div>
+                <Button
+                  type="button"
+                  disabled={!homepageAddCategoryId}
+                  onClick={() => {
+                    const cat = categories.find((c) => c.id === homepageAddCategoryId)
+                    if (!cat) return
+                    setHomepageTrendingRows((prev) => [...prev, { categoryId: cat.id, categoryTitle: cat.title, serviceIds: homepageAddServiceIds }])
+                    setHomepageAddCategoryId('')
+                    setHomepageAddServiceIds([])
+                  }}
+                  className="bg-[var(--color-primary)] hover:opacity-90"
+                >
+                  Add row
+                </Button>
+              </div>
+            </>
+          )}
+        </div>
+        {/* Recommended */}
+        <div>
+          <h3 className="text-lg font-semibold mb-3">Recommended</h3>
+          <div className="flex flex-wrap gap-2 mb-2">
+            {homepageRecommendedIds.map((id, idx) => (
+              <span
+                key={id}
+                className="inline-flex items-center gap-1 px-2 py-1 rounded bg-gray-100 text-sm"
+              >
+                {getServiceTitle(id)}
+                <button
+                  type="button"
+                  onClick={() => setHomepageRecommendedIds((prev) => prev.filter((_, i) => i !== idx))}
+                  className="text-red-600 hover:text-red-800"
+                >
+                  <X size={14} />
+                </button>
+              </span>
+            ))}
+          </div>
+          <div className="flex items-center gap-2">
+            <select
+              multiple
+              value={[]}
+              onChange={(e) => {
+                const added = Array.from(e.target.selectedOptions, (o) => o.value).filter((id) => !homepageRecommendedIds.includes(id))
+                if (added.length) setHomepageRecommendedIds((prev) => [...prev, ...added])
+                e.target.selectedIndex = -1
+              }}
+              className="border border-gray-300 rounded px-3 py-2 text-sm min-w-[200px] h-24"
+            >
+              {services.filter((s) => s.status === 'active' && !homepageRecommendedIds.includes(s.id)).map((s) => (
+                <option key={s.id} value={s.id}>{s.title}</option>
+              ))}
+            </select>
+            <span className="text-xs text-gray-500">Select one or more to add</span>
+          </div>
+        </div>
+        <Button onClick={saveHomepageSections} disabled={homepageSaving} className="bg-[var(--color-primary)] hover:opacity-90">
+          {homepageSaving ? 'Saving…' : 'Save Trending & Recommended'}
+        </Button>
+      </div>
+    )
+  }
+
   const renderChatsTab = () => {
     const handleSendMessage = (orderId: string) => {
       if (!adminChatMessage.trim()) return
@@ -3199,10 +3433,13 @@ export default function AdminDashboard() {
                 <div className="flex items-start justify-between mb-2">
                   <h3 className="font-bold text-lg text-gray-900">{service.title}</h3>
                   <div className="flex gap-2">
-                    <button onClick={() => handleEdit(service)} className="text-indigo-600 hover:text-indigo-900">
+                    <button onClick={() => handleCloneService(service)} className="text-gray-600 hover:text-gray-900" title="Clone service">
+                      <Copy size={16} />
+                    </button>
+                    <button onClick={() => handleEdit(service)} className="text-indigo-600 hover:text-indigo-900" title="Edit">
                       <Edit size={16} />
                     </button>
-                    <button onClick={() => handleDelete(service.id)} className="text-red-600 hover:text-red-900">
+                    <button onClick={() => handleDelete(service.id)} className="text-red-600 hover:text-red-900" title="Delete">
                       <Trash2 size={16} />
                     </button>
                   </div>
@@ -3525,9 +3762,9 @@ export default function AdminDashboard() {
         <div className={`bg-white rounded-lg shadow-xl ${activeTab === 'services' ? 'max-w-6xl' : 'max-w-2xl'} w-full max-h-[90vh] overflow-y-auto`}>
           <div className="flex items-center justify-between p-4 md:p-6 border-b sticky top-0 bg-white z-10">
             <h2 className="text-lg md:text-xl font-bold">
-              {editingItem ? 'Edit' : 'Add New'} {activeTab === 'users' ? 'User' : activeTab === 'vendors' ? 'Vendor' : activeTab === 'categories' ? 'Category' : activeTab === 'subcategories' ? 'Sub-Category' : activeTab === 'services' ? 'Service' : activeTab === 'reviews' ? 'Review' : ''}
+              {activeTab === 'services' && isCloningService ? 'Clone Service' : editingItem ? 'Edit' : 'Add New'} {activeTab === 'users' ? 'User' : activeTab === 'vendors' ? 'Vendor' : activeTab === 'categories' ? 'Category' : activeTab === 'subcategories' ? 'Sub-Category' : activeTab === 'services' ? 'Service' : activeTab === 'reviews' ? 'Review' : ''}
             </h2>
-            <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+            <button onClick={() => { setIsModalOpen(false); if (activeTab === 'services') setIsCloningService(false) }} className="text-gray-400 hover:text-gray-600">
               <X size={24} />
             </button>
           </div>
@@ -4291,12 +4528,12 @@ export default function AdminDashboard() {
         </div>
 
         {/* Tabs */}
-        <div className="bg-white rounded-lg shadow-sm mb-6">
-          <div className="flex border-b border-gray-200 overflow-x-auto scrollbar-hide">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm mb-6">
+          <div className="flex border-b border-gray-200 dark:border-gray-600 overflow-x-auto scrollbar-hide">
             <button
               onClick={() => setActiveTab('leads')}
               className={`px-4 md:px-6 py-3 md:py-4 font-medium text-xs md:text-sm flex items-center gap-1 md:gap-2 border-b-2 transition-colors whitespace-nowrap ${
-                activeTab === 'leads' ? 'border-[var(--color-primary)] text-[var(--color-primary)]' : 'border-transparent text-gray-500 hover:text-gray-700'
+                activeTab === 'leads' ? 'border-[var(--color-primary)] text-[var(--color-primary)] font-bold dark:border-white dark:text-white' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
               }`}
             >
               <UserCircle size={18} className="md:w-5 md:h-5" />
@@ -4305,7 +4542,7 @@ export default function AdminDashboard() {
             <button
               onClick={() => setActiveTab('users')}
               className={`px-4 md:px-6 py-3 md:py-4 font-medium text-xs md:text-sm flex items-center gap-1 md:gap-2 border-b-2 transition-colors whitespace-nowrap ${
-                activeTab === 'users' ? 'border-[var(--color-primary)] text-[var(--color-primary)]' : 'border-transparent text-gray-500 hover:text-gray-700'
+                activeTab === 'users' ? 'border-[var(--color-primary)] text-[var(--color-primary)] font-bold dark:border-white dark:text-white' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
               }`}
             >
               <Users size={18} className="md:w-5 md:h-5" />
@@ -4314,7 +4551,7 @@ export default function AdminDashboard() {
             <button
               onClick={() => setActiveTab('vendors')}
               className={`px-4 md:px-6 py-3 md:py-4 font-medium text-xs md:text-sm flex items-center gap-1 md:gap-2 border-b-2 transition-colors whitespace-nowrap ${
-                activeTab === 'vendors' ? 'border-[var(--color-primary)] text-[var(--color-primary)]' : 'border-transparent text-gray-500 hover:text-gray-700'
+                activeTab === 'vendors' ? 'border-[var(--color-primary)] text-[var(--color-primary)] font-bold dark:border-white dark:text-white' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
               }`}
             >
               <Store size={18} className="md:w-5 md:h-5" />
@@ -4323,7 +4560,7 @@ export default function AdminDashboard() {
             <button
               onClick={() => setActiveTab('categories')}
               className={`px-4 md:px-6 py-3 md:py-4 font-medium text-xs md:text-sm flex items-center gap-1 md:gap-2 border-b-2 transition-colors whitespace-nowrap ${
-                activeTab === 'categories' ? 'border-[var(--color-primary)] text-[var(--color-primary)]' : 'border-transparent text-gray-500 hover:text-gray-700'
+                activeTab === 'categories' ? 'border-[var(--color-primary)] text-[var(--color-primary)] font-bold dark:border-white dark:text-white' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
               }`}
             >
               <FolderTree size={18} className="md:w-5 md:h-5" />
@@ -4332,7 +4569,7 @@ export default function AdminDashboard() {
             <button
               onClick={() => setActiveTab('subcategories')}
               className={`px-4 md:px-6 py-3 md:py-4 font-medium text-xs md:text-sm flex items-center gap-1 md:gap-2 border-b-2 transition-colors whitespace-nowrap ${
-                activeTab === 'subcategories' ? 'border-[var(--color-primary)] text-[var(--color-primary)]' : 'border-transparent text-gray-500 hover:text-gray-700'
+                activeTab === 'subcategories' ? 'border-[var(--color-primary)] text-[var(--color-primary)] font-bold dark:border-white dark:text-white' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
               }`}
             >
               <FolderOpen size={18} className="md:w-5 md:h-5" />
@@ -4341,16 +4578,25 @@ export default function AdminDashboard() {
             <button
               onClick={() => setActiveTab('services')}
               className={`px-4 md:px-6 py-3 md:py-4 font-medium text-xs md:text-sm flex items-center gap-1 md:gap-2 border-b-2 transition-colors whitespace-nowrap ${
-                activeTab === 'services' ? 'border-[var(--color-primary)] text-[var(--color-primary)]' : 'border-transparent text-gray-500 hover:text-gray-700'
+                activeTab === 'services' ? 'border-[var(--color-primary)] text-[var(--color-primary)] font-bold dark:border-white dark:text-white' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
               }`}
             >
               <Briefcase size={18} className="md:w-5 md:h-5" />
               <span className="hidden sm:inline">Services</span>
             </button>
             <button
+              onClick={() => setActiveTab('homepage')}
+              className={`px-4 md:px-6 py-3 md:py-4 font-medium text-xs md:text-sm flex items-center gap-1 md:gap-2 border-b-2 transition-colors whitespace-nowrap ${
+                activeTab === 'homepage' ? 'border-[var(--color-primary)] text-[var(--color-primary)] font-bold dark:border-white dark:text-white' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+              }`}
+            >
+              <Home size={18} className="md:w-5 md:h-5" />
+              <span className="hidden sm:inline">Homepage</span>
+            </button>
+            <button
               onClick={() => setActiveTab('service-requests')}
               className={`px-4 md:px-6 py-3 md:py-4 font-medium text-xs md:text-sm flex items-center gap-1 md:gap-2 border-b-2 transition-colors whitespace-nowrap ${
-                activeTab === 'service-requests' ? 'border-[var(--color-primary)] text-[var(--color-primary)]' : 'border-transparent text-gray-500 hover:text-gray-700'
+                activeTab === 'service-requests' ? 'border-[var(--color-primary)] text-[var(--color-primary)] font-bold dark:border-white dark:text-white' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
               }`}
             >
               <FileText size={18} className="md:w-5 md:h-5" />
@@ -4359,7 +4605,7 @@ export default function AdminDashboard() {
             <button
               onClick={() => setActiveTab('chats')}
               className={`px-4 md:px-6 py-3 md:py-4 font-medium text-xs md:text-sm flex items-center gap-1 md:gap-2 border-b-2 transition-colors whitespace-nowrap ${
-                activeTab === 'chats' ? 'border-[var(--color-primary)] text-[var(--color-primary)]' : 'border-transparent text-gray-500 hover:text-gray-700'
+                activeTab === 'chats' ? 'border-[var(--color-primary)] text-[var(--color-primary)] font-bold dark:border-white dark:text-white' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
               }`}
             >
               <MessageCircle size={18} className="md:w-5 md:h-5" />
@@ -4368,7 +4614,7 @@ export default function AdminDashboard() {
             <button
               onClick={() => setActiveTab('orders')}
               className={`px-4 md:px-6 py-3 md:py-4 font-medium text-xs md:text-sm flex items-center gap-1 md:gap-2 border-b-2 transition-colors whitespace-nowrap ${
-                activeTab === 'orders' ? 'border-[var(--color-primary)] text-[var(--color-primary)]' : 'border-transparent text-gray-500 hover:text-gray-700'
+                activeTab === 'orders' ? 'border-[var(--color-primary)] text-[var(--color-primary)] font-bold dark:border-white dark:text-white' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
               }`}
             >
               <ShoppingCart size={18} className="md:w-5 md:h-5" />
@@ -4377,7 +4623,7 @@ export default function AdminDashboard() {
             <button
               onClick={() => setActiveTab('reviews')}
               className={`px-4 md:px-6 py-3 md:py-4 font-medium text-xs md:text-sm flex items-center gap-1 md:gap-2 border-b-2 transition-colors whitespace-nowrap ${
-                activeTab === 'reviews' ? 'border-[var(--color-primary)] text-[var(--color-primary)]' : 'border-transparent text-gray-500 hover:text-gray-700'
+                activeTab === 'reviews' ? 'border-[var(--color-primary)] text-[var(--color-primary)] font-bold dark:border-white dark:text-white' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
               }`}
             >
               <Star size={18} className="md:w-5 md:h-5" />
@@ -4396,12 +4642,13 @@ export default function AdminDashboard() {
               {activeTab === 'categories' && 'Service Categories'}
               {activeTab === 'subcategories' && 'Sub-Categories'}
               {activeTab === 'services' && 'All Services'}
+              {activeTab === 'homepage' && 'Homepage – Trending & Recommended'}
               {activeTab === 'service-requests' && 'Vendor Service Requests'}
               {activeTab === 'chats' && 'Vendor-Client Chats'}
               {activeTab === 'orders' && 'All Orders'}
               {activeTab === 'reviews' && 'All Reviews'}
             </h2>
-            {(activeTab !== 'leads' && activeTab !== 'service-requests' && activeTab !== 'chats' && activeTab !== 'orders') && (
+            {(activeTab !== 'leads' && activeTab !== 'homepage' && activeTab !== 'service-requests' && activeTab !== 'chats' && activeTab !== 'orders') && (
               <Button onClick={handleAdd} className="bg-[var(--color-primary)] hover:opacity-90 w-full sm:w-auto">
                 <Plus size={16} className="mr-2" />
                 Add New
@@ -4415,6 +4662,7 @@ export default function AdminDashboard() {
           {activeTab === 'categories' && renderCategoriesTab()}
           {activeTab === 'subcategories' && renderSubCategoriesTab()}
           {activeTab === 'services' && renderServicesTab()}
+          {activeTab === 'homepage' && renderHomepageTab()}
           {activeTab === 'service-requests' && renderServiceRequestsTab()}
           {activeTab === 'chats' && renderChatsTab()}
           {activeTab === 'orders' && renderOrdersTab()}

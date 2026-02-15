@@ -74,13 +74,13 @@ export default function Navbar() {
   }, [showProfileDropdown, showMobileMenu])
 
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-50">
+    <header className="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 py-3 sm:py-4">
         {/* Mobile Layout */}
         <div className="flex md:hidden items-center justify-between gap-3">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-            <span className="text-lg sm:text-xl font-bold text-gray-900">SnapLegal</span>
+            <span className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">SnapLegal</span>
           </Link>
 
           {/* Search Bar - Mobile */}
@@ -120,17 +120,17 @@ export default function Navbar() {
           {/* Left Section - Logo and Location */}
           <div className="flex items-center gap-4">
             <Link href="/" className="flex items-center gap-2">
-              <span className="text-xl font-bold text-gray-900">SnapLegal</span>
+              <span className="text-xl font-bold text-gray-900 dark:text-white">SnapLegal</span>
             </Link>
             
-            <button className="flex items-center gap-1 text-gray-700 hover:text-[var(--color-primary)] transition-colors">
-              <MapPin className="w-4 h-4 text-[var(--color-primary)]" />
+            <button className="flex items-center gap-1 text-gray-700 hover:text-[var(--color-primary)] dark:text-white dark:hover:text-white transition-colors">
+              <MapPin className="w-4 h-4 text-[var(--color-primary)] dark:text-white" />
               <span className="text-sm font-medium">Gulshan</span>
             </button>
 
             <Button 
               variant="outline" 
-              className="border-[var(--color-primary)] text-[var(--color-primary)] hover:bg-[var(--color-neutral)] font-medium"
+              className="border-[var(--color-primary)] text-[var(--color-primary)] hover:bg-[var(--color-neutral)] dark:border-white dark:text-white dark:hover:bg-gray-700 font-medium"
               onClick={() => router.push('/all-services')}
             >
               All Services
@@ -277,7 +277,7 @@ export default function Navbar() {
       {showMobileMenu && (
         <div 
           ref={mobileMenuRef}
-          className="md:hidden border-t border-gray-200 bg-white shadow-lg"
+          className="md:hidden border-t border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-lg"
         >
           <div className="container mx-auto px-4 py-4 space-y-1">
             {/* Location */}
@@ -286,9 +286,9 @@ export default function Navbar() {
                 setShowMobileMenu(false)
                 // Add location change functionality
               }}
-              className="w-full flex items-center gap-3 px-4 py-3 text-left text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+              className="w-full flex items-center gap-3 px-4 py-3 text-left text-gray-700 hover:bg-gray-50 dark:text-white dark:hover:bg-gray-700 rounded-lg transition-colors"
             >
-              <MapPin className="w-5 h-5 text-[var(--color-primary)] flex-shrink-0" />
+              <MapPin className="w-5 h-5 text-[var(--color-primary)] dark:text-white flex-shrink-0" />
               <span className="font-medium">Gulshan</span>
             </button>
 
@@ -298,9 +298,9 @@ export default function Navbar() {
                 router.push('/all-services')
                 setShowMobileMenu(false)
               }}
-              className="w-full flex items-center gap-3 px-4 py-3 text-left text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+              className="w-full flex items-center gap-3 px-4 py-3 text-left text-gray-700 hover:bg-gray-50 dark:text-white dark:hover:bg-gray-700 rounded-lg transition-colors"
             >
-              <LayoutDashboard className="w-5 h-5 text-[var(--color-primary)] flex-shrink-0" />
+              <LayoutDashboard className="w-5 h-5 text-[var(--color-primary)] dark:text-white flex-shrink-0" />
               <span className="font-medium">All Services</span>
             </button>
 

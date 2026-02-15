@@ -1,21 +1,50 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useRef } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Search, MapPin, ChevronRight, Star, Clock, Scale, Building2, FileBadge, Car, Receipt, Grid2X2, LandPlot } from 'lucide-react'
+import { ChevronRight, Star, Clock, Scale, Building2, FileBadge, Car, Receipt, Grid2X2, LandPlot } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import Image from 'next/image'
 import Navbar from '@/components/navbar'
 import Footer from '@/components/footer'
 
+interface HomepageService {
+  id: string
+  title: string
+  slug: string
+  image: string
+  rating: string
+  description: string
+  deliveryTime: string
+  startingPrice: string
+}
 
 export default function HomePage() {
   const router = useRouter()
   const categoriesScrollRef = useRef<HTMLDivElement>(null)
-  
-  // Helper function to convert service title to slug
+  const [trendingRows, setTrendingRows] = useState<{ categoryTitle: string; services: HomepageService[] }[]>([])
+  const [recommended, setRecommended] = useState<HomepageService[]>([])
+  const [sectionsLoading, setSectionsLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchSections = async () => {
+      try {
+        const res = await fetch('/api/homepage-sections')
+        const data = await res.json()
+        if (data.success) {
+          setTrendingRows(data.trending || [])
+          setRecommended(data.recommended || [])
+        }
+      } catch (e) {
+        console.error('Fetch homepage sections failed', e)
+      } finally {
+        setSectionsLoading(false)
+      }
+    }
+    fetchSections()
+  }, [])
+
   const getServiceSlug = (title: string): string => {
     const slugMap: Record<string, string> = {
       'AC Servicings': 'ac-servicing',
@@ -30,9 +59,9 @@ export default function HomePage() {
     return slugMap[title] || title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
   }
 
-  const handleBookNow = (e: React.MouseEvent, serviceTitle: string) => {
-    e.stopPropagation() // Prevent card onClick from firing
-    const slug = getServiceSlug(serviceTitle)
+  const handleBookNow = (e: React.MouseEvent, service: HomepageService | { title: string; slug?: string }) => {
+    e.stopPropagation()
+    const slug = 'slug' in service && service.slug ? service.slug : getServiceSlug(service.title)
     router.push(`/services/${slug}`)
   }
 
@@ -89,68 +118,6 @@ const categories = [
       description: 'Expert gas stove and burner repair, installation, and maintenance services.',
       deliveryTime: '1-2 hours',
       startingPrice: '৳400',
-    },
-  ]
-
-  const recommended = [
-    {
-      title: 'AC Servicing',
-      image: '/plumbing.jpg',
-      rating: '4.9',
-      description: 'Professional AC servicing and maintenance to keep your air conditioner running efficiently.',
-      deliveryTime: '2-3 hours',
-      startingPrice: '৳800',
-    },
-    {
-      title: 'Home Cleaning',
-      image: '/moving_service.webp',
-      rating: '4.7',
-      description: 'Comprehensive home cleaning services for a spotless and fresh living space.',
-      deliveryTime: '3-5 hours',
-      startingPrice: '৳1,500',
-    },
-    {
-      title: 'DigiGO',
-      image: '/cleaning_service.jpg',
-      rating: '4.8',
-      description: 'Digital services and solutions for all your tech needs and requirements.',
-      deliveryTime: '1-2 hours',
-      startingPrice: '৳600',
-    },
-    {
-      title: 'On Demand Driver',
-      image: '/gas-cooker-repair.jpg',
-      rating: '4.6',
-      description: 'Professional on-demand driver services for your transportation needs.',
-      deliveryTime: '30 mins',
-      startingPrice: '৳300',
-    },
-  ]
-
-  const trending = [
-    {
-      title: 'AC Servicing',
-      image: '/plumbing.jpg',
-      rating: '4.9',
-      description: 'Top-rated AC servicing with expert technicians and quality service guarantee.',
-      deliveryTime: '2-3 hours',
-      startingPrice: '৳800',
-    },
-    {
-      title: 'Home Cleaning',
-      image: '/cleaning_service.jpg',
-      rating: '4.7',
-      description: 'Popular home cleaning service trusted by thousands of satisfied customers.',
-      deliveryTime: '3-5 hours',
-      startingPrice: '৳1,500',
-    },
-    {
-      title: 'Salon Care',
-      image: '/gas-cooker-repair.jpg',
-      rating: '4.8',
-      description: 'Premium salon and beauty care services at your doorstep.',
-      deliveryTime: '2-4 hours',
-      startingPrice: '৳1,200',
     },
   ]
 
@@ -237,6 +204,67 @@ const categories = [
         </div>
       </section>
 
+      {/* Trending – one row per category (fetched from admin) */}
+      {!sectionsLoading && trendingRows.length > 0 && (
+        <section className="container mx-auto px-4 py-12">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold">Trending</h2>
+            <button onClick={() => router.push('/all-services')} className="flex items-center gap-1 text-[var(--color-primary)] hover:underline font-medium">
+              View All <ChevronRight size={20} />
+            </button>
+          </div>
+          <div className="space-y-10">
+            {trendingRows.map((row) => (
+              <div key={row.categoryTitle}>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">{row.categoryTitle}</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                  {row.services.map((service) => (
+                    <div
+                      key={service.id}
+                      className="group cursor-pointer rounded-xl md:rounded-2xl overflow-hidden bg-white shadow-sm md:shadow-md hover:shadow-md md:hover:shadow-2xl transition-all duration-300 border border-gray-100"
+                      onClick={() => router.push(`/services/${service.slug}`)}
+                    >
+                      <div className="md:hidden">
+                        <div className="relative h-32 sm:h-40 overflow-hidden">
+                          <Image src={service.image || '/placeholder.svg'} alt={service.title} fill className="object-cover group-hover:scale-110 transition-transform duration-300" />
+                        </div>
+                        <div className="p-3 sm:p-4 text-center">
+                          <h3 className="text-sm sm:text-base font-medium text-gray-900 leading-tight">{service.title}</h3>
+                        </div>
+                      </div>
+                      <div className="hidden md:block">
+                        <div className="relative h-56 overflow-hidden p-3">
+                          <div className="relative h-full w-full rounded-xl overflow-hidden">
+                            <Image src={service.image || '/placeholder.svg'} alt={service.title} fill className="object-cover group-hover:scale-110 transition-transform duration-300" />
+                          </div>
+                        </div>
+                        <div className="p-5">
+                          <div className="flex items-start justify-between mb-2">
+                            <h3 className="font-bold text-lg text-gray-900 leading-tight">{service.title}</h3>
+                            <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg flex-shrink-0 ml-2">
+                              <Star size={16} className="fill-yellow-400 text-yellow-400" />
+                              <span className="font-semibold text-sm">{service.rating}</span>
+                            </div>
+                          </div>
+                          <p className="text-sm text-gray-600 mb-4 line-clamp-2">{service.description}</p>
+                          <div className="flex items-center justify-between mb-4">
+                            <span className="text-sm text-gray-600"><Clock size={16} className="inline mr-1" />{service.deliveryTime}</span>
+                            <span className="text-sm font-semibold text-gray-900">Starting at {service.startingPrice}</span>
+                          </div>
+                          <button onClick={(e) => handleBookNow(e, service)} className="w-full mt-6 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer">
+                            Book Now
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* EMI Banner */}
       {/* <section className="container mx-auto max-w-6xl px-4 py-8">
         <div className="bg-gradient-to-r from-orange-400 to-orange-300 rounded-lg p-6 flex items-center justify-between">
@@ -306,7 +334,7 @@ const categories = [
                     <span className="text-sm font-semibold text-gray-900">Starting at {service.startingPrice}</span>
                   </div>
                   <button 
-                    onClick={(e) => handleBookNow(e, service.title)}
+                    onClick={(e) => handleBookNow(e, { title: service.title })}
                     className="w-full mt-6 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
                   >
                     Book Now
@@ -318,147 +346,60 @@ const categories = [
         </div>
       </section>
 
-      {/* Recommended */}
-      <section className="container mx-auto px-4 py-12">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold">Recommended</h2>
-          <button className="flex items-center gap-1 text-[var(--color-primary)] hover:underline font-medium">
-            View All <ChevronRight size={20} />
-          </button>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          {recommended.map((service, index) => (
-            <div
-              key={index}
-              className="group cursor-pointer rounded-xl md:rounded-2xl overflow-hidden bg-white shadow-sm md:shadow-md hover:shadow-md md:hover:shadow-2xl transition-all duration-300 border border-gray-100"
-              onClick={() => router.push('/all-services')}
-            >
-              {/* Mobile: Simple design */}
-              <div className="md:hidden">
-                <div className="relative h-32 sm:h-40 overflow-hidden">
-                  <Image
-                    src={service.image || "/placeholder.svg"}
-                    alt={service.title}
-                    fill
-                    className="object-cover group-hover:scale-110 transition-transform duration-300"
-                  />
-                </div>
-                <div className="p-3 sm:p-4 text-center">
-                  <h3 className="text-sm sm:text-base font-medium text-gray-900 leading-tight">{service.title}</h3>
-                </div>
-              </div>
-              {/* Desktop: Full design */}
-              <div className="hidden md:block">
-                <div className="relative h-56 overflow-hidden p-3">
-                  <div className="relative h-full w-full rounded-xl overflow-hidden">
-                    <Image
-                      src={service.image || "/placeholder.svg"}
-                      alt={service.title}
-                      fill
-                      className="object-cover group-hover:scale-110 transition-transform duration-300"
-                    />
+      {/* Recommended (fetched from admin) */}
+      {!sectionsLoading && recommended.length > 0 && (
+        <section className="container mx-auto px-4 py-12">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold">Recommended</h2>
+            <button onClick={() => router.push('/all-services')} className="flex items-center gap-1 text-[var(--color-primary)] hover:underline font-medium">
+              View All <ChevronRight size={20} />
+            </button>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            {recommended.map((service) => (
+              <div
+                key={service.id}
+                className="group cursor-pointer rounded-xl md:rounded-2xl overflow-hidden bg-white shadow-sm md:shadow-md hover:shadow-md md:hover:shadow-2xl transition-all duration-300 border border-gray-100"
+                onClick={() => router.push(`/services/${service.slug}`)}
+              >
+                <div className="md:hidden">
+                  <div className="relative h-32 sm:h-40 overflow-hidden">
+                    <Image src={service.image || '/placeholder.svg'} alt={service.title} fill className="object-cover group-hover:scale-110 transition-transform duration-300" />
+                  </div>
+                  <div className="p-3 sm:p-4 text-center">
+                    <h3 className="text-sm sm:text-base font-medium text-gray-900 leading-tight">{service.title}</h3>
                   </div>
                 </div>
-                <div className="p-5">
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-bold text-lg text-gray-900 leading-tight">{service.title}</h3>
-                    <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg flex-shrink-0 ml-2">
-                      <Star size={16} className="fill-yellow-400 text-yellow-400" />
-                      <span className="font-semibold text-sm">{service.rating}</span>
+                <div className="hidden md:block">
+                  <div className="relative h-56 overflow-hidden p-3">
+                    <div className="relative h-full w-full rounded-xl overflow-hidden">
+                      <Image src={service.image || '/placeholder.svg'} alt={service.title} fill className="object-cover group-hover:scale-110 transition-transform duration-300" />
                     </div>
                   </div>
-                  <p className="text-sm text-gray-600 mb-4 line-clamp-2">{service.description}</p>
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-sm text-gray-600">
-                      <Clock size={16} className="inline mr-1" />
-                      {service.deliveryTime}
-                    </span>
-                    <span className="text-sm font-semibold text-gray-900">Starting at {service.startingPrice}</span>
-                  </div>
-                  <button 
-                    onClick={(e) => handleBookNow(e, service.title)}
-                    className="w-full mt-6 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
-                  >
-                    Book Now
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Trending */}
-      <section className="container mx-auto px-4 py-12">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold">Trending</h2>
-          <button className="flex items-center gap-1 text-[var(--color-primary)] hover:underline font-medium">
-            View All <ChevronRight size={20} />
-          </button>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-          {trending.map((service, index) => (
-            <div
-              key={index}
-              className="group cursor-pointer rounded-xl md:rounded-2xl overflow-hidden bg-white shadow-sm md:shadow-md hover:shadow-md md:hover:shadow-2xl transition-all duration-300 border border-gray-100"
-              onClick={() => router.push('/all-services')}
-            >
-              {/* Mobile: Simple design */}
-              <div className="md:hidden">
-                <div className="relative h-32 sm:h-40 overflow-hidden">
-                  <Image
-                    src={service.image || "/placeholder.svg"}
-                    alt={service.title}
-                    fill
-                    className="object-cover group-hover:scale-110 transition-transform duration-300"
-                  />
-                </div>
-                <div className="p-3 sm:p-4 text-center">
-                  <h3 className="text-sm sm:text-base font-medium text-gray-900 leading-tight">{service.title}</h3>
-                </div>
-              </div>
-              {/* Desktop: Full design */}
-              <div className="hidden md:block">
-                <div className="relative h-56 overflow-hidden p-3">
-                  <div className="relative h-full w-full rounded-xl overflow-hidden">
-                    <Image
-                      src={service.image || "/placeholder.svg"}
-                      alt={service.title}
-                      fill
-                      className="object-cover group-hover:scale-110 transition-transform duration-300"
-                    />
-                  </div>
-                </div>
-                <div className="p-5">
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-bold text-lg text-gray-900 leading-tight">{service.title}</h3>
-                    <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg flex-shrink-0 ml-2">
-                      <Star size={16} className="fill-yellow-400 text-yellow-400" />
-                      <span className="font-semibold text-sm">{service.rating}</span>
+                  <div className="p-5">
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className="font-bold text-lg text-gray-900 leading-tight">{service.title}</h3>
+                      <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg flex-shrink-0 ml-2">
+                        <Star size={16} className="fill-yellow-400 text-yellow-400" />
+                        <span className="font-semibold text-sm">{service.rating}</span>
+                      </div>
                     </div>
+                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">{service.description}</p>
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-sm text-gray-600"><Clock size={16} className="inline mr-1" />{service.deliveryTime}</span>
+                      <span className="text-sm font-semibold text-gray-900">Starting at {service.startingPrice}</span>
+                    </div>
+                    <button onClick={(e) => handleBookNow(e, service)} className="w-full mt-6 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer">
+                      Book Now
+                    </button>
                   </div>
-                  <p className="text-sm text-gray-600 mb-4 line-clamp-2">{service.description}</p>
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-sm text-gray-600">
-                      <Clock size={16} className="inline mr-1" />
-                      {service.deliveryTime}
-                    </span>
-                    <span className="text-sm font-semibold text-gray-900">Starting at {service.startingPrice}</span>
-                  </div>
-                  <button 
-                    onClick={(e) => handleBookNow(e, service.title)}
-                    className="w-full mt-6 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
-                  >
-                    Book Now
-                  </button>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
+      )}
 
-      
       {/* Why Choose Us Section */}
       <section className="container mx-auto max-w-6xl  px-4 pt-6">
         <div className="bg-blue-50 rounded-lg px-8 py-12 ">
@@ -543,6 +484,37 @@ const categories = [
             <p className="text-gray-600 text-lg">5 Star Received</p>
           </div>
         </div> */}
+      </section>
+
+      {/* FAQ Section */}
+      <section id="faq" className="container mx-auto max-w-6xl px-4 py-12">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+            Frequently Asked Questions
+          </h2>
+          <p className="text-gray-600 max-w-xl mx-auto">
+            Quick answers about SnapLegal, booking, and support.
+          </p>
+        </div>
+        <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto mb-8">
+          <div className="bg-gray-50 rounded-lg p-6 text-left">
+            <h3 className="font-semibold text-gray-900 mb-2">What is SnapLegal?</h3>
+            <p className="text-gray-600 text-sm">
+              A one-stop platform for legal and related services—connect with verified consultants, transparent pricing, and quick delivery.
+            </p>
+          </div>
+          <div className="bg-gray-50 rounded-lg p-6 text-left">
+            <h3 className="font-semibold text-gray-900 mb-2">How do I book a service?</h3>
+            <p className="text-gray-600 text-sm">
+              Browse services, choose what you need, book or add to cart, pay securely (e.g. bKash), and we deliver.
+            </p>
+          </div>
+        </div>
+        <div className="text-center">
+          <Button asChild variant="outline" className="border-[var(--color-primary)] text-[var(--color-primary)] hover:bg-[var(--color-neutral)]">
+            <Link href="/faq">View all FAQs</Link>
+          </Button>
+        </div>
       </section>
 
        {/* CTA Section for Requesting Services */}

@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Star, Clock } from 'lucide-react'
 import Navbar from '@/components/navbar'
@@ -89,6 +89,7 @@ export default function AllServicesPage() {
   const [serviceCategories, setServiceCategories] = useState<ServiceCategory[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const categoriesNavRef = useRef<HTMLElement>(null)
 
   // Fetch data from backend
   useEffect(() => {
@@ -344,6 +345,23 @@ export default function AllServicesPage() {
     }
   }, [serviceCategories])
 
+  // Auto-scroll the categories sidebar so the active section link is visible
+  useEffect(() => {
+    if (!activeSection || !categoriesNavRef.current) return
+    const nav = categoriesNavRef.current
+    const activeLink = document.getElementById(`nav-${activeSection}`)
+    if (!activeLink || !nav.contains(activeLink)) return
+
+    const navRect = nav.getBoundingClientRect()
+    const linkRect = activeLink.getBoundingClientRect()
+
+    if (linkRect.top < navRect.top) {
+      nav.scrollTo({ top: nav.scrollTop + (linkRect.top - navRect.top), behavior: 'smooth' })
+    } else if (linkRect.bottom > navRect.bottom) {
+      nav.scrollTo({ top: nav.scrollTop + (linkRect.bottom - navRect.bottom), behavior: 'smooth' })
+    }
+  }, [activeSection])
+
   const handleSidebarClick = (e: React.MouseEvent<HTMLAnchorElement>, categoryId: string) => {
     e.preventDefault()
     const element = document.getElementById(categoryId)
@@ -404,12 +422,13 @@ export default function AllServicesPage() {
         <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
           {/* Sidebar */}
           <aside className="w-full lg:w-64 flex-shrink-0">
-            <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm lg:sticky lg:top-8">
-              <h3 className="font-semibold text-gray-900 mb-4 text-sm sm:text-base">Categories</h3>
-              <nav className="space-y-1">
+            <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm lg:sticky lg:top-8 lg:max-h-[calc(100vh-6rem)] lg:flex lg:flex-col">
+              <h3 className="font-semibold text-gray-900 mb-4 text-sm sm:text-base flex-shrink-0">Categories</h3>
+              <nav ref={categoriesNavRef} className="space-y-1 overflow-y-auto min-h-0 lg:max-h-[calc(100vh-12rem)] pr-1 -mr-1">
                 {serviceCategories.map((category) => (
                   <div key={category.id}>
                     <a
+                      id={`nav-${category.id}`}
                       href={`#${category.id}`}
                       onClick={(e) => handleSidebarClick(e, category.id)}
                       className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors text-sm sm:text-base ${
@@ -427,6 +446,7 @@ export default function AllServicesPage() {
                       <div className="ml-6 sm:ml-8 mt-1 space-y-1">
                         {category.subCategories.map((subCategory) => (
                           <a
+                            id={`nav-${subCategory.id}`}
                             key={subCategory.id}
                             href={`#${subCategory.id}`}
                             onClick={(e) => handleSidebarClick(e, subCategory.id)}

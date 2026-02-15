@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
 
     // Check if serial number already exists (if provided)
     if (serialNumber !== undefined && serialNumber !== null) {
-      const existingSerial = await prisma.category.findUnique({
+      const existingSerial = await prisma.category.findFirst({
         where: { serialNumber: Number(serialNumber) },
       })
 

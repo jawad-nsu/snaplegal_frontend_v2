@@ -57,7 +57,7 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/SnapLegal-pro" className="text-gray-600 hover:text-[var(--color-primary)] text-sm">
+                <Link href="/corporate-services" className="text-gray-600 hover:text-[var(--color-primary)] text-sm">
                   Corporate Services
                 </Link>
               </li>

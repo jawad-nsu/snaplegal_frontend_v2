@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,6 +5,262 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DIRECT_URL")
+}
+
+model User {
+  id                    String        @id @default(uuid())
+  name                  String?
+  email                 String?       @unique
+  emailVerified         DateTime?
+  phone                 String?       @unique
+  phoneVerified         DateTime?
+  password              String?
+  type                  UserType      @default(USER)
+  image                 String?
+  address               String?
+  district              String?
+  serviceCategories     String[]      @default([])
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+  status                UserStatus    @default(active)
+  accounts              Account[]
+  modifiedCategories    Category[]    @relation("CategoryLastModifiedBy")
+  assignedOrders        Order[]       @relation("AssignedOrders")
+  customerOrders        Order[]       @relation("CustomerOrders")
+  vendorOrders          Order[]       @relation("VendorOrders")
+  reviews               Review[]
+  modifiedServices      Service[]     @relation("ServiceLastModifiedBy")
+  sessions              Session[]
+  modifiedSubCategories SubCategory[] @relation("SubCategoryLastModifiedBy")
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(uuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+model Lead {
+  id                String         @id @default(uuid())
+  clientName        String
+  whatsapp          String?
+  mobile            String?
+  facebook          String?
+  email             String?
+  profession        String?
+  street            String?
+  city              String?
+  thana             String?
+  district          String?
+  country           String?        @default("Bangladesh")
+  postalCode        String?
+  desiredService    String?
+  initialDiscussion String?
+  stage             LeadStage      @default(New)
+  closedReason      ClosedReason?
+  closedReasonText  String?
+  leadSource        LeadSource
+  leadSubSource     LeadSubSource?
+  leadOwner         String
+  comment           String?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  @@map("leads")
+}
+
+model Category {
+  id               String            @id @default(uuid())
+  title            String            @unique
+  icon             String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  serialNumber     Int?
+  status           String            @default("active")
+  lastModifiedById String?
+  lastModifiedBy   User?             @relation("CategoryLastModifiedBy", fields: [lastModifiedById], references: [id])
+  homepageSections HomepageSection[]
+  services         Service[]         @relation("ServiceCategory")
+  subCategories    SubCategory[]
+
+  @@map("categories")
+}
+
+model SubCategory {
+  id               String    @id @default(uuid())
+  serialNumber     Int?
+  title            String
+  icon             String?
+  categoryId       String
+  status           String    @default("active")
+  lastModifiedById String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  services         Service[] @relation("ServiceSubCategory")
+  category         Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  lastModifiedBy   User?     @relation("SubCategoryLastModifiedBy", fields: [lastModifiedById], references: [id])
+
+  @@unique([title, categoryId])
+  @@map("sub_categories")
+}
+
+model Service {
+  id                       String       @id @default(uuid())
+  title                    String
+  slug                     String       @unique
+  image                    String?
+  rating                   String?      @default("0")
+  description              String?
+  deliveryTime             String?
+  startingPrice            String?
+  categoryId               String
+  subCategoryId            String?
+  status                   String       @default("active")
+  shortDescription         String?
+  detailedDescription      String?
+  providerAuthority        String?
+  requiredDocuments        String[]     @default([])
+  whatsIncluded            String?
+  whatsNotIncluded         String?
+  timeline                 String?
+  additionalNotes          String?
+  processFlow              String?
+  videoUrl                 String?
+  faqs                     Json?
+  consultantQualifications String?
+  packages                 Json?
+  coreFiling               String?
+  coreStamps               String?
+  coreCourtFee             String?
+  clientFiling             String?
+  clientStamps             String?
+  clientCourtFee           String?
+  clientConsultantFee      String?
+  lastModifiedById         String?
+  createdAt                DateTime     @default(now())
+  updatedAt                DateTime     @updatedAt
+  infoSource               String?
+  whyChooseConsultants     Json?
+  howWeSelectConsultants   Json?
+  communityDiscussions     Json?
+  orderItems               OrderItem[]
+  reviews                  Review[]
+  category                 Category     @relation("ServiceCategory", fields: [categoryId], references: [id], onDelete: Cascade)
+  lastModifiedBy           User?        @relation("ServiceLastModifiedBy", fields: [lastModifiedById], references: [id])
+  subCategory              SubCategory? @relation("ServiceSubCategory", fields: [subCategoryId], references: [id])
+
+  @@map("services")
+}
+
+model Order {
+  id             String        @id @default(uuid())
+  orderNumber    String        @unique
+  customerId     String
+  vendorId       String?
+  assignedToId   String?
+  status         OrderStatus   @default(Submitted)
+  paymentMethod  PaymentMethod
+  paymentStatus  PaymentStatus @default(Pending)
+  subtotal       Float
+  additionalCost Float         @default(0)
+  deliveryCharge Float         @default(0)
+  discount       Float         @default(0)
+  total          Float
+  scheduledDate  DateTime?
+  scheduledTime  String?
+  address        String?
+  notes          String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  items          OrderItem[]
+  assignedTo     User?         @relation("AssignedOrders", fields: [assignedToId], references: [id])
+  customer       User          @relation("CustomerOrders", fields: [customerId], references: [id], onDelete: Cascade)
+  vendor         User?         @relation("VendorOrders", fields: [vendorId], references: [id])
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id            String   @id @default(uuid())
+  orderId       String
+  serviceId     String?
+  serviceName   String
+  quantity      Int      @default(1)
+  price         Float
+  originalPrice Float?
+  details       String?
+  createdAt     DateTime @default(now())
+  order         Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  service       Service? @relation(fields: [serviceId], references: [id])
+
+  @@map("order_items")
+}
+
+model Review {
+  id           String   @id @default(uuid())
+  serviceId    String
+  userId       String?
+  orderId      String?
+  reviewType   String   @default("service")
+  rating       Int
+  comment      String?
+  reviewerName String
+  images       String[] @default([])
+  helpfulCount Int      @default(0)
+  isVerified   Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  service      Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  user         User?    @relation(fields: [userId], references: [id])
+
+  @@map("reviews")
+}
+
+model HomepageSection {
+  id         String    @id @default(uuid())
+  type       String
+  categoryId String?
+  serviceIds String[]  @default([])
+  sortOrder  Int       @default(0)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@map("homepage_sections")
 }
 
 enum UserType {
@@ -76,261 +329,4 @@ enum PaymentStatus {
   Paid
   Refunded
   Failed
-}
-
-model User {
-  id                    String        @id @default(uuid())
-  name                  String?
-  email                 String?       @unique
-  emailVerified         DateTime?
-  phone                 String?       @unique
-  phoneVerified         DateTime?
-  password              String?
-  type                  UserType      @default(USER)
-  status                UserStatus    @default(active)
-  image                 String?
-  address               String?
-  district              String?
-  serviceCategories     String[]      @default([])
-  createdAt             DateTime      @default(now())
-  updatedAt             DateTime      @updatedAt
-  accounts              Account[]
-  sessions              Session[]
-  modifiedCategories    Category[]    @relation("CategoryLastModifiedBy")
-  modifiedSubCategories SubCategory[] @relation("SubCategoryLastModifiedBy")
-  modifiedServices      Service[]     @relation("ServiceLastModifiedBy")
-  customerOrders        Order[]       @relation("CustomerOrders")
-  vendorOrders          Order[]       @relation("VendorOrders")
-  assignedOrders        Order[]       @relation("AssignedOrders")
-  reviews               Review[]
-
-  @@map("users")
-}
-
-model Account {
-  id                String  @id @default(uuid())
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String? @db.Text
-  session_state     String?
-  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([provider, providerAccountId])
-  @@map("accounts")
-}
-
-model Session {
-  id           String   @id @default(uuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("sessions")
-}
-
-model VerificationToken {
-  identifier String
-  token      String
-  expires    DateTime
-
-  @@unique([identifier, token])
-  @@map("verification_tokens")
-}
-
-model Lead {
-  id                String         @id @default(uuid())
-  clientName        String
-  whatsapp          String?
-  mobile            String?
-  facebook          String?
-  email             String?
-  profession        String?
-  street            String?
-  city              String?
-  thana             String?
-  district          String?
-  country           String?        @default("Bangladesh")
-  postalCode        String?
-  desiredService    String?
-  initialDiscussion String?
-  stage             LeadStage      @default(New)
-  closedReason      ClosedReason?
-  closedReasonText  String?
-  leadSource        LeadSource
-  leadSubSource     LeadSubSource?
-  leadOwner         String
-  comment           String?
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
-
-  @@map("leads")
-}
-
-model Category {
-  id               String        @id @default(uuid())
-  serialNumber     Int?          @unique
-  title            String        @unique
-  icon             String?
-  status           String        @default("active") // active, inactive
-  lastModifiedById String?
-  lastModifiedBy   User?         @relation("CategoryLastModifiedBy", fields: [lastModifiedById], references: [id])
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
-  subCategories    SubCategory[]
-  services         Service[]     @relation("ServiceCategory")
-
-  @@map("categories")
-}
-
-model SubCategory {
-  id               String    @id @default(uuid())
-  serialNumber     Int?      @unique
-  title            String
-  icon             String?
-  categoryId       String
-  category         Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  status           String    @default("active") // active, inactive
-  lastModifiedById String?
-  lastModifiedBy   User?     @relation("SubCategoryLastModifiedBy", fields: [lastModifiedById], references: [id])
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-  services         Service[] @relation("ServiceSubCategory")
-
-  @@unique([title, categoryId])
-  @@map("sub_categories")
-}
-
-model Service {
-  id            String       @id @default(uuid())
-  title         String
-  slug          String       @unique
-  image         String?
-  rating        String?      @default("0")
-  description   String?      @db.Text
-  deliveryTime  String?
-  startingPrice String?
-  categoryId    String
-  category      Category     @relation("ServiceCategory", fields: [categoryId], references: [id], onDelete: Cascade)
-  subCategoryId String?
-  subCategory   SubCategory? @relation("ServiceSubCategory", fields: [subCategoryId], references: [id], onDelete: SetNull)
-  status        String       @default("active") // active, inactive
-
-  // Overview fields
-  shortDescription    String?  @db.Text
-  detailedDescription String?  @db.Text // acts, laws, orders, rules, with years
-  providerAuthority   String? // court/council (who provides the service)
-  infoSource          String?  @db.Text // where the service information comes from (for Info Source section)
-  requiredDocuments   String[] @default([]) // needed from the client
-  whatsIncluded       String?  @db.Text // what will we do
-  whatsNotIncluded    String?  @db.Text // what must be done externally
-  timeline            String? // approximate
-  additionalNotes     String?  @db.Text // comments
-
-  // Learning and Discussion
-  processFlow           String? @db.Text
-  videoUrl              String? // TBA
-  communityDiscussions  Json?   // array of { topic, author, avatar, question, replies: [{ author, avatar, reply, time }], time }
-
-  // FAQ
-  faqs Json? // array of {question: string, answer: string}
-
-  // Consultants
-  consultantQualifications String? @db.Text
-  whyChooseConsultants      Json?   // array of {title: string, description: string}
-  howWeSelectConsultants   Json?   // array of {title: string, description: string}
-
-  // Price Packages
-  packages Json? // array of {name: string, price: string, features: string[], description?: string}
-
-  // Core cost breakdown (for snaplegal)
-  coreFiling   String?
-  coreStamps   String?
-  coreCourtFee String?
-
-  // Presented cost breakdown (for the client)
-  clientFiling        String?
-  clientStamps        String?
-  clientCourtFee      String?
-  clientConsultantFee String?
-
-  lastModifiedById String?
-  lastModifiedBy   User?       @relation("ServiceLastModifiedBy", fields: [lastModifiedById], references: [id])
-  createdAt        DateTime    @default(now())
-  updatedAt        DateTime    @updatedAt
-  orderItems       OrderItem[]
-  reviews          Review[]
-
-  @@map("services")
-}
-
-model Order {
-  id             String        @id @default(uuid())
-  orderNumber    String        @unique
-  customerId     String
-  customer       User          @relation("CustomerOrders", fields: [customerId], references: [id], onDelete: Cascade)
-  vendorId       String?
-  vendor         User?         @relation("VendorOrders", fields: [vendorId], references: [id], onDelete: SetNull)
-  assignedToId   String?
-  assignedTo     User?         @relation("AssignedOrders", fields: [assignedToId], references: [id], onDelete: SetNull)
-  status         OrderStatus   @default(Submitted)
-  paymentMethod  PaymentMethod
-  paymentStatus  PaymentStatus @default(Pending)
-  subtotal       Float
-  additionalCost Float         @default(0)
-  deliveryCharge Float         @default(0)
-  discount       Float         @default(0)
-  total          Float
-  scheduledDate  DateTime?
-  scheduledTime  String?
-  address        String?
-  notes          String?       @db.Text
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  items          OrderItem[]
-
-  @@map("orders")
-}
-
-model OrderItem {
-  id            String   @id @default(uuid())
-  orderId       String
-  order         Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  serviceId     String?
-  service       Service? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
-  serviceName   String
-  quantity      Int      @default(1)
-  price         Float
-  originalPrice Float?
-  details       String?  @db.Text
-  createdAt     DateTime @default(now())
-
-  @@map("order_items")
-}
-
-model Review {
-  id              String   @id @default(uuid())
-  serviceId       String
-  service         Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
-  userId          String?
-  user            User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
-  orderId         String?  // Link to order if available (verified purchase)
-  reviewType      String   @default("service") // "service" or "consultant"
-  rating          Int      // 1-5
-  comment         String?  @db.Text
-  reviewerName    String   // Name of reviewer (can be from user or custom)
-  images          String[] @default([]) // URLs
-  helpfulCount    Int      @default(0)
-  isVerified      Boolean  @default(false) // Verified purchase
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  @@map("reviews")
 }
