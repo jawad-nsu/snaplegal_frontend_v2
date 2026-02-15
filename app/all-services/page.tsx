@@ -2,9 +2,9 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useEffect, useRef, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { Star, Clock } from 'lucide-react'
+import { Suspense, useEffect, useRef, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { Star, Clock, ChevronDown } from 'lucide-react'
 import Navbar from '@/components/navbar'
 import Footer from '@/components/footer'
 
@@ -84,26 +84,39 @@ interface ServiceCategory {
 }
 
 
-export default function AllServicesPage() {
+function AllServicesContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const searchQuery = searchParams.get('search') || ''
+  const categoryParam = searchParams.get('category') || ''
+  const subcategoryParam = searchParams.get('subcategory') || ''
   const [activeSection, setActiveSection] = useState('')
   const [serviceCategories, setServiceCategories] = useState<ServiceCategory[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const categoriesNavRef = useRef<HTMLElement>(null)
+  const lastScrolledTargetRef = useRef<string | null>(null)
+  // First category expanded by default; others expand on hover/click or when their section is active
+  const [expandedCategoryIds, setExpandedCategoryIds] = useState<Set<string>>(new Set())
+  // "See more" floating hint on first load — hide after user scrolls or after delay
+  const [showSeeMoreHint, setShowSeeMoreHint] = useState(true)
 
-  // Fetch data from backend
+  // Fetch data from backend (services filtered by search when provided)
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true)
         setError(null)
 
+        const servicesUrl = searchQuery
+          ? `/api/services?search=${encodeURIComponent(searchQuery)}`
+          : '/api/services'
+
         // Fetch all data in parallel
         const [categoriesRes, subcategoriesRes, servicesRes] = await Promise.all([
           fetch('/api/categories'),
           fetch('/api/subcategories'),
-          fetch('/api/services'),
+          fetch(servicesUrl),
         ])
 
         if (!categoriesRes.ok || !subcategoriesRes.ok || !servicesRes.ok) {
@@ -214,6 +227,15 @@ export default function AllServicesPage() {
         })
 
         setServiceCategories(transformedCategories)
+        // Expand first category by default, or the category from URL if present
+        if (transformedCategories.length > 0) {
+          const categoryToExpand = categoryParam && transformedCategories.some((c) => c.id === categoryParam)
+            ? categoryParam
+            : subcategoryParam
+              ? (transformedCategories.find((c) => c.subCategories?.some((s) => s.id === subcategoryParam))?.id ?? transformedCategories[0].id)
+              : transformedCategories[0].id
+          setExpandedCategoryIds(new Set([categoryToExpand]))
+        }
       } catch (err) {
         console.error('Error fetching services:', err)
         setError(err instanceof Error ? err.message : 'Failed to load services')
@@ -223,7 +245,49 @@ export default function AllServicesPage() {
     }
 
     fetchData()
-  }, [])
+  }, [searchQuery])
+
+  // Hide "See more" hint after first scroll or after delay
+  useEffect(() => {
+    if (!showSeeMoreHint) return
+    const scrollThreshold = 120
+    const hideAfterMs = 6000
+    const onScroll = () => {
+      if (window.scrollY > scrollThreshold) setShowSeeMoreHint(false)
+    }
+    const timeout = setTimeout(() => setShowSeeMoreHint(false), hideAfterMs)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      clearTimeout(timeout)
+    }
+  }, [showSeeMoreHint])
+
+  // Scroll to category or subcategory section when opened via search (URL params)
+  useEffect(() => {
+    if (!categoryParam && !subcategoryParam) {
+      lastScrolledTargetRef.current = null
+      return
+    }
+    const targetId = subcategoryParam || categoryParam
+    if (serviceCategories.length === 0 || lastScrolledTargetRef.current === targetId) return
+
+    const exists = subcategoryParam
+      ? serviceCategories.some((c) => c.subCategories?.some((s) => s.id === subcategoryParam))
+      : serviceCategories.some((c) => c.id === categoryParam)
+    if (!exists) return
+
+    const scrollToTarget = () => {
+      const el = document.getElementById(targetId)
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        lastScrolledTargetRef.current = targetId
+      }
+    }
+
+    const t = setTimeout(scrollToTarget, 100)
+    return () => clearTimeout(t)
+  }, [serviceCategories, categoryParam, subcategoryParam])
 
   // Helper function to convert service title to slug
   const getServiceSlug = (title: string): string => {
@@ -346,6 +410,17 @@ export default function AllServicesPage() {
     }
   }, [serviceCategories])
 
+  // Keep parent category expanded when scroll highlights one of its subcategories
+  useEffect(() => {
+    if (!activeSection || serviceCategories.length === 0) return
+    const category = serviceCategories.find(
+      (c) => c.id === activeSection || c.subCategories?.some((s) => s.id === activeSection)
+    )
+    if (category && category.subCategories?.length) {
+      setExpandedCategoryIds((prev) => new Set(prev).add(category.id))
+    }
+  }, [activeSection, serviceCategories])
+
   // Auto-scroll the categories sidebar so the active section link is visible
   useEffect(() => {
     if (!activeSection || !categoriesNavRef.current) return
@@ -373,7 +448,7 @@ export default function AllServicesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-100">
         <Navbar />
         <main className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
           <div className="flex items-center justify-center min-h-[60vh]">
@@ -390,7 +465,7 @@ export default function AllServicesPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-100">
         <Navbar />
         <main className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
           <div className="flex items-center justify-center min-h-[60vh]">
@@ -411,60 +486,77 @@ export default function AllServicesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-100">
       {/* Navbar */}
       <Navbar />
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
-        {/* Page Title */}
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-8">All Services</h1>
+      <main className="container mx-auto px-4 sm:px-6 pt-2 sm:pt-4 pb-4 sm:pb-8">
+        {/* Page Title - commented out
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 sm:mb-4">All Services</h1>
+        */}
 
         <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
           {/* Sidebar */}
-          <aside className="w-full lg:w-64 flex-shrink-0">
+          <aside className="w-full lg:w-80 flex-shrink-0">
             <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm lg:sticky lg:top-8 lg:max-h-[calc(100vh-6rem)] lg:flex lg:flex-col">
               <h3 className="font-semibold text-gray-900 mb-4 text-sm sm:text-base flex-shrink-0">Categories</h3>
               <nav ref={categoriesNavRef} className="space-y-1 overflow-y-auto min-h-0 lg:max-h-[calc(100vh-12rem)] scrollbar-hide">
-                {serviceCategories.map((category) => (
-                  <div key={category.id}>
-                    <a
-                      id={`nav-${category.id}`}
-                      href={`#${category.id}`}
-                      onClick={(e) => handleSidebarClick(e, category.id)}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors text-sm sm:text-base ${
-                        activeSection === category.id && (!category.subCategories || !category.subCategories.some(sub => activeSection === sub.id))
-                          ? 'bg-[var(--color-neutral)] text-[var(--color-primary)] font-semibold'
-                          : category.subCategories && category.subCategories.some(sub => activeSection === sub.id)
-                          ? 'bg-[var(--color-neutral)] text-[var(--color-primary)] font-medium'
-                          : 'text-gray-700 hover:bg-[var(--color-neutral)] hover:text-[var(--color-primary)]'
-                      }`}
+                {serviceCategories.map((category) => {
+                  const hasSubs = category.subCategories && category.subCategories.length > 0
+                  const isExpanded = hasSubs && expandedCategoryIds.has(category.id)
+                  return (
+                    <div
+                      key={category.id}
+                      onMouseEnter={() => hasSubs && setExpandedCategoryIds((prev) => new Set(prev).add(category.id))}
                     >
-                      <span className="text-lg sm:text-xl">{category.icon}</span>
-                      <span>{category.title}</span>
-                    </a>
-                    {category.subCategories && (
-                      <div className="ml-6 sm:ml-8 mt-1 space-y-1">
-                        {category.subCategories.map((subCategory) => (
-                          <a
-                            id={`nav-${subCategory.id}`}
-                            key={subCategory.id}
-                            href={`#${subCategory.id}`}
-                            onClick={(e) => handleSidebarClick(e, subCategory.id)}
-                            className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors text-sm sm:text-base ${
-                              activeSection === subCategory.id
-                                ? 'bg-blue-100 text-blue-600 font-semibold'
-                                : 'text-gray-600 hover:bg-blue-50 hover:text-blue-600'
-                            }`}
-                          >
-                            {subCategory.icon && <span className="text-base sm:text-lg">{subCategory.icon}</span>}
-                            <span>{subCategory.title}</span>
-                          </a>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
+                      <a
+                        id={`nav-${category.id}`}
+                        href={`#${category.id}`}
+                        onClick={(e) => {
+                          if (hasSubs) setExpandedCategoryIds((prev) => new Set(prev).add(category.id))
+                          handleSidebarClick(e, category.id)
+                        }}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors text-sm sm:text-base ${
+                          activeSection === category.id && (!hasSubs || !category.subCategories!.some(sub => activeSection === sub.id))
+                            ? 'bg-[var(--color-neutral)] text-[var(--color-primary)] font-semibold'
+                            : hasSubs && category.subCategories!.some(sub => activeSection === sub.id)
+                            ? 'bg-[var(--color-neutral)] text-[var(--color-primary)] font-medium'
+                            : 'text-gray-700 hover:bg-[var(--color-neutral)] hover:text-[var(--color-primary)]'
+                        }`}
+                      >
+                        <span className="text-lg sm:text-xl">{category.icon}</span>
+                        <span className="flex-1 min-w-0">{category.title}</span>
+                        {hasSubs && (
+                          <ChevronDown
+                            className={`flex-shrink-0 w-4 h-4 text-gray-500 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+                            aria-hidden
+                          />
+                        )}
+                      </a>
+                      {hasSubs && isExpanded && (
+                        <div className="ml-6 sm:ml-8 mt-1 space-y-1">
+                          {category.subCategories!.map((subCategory) => (
+                            <a
+                              id={`nav-${subCategory.id}`}
+                              key={subCategory.id}
+                              href={`#${subCategory.id}`}
+                              onClick={(e) => handleSidebarClick(e, subCategory.id)}
+                              className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors text-sm sm:text-base ${
+                                activeSection === subCategory.id
+                                  ? 'bg-blue-100 text-blue-600 font-semibold'
+                                  : 'text-gray-600 hover:bg-blue-50 hover:text-blue-600'
+                              }`}
+                            >
+                              {subCategory.icon && <span className="text-base sm:text-lg">{subCategory.icon}</span>}
+                              <span>{subCategory.title}</span>
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
               </nav>
             </div>
           </aside>
@@ -472,106 +564,47 @@ export default function AllServicesPage() {
           {/* Service Categories */}
           <div className="flex-1 space-y-8 sm:space-y-12">
             {serviceCategories.map((category) => (
-              <div key={category.id} className="space-y-8 sm:space-y-12">
-                <section id={category.id} className="bg-white rounded-lg p-4 sm:p-6 shadow-sm">
-                  {/* Category Title */}
-                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">
-                    {category.title}
-                  </h2>
-
-                  {/* Featured Services Grid */}
+              <div key={category.id} id={category.id} className="space-y-4 sm:space-y-6">
+                {/* Category box (commented out)
+                <section id={category.id} className="bg-white rounded-xl px-4 sm:px-6 py-5 sm:py-7 shadow-sm border border-gray-100/80 overflow-hidden">
+                  <div className="flex items-center gap-3 sm:gap-4 mb-5 sm:mb-6 pb-4 border-b border-gray-100">
+                    <span className="flex h-11 w-11 sm:h-12 sm:w-12 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--color-neutral)] text-2xl sm:text-3xl ring-1 ring-gray-100">
+                      {category.icon}
+                    </span>
+                    <div>
+                      <span className="text-xs font-medium uppercase tracking-wider text-gray-500">Category</span>
+                      <h2 className="text-xl sm:text-2xl font-bold text-gray-900 leading-tight mt-0.5">
+                        {category.title}
+                      </h2>
+                    </div>
+                  </div>
                   {category.featured && category.featured.length > 0 && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
-                      {category.featured.map((service, index) => {
-                      const serviceWithDetails = service as typeof service & {
-                        rating?: string
-                        description?: string
-                        deliveryTime?: string
-                        startingPrice?: string
-                      }
-
-                      return (
-                        <div
-                          key={index}
-                          className="group cursor-pointer rounded-2xl overflow-hidden bg-white shadow-md hover:shadow-2xl transition-all duration-300 border border-gray-100"
-                          onClick={() => router.push(`/services/${service.slug}`)}
-                        >
-                          <div className="relative h-44 sm:h-56 overflow-hidden p-1.5 sm:p-3">
-                            <div className="relative h-full w-full rounded-xl overflow-hidden">
-                              <Image
-                                src={service.image || "/placeholder.svg"}
-                                alt={service.title}
-                                fill
-                                className="object-cover group-hover:scale-110 transition-transform duration-300"
-                              />
-                            </div>
-                          </div>
-                          <div className="p-3 sm:p-5">
-                            <div className="flex items-start justify-between mb-1.5 sm:mb-2 gap-1.5 sm:gap-2">
-                              <h3 className="font-bold text-base sm:text-lg text-gray-900 leading-tight flex-1">{service.title}</h3>
-                              {serviceWithDetails.rating && (
-                                <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg flex-shrink-0">
-                                  <Star size={14} className="fill-yellow-400 text-yellow-400 sm:w-4 sm:h-4" />
-                                  <span className="font-semibold text-xs sm:text-sm">{serviceWithDetails.rating}</span>
-                                </div>
-                              )}
-                            </div>
-                            {serviceWithDetails.description && (
-                              <p className="text-xs sm:text-sm text-gray-600 mb-2 sm:mb-4 line-clamp-2">{serviceWithDetails.description}</p>
-                            )}
-                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 sm:gap-0 mb-2.5 sm:mb-4">
-                              {serviceWithDetails.deliveryTime && (
-                                <span className="text-xs sm:text-sm text-gray-600">
-                                  <Clock size={14} className="inline mr-1 sm:w-4 sm:h-4" />
-                                  {serviceWithDetails.deliveryTime}
-                                </span>
-                              )}
-                              {serviceWithDetails.startingPrice && (
-                                <span className="text-xs sm:text-sm font-semibold text-gray-900">Starting at {serviceWithDetails.startingPrice}</span>
-                              )}
-                            </div>
-                            <button 
-                              onClick={(e) => handleBookNow(e, service.title)}
-                              className="w-full mt-3 sm:mt-6 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 sm:py-2.5 text-sm sm:text-base rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
-                            >
-                              Book Now
-                            </button>
-                          </div>
-                        </div>
-                      )
-                    })}
+                      {category.featured.map((service, index) => { ... })}
                     </div>
                   )}
-
-                  {/* All Services List */}
                   {category.services && category.services.length > 0 && (
-                    <div>
-                      <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
-                        All {category.title.toLowerCase()} services
-                      </h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                        {category.services.map((service, index) => (
-                        <Link
-                          key={index}
-                          href={`/services/${service.slug}`}
-                          className="flex items-center gap-2 text-left text-sm sm:text-base text-gray-700 hover:text-[var(--color-primary)] transition-colors"
-                        >
-                          <span className="w-2 h-2 rounded-full bg-[var(--color-primary)] flex-shrink-0" />
-                          <span>{service.title}</span>
-                        </Link>
-                      ))}
-                      </div>
-                    </div>
+                    <div> ... </div>
                   )}
                 </section>
+                */}
 
                 {/* Sub-Categories */}
                 {category.subCategories && category.subCategories.map((subCategory) => (
-                  <section key={subCategory.id} id={subCategory.id} className="bg-white rounded-lg p-4 sm:p-6 shadow-sm">
-                    {/* Sub-Category Title */}
-                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">
-                      {subCategory.title}
-                    </h2>
+                  <section key={subCategory.id} id={subCategory.id} className="bg-white rounded-xl px-4 sm:px-6 py-5 sm:py-6 shadow-sm border border-gray-200/80 overflow-hidden">
+                    {/* Subcategory header: icon + Category > Subcategory */}
+                    <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 pb-4 border-b border-gray-200/80">
+                      <span className="flex h-10 w-10 sm:h-11 sm:w-11 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--color-neutral)] text-xl sm:text-2xl shadow-sm ring-1 ring-black/5">
+                        {subCategory.icon || category.icon}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <h2 className="text-lg sm:text-xl font-bold text-gray-900 leading-tight">
+                          <span className="font-medium text-gray-500">{category.title}</span>
+                          <span className="mx-1 text-gray-300 font-normal" aria-hidden="true">&gt;</span>
+                          <span className="text-gray-900">{subCategory.title}</span>
+                        </h2>
+                      </div>
+                    </div>
 
                     {/* Featured Services Grid */}
                     {subCategory.featured && subCategory.featured.length > 0 && (
@@ -587,7 +620,7 @@ export default function AllServicesPage() {
                           return (
                             <div
                               key={index}
-                              className="group cursor-pointer rounded-2xl overflow-hidden bg-white shadow-md hover:shadow-2xl transition-all duration-300 border border-gray-100"
+                              className="group cursor-pointer rounded-2xl overflow-hidden bg-gray-50 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200/70"
                               onClick={() => router.push(`/services/${service.slug}`)}
                             >
                               <div className="relative h-44 sm:h-56 overflow-hidden p-1.5 sm:p-3">
@@ -600,8 +633,8 @@ export default function AllServicesPage() {
                                   />
                                 </div>
                               </div>
-                              <div className="p-3 sm:p-5">
-                                <div className="flex items-start justify-between mb-1.5 sm:mb-2 gap-1.5 sm:gap-2">
+                              <div className="px-3 sm:px-5 pt-2 sm:pt-3 pb-3 sm:pb-5">
+                                <div className="flex items-start justify-between mb-1 sm:mb-1.5 gap-1.5 sm:gap-2">
                                   <h3 className="font-bold text-base sm:text-lg text-gray-900 leading-tight flex-1">{service.title}</h3>
                                   {serviceWithDetails.rating && (
                                     <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg flex-shrink-0">
@@ -611,9 +644,9 @@ export default function AllServicesPage() {
                                   )}
                                 </div>
                                 {serviceWithDetails.description && (
-                                  <p className="text-xs sm:text-sm text-gray-600 mb-2 sm:mb-4 line-clamp-2">{serviceWithDetails.description}</p>
+                                  <p className="text-xs sm:text-sm text-gray-600 mb-2 sm:mb-3 line-clamp-2">{serviceWithDetails.description}</p>
                                 )}
-                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 sm:gap-0 mb-2.5 sm:mb-4">
+                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 sm:gap-0 mb-1.5 sm:mb-2">
                                   {serviceWithDetails.deliveryTime && (
                                     <span className="text-xs sm:text-sm text-gray-600">
                                       <Clock size={14} className="inline mr-1 sm:w-4 sm:h-4" />
@@ -626,7 +659,7 @@ export default function AllServicesPage() {
                                 </div>
                                 <button 
                                   onClick={(e) => handleBookNow(e, service.title)}
-                                  className="w-full mt-3 sm:mt-6 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 sm:py-2.5 text-sm sm:text-base rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
+                                  className="w-full mt-2 sm:mt-3 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 sm:py-2.5 text-sm sm:text-base rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
                                 >
                                   Book Now
                                 </button>
@@ -637,20 +670,20 @@ export default function AllServicesPage() {
                       </div>
                     )}
 
-                    {/* All Services List */}
+                    {/* Other Services List */}
                     {subCategory.services && subCategory.services.length > 0 && (
                       <div>
                         <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
-                          All {subCategory.title.toLowerCase()} services
+                          More {subCategory.title.toLowerCase()} services
                         </h3>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                           {subCategory.services.map((service, index) => (
                             <Link
                               key={index}
                               href={`/services/${service.slug}`}
-                              className="flex items-center gap-2 text-left text-sm sm:text-base text-gray-700 hover:text-blue-600 transition-colors"
+                              className="flex items-center gap-2 text-left font-semibold text-base sm:text-lg text-gray-900 leading-tight hover:text-[var(--color-primary)] transition-colors"
                             >
-                              <span className="w-2 h-2 rounded-full bg-blue-600 flex-shrink-0" />
+                              <span className="w-2 h-2 rounded-full bg-[var(--color-primary)] flex-shrink-0" />
                               <span>{service.title}</span>
                             </Link>
                           ))}
@@ -665,8 +698,51 @@ export default function AllServicesPage() {
         </div>
       </main>
 
+      {/* First-load "See more" floating hint — encourages scrolling */}
+      <div
+        role="status"
+        aria-live="polite"
+        className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-40 transition-all duration-500 ease-out ${
+          showSeeMoreHint ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
+        }`}
+      >
+        <div
+          className={`flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl bg-[var(--color-primary)] text-white font-semibold text-sm sm:text-base shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:shadow-[0_6px_24px_rgba(0,0,0,0.2)] hover:opacity-95 transition-all duration-200 select-none ${
+            showSeeMoreHint ? 'animate-see-more-float' : ''
+          }`}
+        >
+          <span>See more</span>
+          <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-white/90" aria-hidden />
+        </div>
+      </div>
+
       {/* Footer */}
       <Footer />
     </div>
+  )
+}
+
+function AllServicesPageFallback() {
+  return (
+    <div className="min-h-screen bg-gray-100">
+      <Navbar />
+      <main className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-primary)] mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading services...</p>
+          </div>
+        </div>
+      </main>
+      <Footer />
+    </div>
+  )
+}
+
+export default function AllServicesPage() {
+  return (
+    <Suspense fallback={<AllServicesPageFallback />}>
+      <AllServicesContent />
+    </Suspense>
   )
 }

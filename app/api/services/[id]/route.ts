@@ -61,6 +61,7 @@ export async function GET(
         providerAuthority: service.providerAuthority || '',
         infoSource: service.infoSource || '',
         requiredDocuments: service.requiredDocuments || [],
+        keywords: service.keywords || [],
         whatsIncluded: service.whatsIncluded || '',
         whatsNotIncluded: service.whatsNotIncluded || '',
         timeline: service.timeline || '',
@@ -122,7 +123,7 @@ export async function PUT(
     const body = await request.json()
     const { 
       title, slug, serialNumber, image, rating, description, deliveryTime, startingPrice, categoryId, subCategoryId, status,
-      shortDescription, detailedDescription, providerAuthority, infoSource, requiredDocuments, whatsIncluded, whatsNotIncluded,
+      shortDescription, detailedDescription, providerAuthority, infoSource, requiredDocuments, keywords, whatsIncluded, whatsNotIncluded,
       timeline, additionalNotes, processFlow, videoUrl, communityDiscussions, faqs, consultantQualifications, whyChooseConsultants, howWeSelectConsultants, packages,
       coreFiling, coreStamps, coreCourtFee, clientFiling, clientStamps, clientCourtFee, clientConsultantFee
     } = body
@@ -234,6 +235,7 @@ export async function PUT(
         providerAuthority: providerAuthority !== undefined ? (providerAuthority && providerAuthority.trim() ? providerAuthority.trim() : null) : existingService.providerAuthority,
         infoSource: infoSource !== undefined ? (infoSource && infoSource.trim() ? infoSource.trim() : null) : existingService.infoSource,
         requiredDocuments: requiredDocuments !== undefined ? (Array.isArray(requiredDocuments) ? requiredDocuments : []) : existingService.requiredDocuments,
+        keywords: keywords !== undefined ? (Array.isArray(keywords) ? keywords.filter((k: string) => typeof k === 'string' && k.trim()).map((k: string) => k.trim()) : []) : existingService.keywords,
         whatsIncluded: whatsIncluded !== undefined ? (whatsIncluded && whatsIncluded.trim() ? whatsIncluded.trim() : null) : existingService.whatsIncluded,
         whatsNotIncluded: whatsNotIncluded !== undefined ? (whatsNotIncluded && whatsNotIncluded.trim() ? whatsNotIncluded.trim() : null) : existingService.whatsNotIncluded,
         timeline: timeline !== undefined ? (timeline && timeline.trim() ? timeline.trim() : null) : existingService.timeline,
@@ -305,6 +307,7 @@ export async function PUT(
         providerAuthority: service.providerAuthority || '',
         infoSource: service.infoSource || '',
         requiredDocuments: service.requiredDocuments || [],
+        keywords: service.keywords || [],
         whatsIncluded: service.whatsIncluded || '',
         whatsNotIncluded: service.whatsNotIncluded || '',
         timeline: service.timeline || '',

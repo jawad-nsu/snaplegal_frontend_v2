@@ -115,6 +115,7 @@ interface Service {
   providerAuthority?: string
   infoSource?: string
   requiredDocuments?: string[]
+  keywords?: string[]
   whatsIncluded?: string
   whatsNotIncluded?: string
   timeline?: string
@@ -1001,7 +1002,7 @@ export default function AdminDashboard() {
   const [serviceForm, setServiceForm] = useState({
     title: '', slug: '', serialNumber: '', image: '', rating: '', description: '', deliveryTime: '', startingPrice: '', categoryId: '', subCategoryId: '',
     // Overview fields
-    shortDescription: '', detailedDescription: '', providerAuthority: '', infoSource: '', requiredDocuments: [] as string[], whatsIncluded: '', whatsNotIncluded: '',
+    shortDescription: '', detailedDescription: '', providerAuthority: '', infoSource: '', requiredDocuments: [] as string[], keywords: [] as string[], whatsIncluded: '', whatsNotIncluded: '',
     timeline: '', additionalNotes: '',
     // Learning and Discussion
     processFlow: '', videoUrl: '',
@@ -1036,7 +1037,7 @@ export default function AdminDashboard() {
       setIsCloningService(false)
       setServiceForm({
         title: '', slug: '', serialNumber: '', image: '', rating: '', description: '', deliveryTime: '', startingPrice: '', categoryId: '', subCategoryId: '',
-        shortDescription: '', detailedDescription: '', providerAuthority: '', infoSource: '', requiredDocuments: [], whatsIncluded: '', whatsNotIncluded: '',
+        shortDescription: '', detailedDescription: '', providerAuthority: '', infoSource: '', requiredDocuments: [], keywords: [], whatsIncluded: '', whatsNotIncluded: '',
         timeline: '', additionalNotes: '', processFlow: '', videoUrl: '', communityDiscussions: [], faqs: [], consultantQualifications: '', whyChooseConsultants: [], howWeSelectConsultants: [], packages: [],
         coreFiling: '', coreStamps: '', coreCourtFee: '', clientFiling: '', clientStamps: '', clientCourtFee: '', clientConsultantFee: ''
       })
@@ -1087,7 +1088,7 @@ export default function AdminDashboard() {
         title: serviceItem.title, slug: serviceItem.slug, serialNumber: serviceItem.serialNumber != null ? String(serviceItem.serialNumber) : '', image: serviceItem.image, rating: serviceItem.rating, description: serviceItem.description,
         deliveryTime: serviceItem.deliveryTime, startingPrice: serviceItem.startingPrice, categoryId: serviceItem.categoryId, subCategoryId: serviceItem.subCategoryId || '',
         shortDescription: serviceItem.shortDescription || '', detailedDescription: serviceItem.detailedDescription || '', providerAuthority: serviceItem.providerAuthority || '', infoSource: serviceItem.infoSource || '',
-        requiredDocuments: serviceItem.requiredDocuments || [], whatsIncluded: serviceItem.whatsIncluded || '', whatsNotIncluded: serviceItem.whatsNotIncluded || '',
+        requiredDocuments: serviceItem.requiredDocuments || [], keywords: serviceItem.keywords || [], whatsIncluded: serviceItem.whatsIncluded || '', whatsNotIncluded: serviceItem.whatsNotIncluded || '',
         timeline: serviceItem.timeline || '', additionalNotes: serviceItem.additionalNotes || '', processFlow: serviceItem.processFlow || '', videoUrl: serviceItem.videoUrl || '',
         communityDiscussions: serviceItem.communityDiscussions ?? [], faqs: serviceItem.faqs || [], consultantQualifications: serviceItem.consultantQualifications || '', whyChooseConsultants: serviceItem.whyChooseConsultants ?? [], howWeSelectConsultants: serviceItem.howWeSelectConsultants ?? [], packages: serviceItem.packages || [],
         coreFiling: serviceItem.coreFiling || '', coreStamps: serviceItem.coreStamps || '', coreCourtFee: serviceItem.coreCourtFee || '',
@@ -1132,6 +1133,7 @@ export default function AdminDashboard() {
       providerAuthority: service.providerAuthority || '',
       infoSource: service.infoSource || '',
       requiredDocuments: [...(service.requiredDocuments || [])],
+      keywords: [...(service.keywords || [])],
       whatsIncluded: service.whatsIncluded || '',
       whatsNotIncluded: service.whatsNotIncluded || '',
       timeline: service.timeline || '',
@@ -1452,7 +1454,8 @@ export default function AdminDashboard() {
             detailedDescription: serviceForm.detailedDescription,
             providerAuthority: serviceForm.providerAuthority,
             infoSource: serviceForm.infoSource,
-            requiredDocuments: serviceForm.requiredDocuments,
+            requiredDocuments: serviceForm.requiredDocuments.filter((doc: string) => doc.trim()),
+            keywords: serviceForm.keywords.filter((k: string) => k.trim()),
             whatsIncluded: serviceForm.whatsIncluded,
             whatsNotIncluded: serviceForm.whatsNotIncluded,
             timeline: serviceForm.timeline,
@@ -1468,7 +1471,7 @@ export default function AdminDashboard() {
             whyChooseConsultants: serviceForm.whyChooseConsultants,
             howWeSelectConsultants: serviceForm.howWeSelectConsultants,
             // Price Packages
-            packages: serviceForm.packages,
+            packages: serviceForm.packages.map(p => ({ ...p, features: p.features.filter((f: string) => f.trim()) })),
             // Core cost breakdown
             coreFiling: serviceForm.coreFiling,
             coreStamps: serviceForm.coreStamps,
@@ -2936,7 +2939,7 @@ export default function AdminDashboard() {
               </Button>
               <Button
                 onClick={handleConfirmAssignment}
-                className="bg-[var(--color-primary)] hover:opacity-90 w-full sm:w-auto"
+                className="bg-[var(--color-primary)] hover:opacity-90 text-white w-full sm:w-auto"
                 disabled={!selectedVendorId}
               >
                 <CheckCircle size={16} className="mr-2" />
@@ -3560,7 +3563,7 @@ export default function AdminDashboard() {
                   />
                   <Button
                     onClick={() => handleSendMessage(selectedChat.orderId)}
-                    className="bg-[var(--color-primary)] hover:opacity-90"
+                    className="bg-[var(--color-primary)] hover:opacity-90 text-white"
                     disabled={!adminChatMessage.trim()}
                   >
                     <Send size={16} />
@@ -3917,7 +3920,7 @@ export default function AdminDashboard() {
             </Button>
             <Button 
               onClick={handleSaveLead} 
-              className="bg-[var(--color-primary)] hover:opacity-90 w-full sm:w-auto"
+              className="bg-[var(--color-primary)] hover:opacity-90 text-white w-full sm:w-auto"
             >
               <Save size={16} className="mr-2" />
               Save Lead
@@ -4297,12 +4300,23 @@ export default function AdminDashboard() {
                       <label className="block text-sm font-medium text-gray-700 mb-1">Required Documents (One per line)</label>
                       <textarea 
                         value={serviceForm.requiredDocuments.join('\n')} 
-                        onChange={(e) => setServiceForm({ ...serviceForm, requiredDocuments: e.target.value.split('\n').filter(doc => doc.trim()) })} 
+                        onChange={(e) => setServiceForm({ ...serviceForm, requiredDocuments: e.target.value.split('\n') })} 
                         className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea" 
                         rows={4}
                         placeholder="Document 1&#10;Document 2&#10;Document 3"
                       />
                       <p className="text-xs text-gray-500 mt-1">Enter each document on a new line</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Keywords (One per line — used for navbar search)</label>
+                      <textarea 
+                        value={serviceForm.keywords.join('\n')} 
+                        onChange={(e) => setServiceForm({ ...serviceForm, keywords: e.target.value.split('\n') })} 
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea" 
+                        rows={3}
+                        placeholder="legal&#10;business&#10;tax&#10;registration"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">Add keywords so users can find this service via the navbar search</p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">What&apos;s Included?</label>
@@ -4607,7 +4621,7 @@ export default function AdminDashboard() {
                             value={pkg.features.join('\n')}
                             onChange={(e) => {
                               const newPackages = [...serviceForm.packages]
-                              newPackages[index].features = e.target.value.split('\n').filter(f => f.trim())
+                              newPackages[index].features = e.target.value.split('\n')
                               setServiceForm({ ...serviceForm, packages: newPackages })
                             }}
                             className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea"
@@ -4686,7 +4700,7 @@ export default function AdminDashboard() {
           </div>
           <div className="flex flex-col sm:flex-row justify-end gap-3 p-4 md:p-6 border-t sticky bottom-0 bg-white">
             <Button variant="outline" onClick={() => setIsModalOpen(false)} className="w-full sm:w-auto">Cancel</Button>
-            <Button onClick={handleSave} className="bg-[var(--color-primary)] hover:opacity-90 w-full sm:w-auto">
+            <Button onClick={handleSave} className="bg-[var(--color-primary)] hover:opacity-90 text-white w-full sm:w-auto">
               <Save size={16} className="mr-2" />
               Save
             </Button>
@@ -4827,7 +4841,7 @@ export default function AdminDashboard() {
               {activeTab === 'reviews' && 'All Reviews'}
             </h2>
             {(activeTab !== 'leads' && activeTab !== 'homepage' && activeTab !== 'service-requests' && activeTab !== 'chats' && activeTab !== 'orders') && (
-              <Button onClick={handleAdd} className="bg-[var(--color-primary)] hover:opacity-90 w-full sm:w-auto">
+              <Button onClick={handleAdd} className="bg-[var(--color-primary)] hover:opacity-90 text-white w-full sm:w-auto">
                 <Plus size={16} className="mr-2" />
                 Add New
               </Button>

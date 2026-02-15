@@ -220,6 +220,20 @@
   animation: scroll-to-top-bounce 2s ease-in-out infinite;
 }
 
+/* All-services: "See more" floating hint (gentle float toward bottom) */
+@keyframes see-more-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(6px);
+  }
+}
+.animate-see-more-float {
+  animation: see-more-float 2.2s ease-in-out infinite;
+}
+
 @layer utilities {
   .scrollbar-hide {
     -ms-overflow-style: none;  /* IE and Edge */

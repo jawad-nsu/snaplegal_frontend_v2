@@ -1,17 +1,48 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
-import { MapPin, Search, ShoppingCart, User, LayoutDashboard, Menu, X, Package, LogOut } from 'lucide-react'
+import { MapPin, Search, ShoppingCart, User, LayoutDashboard, Menu, X, Package, LogOut, ArrowRight, Loader2 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+
+interface SearchResultService {
+  id: string
+  title: string
+  slug: string
+  startingPrice: string
+  categoryTitle?: string
+  subCategoryTitle?: string
+}
+
+interface SearchResultCategory {
+  id: string
+  title: string
+  icon: string
+}
+
+interface SearchResultSubcategory {
+  id: string
+  title: string
+  categoryId: string
+  categoryTitle: string
+  icon: string
+}
+
+const SEARCH_DEBOUNCE_MS = 300
+const MAX_DROPDOWN_RESULTS = 8
+const MAX_CATEGORIES = 4
+const MAX_SUBCATEGORIES = 4
 
 export default function Navbar() {
   const router = useRouter()
   const pathname = usePathname()
   const profileDropdownRef = useRef<HTMLDivElement>(null)
+  const searchDropdownRefMobile = useRef<HTMLDivElement>(null)
+  const searchDropdownRefDesktop = useRef<HTMLDivElement>(null)
+  const searchInputRef = useRef<HTMLInputElement>(null)
   const { data: session, status } = useSession()
   
   // Check if user is authenticated using NextAuth session
@@ -24,7 +55,95 @@ export default function Navbar() {
   const [showProfileDropdown, setShowProfileDropdown] = useState(false)
   const [showMobileMenu, setShowMobileMenu] = useState(false)
   const [cartCount, setCartCount] = useState(0)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState<SearchResultService[]>([])
+  const [searchCategories, setSearchCategories] = useState<SearchResultCategory[]>([])
+  const [searchSubcategories, setSearchSubcategories] = useState<SearchResultSubcategory[]>([])
+  const [searchLoading, setSearchLoading] = useState(false)
+  const [showSearchDropdown, setShowSearchDropdown] = useState(false)
   const mobileMenuRef = useRef<HTMLDivElement>(null)
+
+  const fetchSearchResults = useCallback(async (q: string) => {
+    if (!q.trim()) {
+      setSearchResults([])
+      setSearchCategories([])
+      setSearchSubcategories([])
+      return
+    }
+    setSearchLoading(true)
+    try {
+      const res = await fetch(`/api/search?q=${encodeURIComponent(q.trim())}`)
+      const data = await res.json()
+      if (data.success) {
+        setSearchResults((data.services || []).slice(0, MAX_DROPDOWN_RESULTS))
+        setSearchCategories((data.categories || []).slice(0, MAX_CATEGORIES))
+        setSearchSubcategories((data.subcategories || []).slice(0, MAX_SUBCATEGORIES))
+      } else {
+        setSearchResults([])
+        setSearchCategories([])
+        setSearchSubcategories([])
+      }
+    } catch {
+      setSearchResults([])
+      setSearchCategories([])
+      setSearchSubcategories([])
+    } finally {
+      setSearchLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    const q = searchQuery.trim()
+    if (q.length < 2) {
+      setSearchResults([])
+      setSearchCategories([])
+      setSearchSubcategories([])
+      setShowSearchDropdown(false)
+      return
+    }
+    setShowSearchDropdown(true)
+    const t = setTimeout(() => fetchSearchResults(q), SEARCH_DEBOUNCE_MS)
+    return () => clearTimeout(t)
+  }, [searchQuery, fetchSearchResults])
+
+  const openDropdownIfHasQuery = () => {
+    if (searchQuery.trim().length >= 2) setShowSearchDropdown(true)
+  }
+
+  const handleSearch = () => {
+    const q = searchQuery.trim()
+    if (q) {
+      router.push(`/all-services?search=${encodeURIComponent(q)}`)
+    } else {
+      router.push('/all-services')
+    }
+    setShowSearchDropdown(false)
+  }
+
+  const goToService = (slug: string) => {
+    setShowSearchDropdown(false)
+    setSearchQuery('')
+    router.push(`/services/${slug}`)
+  }
+
+  const goToAllResults = () => {
+    const q = searchQuery.trim()
+    setShowSearchDropdown(false)
+    if (q) router.push(`/all-services?search=${encodeURIComponent(q)}`)
+    else router.push('/all-services')
+  }
+
+  const goToCategory = (categoryId: string) => {
+    setShowSearchDropdown(false)
+    setSearchQuery('')
+    router.push(`/all-services?category=${encodeURIComponent(categoryId)}`)
+  }
+
+  const goToSubcategory = (categoryId: string, subcategoryId: string) => {
+    setShowSearchDropdown(false)
+    setSearchQuery('')
+    router.push(`/all-services?category=${encodeURIComponent(categoryId)}&subcategory=${encodeURIComponent(subcategoryId)}`)
+  }
 
   // Sync cart count from localStorage (key matches cart/cart page)
   const updateCartCount = () => {
@@ -62,16 +181,44 @@ export default function Navbar() {
       if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
         setShowMobileMenu(false)
       }
+      const inSearch = searchDropdownRefMobile.current?.contains(event.target as Node) || searchDropdownRefDesktop.current?.contains(event.target as Node)
+      if (!inSearch) setShowSearchDropdown(false)
     }
 
-    if (showProfileDropdown || showMobileMenu) {
+    if (showProfileDropdown || showMobileMenu || showSearchDropdown) {
       document.addEventListener('mousedown', handleClickOutside)
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [showProfileDropdown, showMobileMenu])
+  }, [showProfileDropdown, showMobileMenu, showSearchDropdown])
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      if (showSearchDropdown) {
+        if (searchCategories.length > 0) {
+          e.preventDefault()
+          goToCategory(searchCategories[0].id)
+        } else if (searchSubcategories.length > 0) {
+          e.preventDefault()
+          const sub = searchSubcategories[0]
+          goToSubcategory(sub.categoryId, sub.id)
+        } else if (searchResults.length > 0) {
+          e.preventDefault()
+          goToService(searchResults[0].slug)
+        } else {
+          handleSearch()
+        }
+      } else {
+        handleSearch()
+      }
+    }
+    if (e.key === 'Escape') {
+      setShowSearchDropdown(false)
+      searchInputRef.current?.blur()
+    }
+  }
 
   return (
     <header className="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-50">
@@ -84,21 +231,136 @@ export default function Navbar() {
           </Link>
 
           {/* Search Bar - Mobile */}
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 relative" ref={searchDropdownRefMobile}>
             <div className="flex items-center gap-1 sm:gap-2 bg-white border border-gray-300 rounded-lg overflow-hidden focus-within:border-[var(--color-primary)] focus-within:ring-1 focus-within:ring-[var(--color-neutral)]">
               <Input
+                ref={searchInputRef}
                 placeholder="Search services..."
                 className="flex-1 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-sm py-2 h-9"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={openDropdownIfHasQuery}
+                onKeyDown={handleSearchKeyDown}
               />
               <Button 
                 className="bg-[var(--color-primary)] hover:opacity-90 text-white rounded-none border-0 px-2 sm:px-3 h-9"
-                onClick={() => {
-                  // Add search functionality here if needed
-                }}
+                onClick={handleSearch}
               >
                 <Search className="w-4 h-4 sm:w-5 sm:h-5" />
               </Button>
             </div>
+            {showSearchDropdown && searchQuery.trim().length >= 2 && (
+              <div className="absolute left-0 right-0 top-full mt-1 z-[100] bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-600 overflow-hidden max-h-[min(70vh,320px)] overflow-y-auto">
+                {searchLoading ? (
+                  <div className="flex items-center justify-center gap-2 py-8 text-gray-500">
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <span className="text-sm">Searching...</span>
+                  </div>
+                ) : (searchCategories.length > 0 || searchSubcategories.length > 0 || searchResults.length > 0) ? (
+                  <>
+                    {searchCategories.length > 0 && (
+                      <>
+                        <div className="px-3 py-2 border-b border-gray-100 dark:border-gray-700">
+                          <p className="text-xs font-semibold text-[var(--color-primary)] dark:text-[var(--color-primary)] uppercase tracking-wide">Categories</p>
+                        </div>
+                        <ul className="py-1 px-1.5 space-y-0.5">
+                          {searchCategories.map((c) => (
+                            <li key={c.id}>
+                              <button
+                                type="button"
+                                onClick={() => goToCategory(c.id)}
+                                className="w-full text-left px-4 py-3 flex items-center gap-3 rounded-lg border-l-4 border-transparent hover:border-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 dark:hover:bg-[var(--color-primary)]/20 transition-all duration-200 group active:scale-[0.99]"
+                              >
+                                {c.icon && <span className="text-lg">{c.icon}</span>}
+                                <span className="font-semibold text-gray-900 dark:text-white truncate group-hover:text-[var(--color-primary)] transition-colors">{c.title}</span>
+                                <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-[var(--color-primary)] flex-shrink-0 ml-auto" />
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      </>
+                    )}
+                    {searchSubcategories.length > 0 && (
+                      <>
+                        <div className="px-3 py-2 border-b border-gray-100 dark:border-gray-700">
+                          <p className="text-xs font-semibold text-[var(--color-primary)] dark:text-[var(--color-primary)] uppercase tracking-wide">Subcategories</p>
+                        </div>
+                        <ul className="py-1 px-1.5 space-y-0.5">
+                          {searchSubcategories.map((sub) => (
+                            <li key={sub.id}>
+                              <button
+                                type="button"
+                                onClick={() => goToSubcategory(sub.categoryId, sub.id)}
+                                className="w-full text-left px-4 py-3 flex items-center gap-3 rounded-lg border-l-4 border-transparent hover:border-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 dark:hover:bg-[var(--color-primary)]/20 transition-all duration-200 group active:scale-[0.99]"
+                              >
+                                {sub.icon && <span className="text-base">{sub.icon}</span>}
+                                <div className="min-w-0 flex-1">
+                                  <p className="font-semibold text-gray-900 dark:text-white truncate group-hover:text-[var(--color-primary)] transition-colors">{sub.title}</p>
+                                  {sub.categoryTitle && (
+                                    <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">{sub.categoryTitle}</p>
+                                  )}
+                                </div>
+                                <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-[var(--color-primary)] flex-shrink-0" />
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      </>
+                    )}
+                    {searchResults.length > 0 && (
+                      <>
+                        <div className="px-3 py-2 border-b border-gray-100 dark:border-gray-700">
+                          <p className="text-xs font-semibold text-[var(--color-primary)] dark:text-[var(--color-primary)] uppercase tracking-wide">Services</p>
+                        </div>
+                        <ul className="py-1 px-1.5 space-y-0.5">
+                          {searchResults.map((s) => (
+                            <li key={s.id}>
+                              <button
+                                type="button"
+                                onClick={() => goToService(s.slug)}
+                                className="w-full text-left px-4 py-3 flex items-center justify-between gap-3 rounded-lg border-l-4 border-transparent hover:border-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 dark:hover:bg-[var(--color-primary)]/20 transition-all duration-200 group active:scale-[0.99]"
+                              >
+                                <div className="min-w-0 flex-1">
+                                  <p className="font-semibold text-gray-900 dark:text-white truncate group-hover:text-[var(--color-primary)] transition-colors">{s.title}</p>
+                                  {(s.categoryTitle || s.subCategoryTitle) && (
+                                    <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5 group-hover:text-[var(--color-primary)]/90 transition-colors">
+                                      {[s.categoryTitle, s.subCategoryTitle].filter(Boolean).join(' › ')}
+                                    </p>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-2 flex-shrink-0">
+                                  {s.startingPrice && (
+                                    <span className="text-sm font-bold text-[var(--color-primary)] group-hover:text-[var(--color-primary)] group-hover:drop-shadow-sm">From {s.startingPrice}</span>
+                                  )}
+                                  <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-[var(--color-primary)] group-hover:translate-x-0.5 transition-all" />
+                                </div>
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      </>
+                    )}
+                    <div className="border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/80">
+                      <button
+                        type="button"
+                        onClick={goToAllResults}
+                        className="w-full text-left px-4 py-3 flex items-center justify-between gap-2 text-[var(--color-primary)] font-semibold rounded-lg hover:bg-[var(--color-primary)]/10 dark:hover:bg-[var(--color-primary)]/20 transition-all duration-200 group"
+                      >
+                        View all results for &quot;{searchQuery.trim()}&quot;
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <div className="px-4 py-8 text-center text-gray-500 dark:text-gray-400 text-sm">
+                    No services or categories found. Try different keywords or{' '}
+                    <button type="button" onClick={goToAllResults} className="text-[var(--color-primary)] font-medium hover:underline">
+                      browse all services
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Menu Icon */}
@@ -138,21 +400,135 @@ export default function Navbar() {
           </div>
 
           {/* Center Section - Search Bar */}
-          <div className="flex-1 max-w-2xl mx-4">
+          <div className="flex-1 max-w-2xl mx-4 relative" ref={searchDropdownRefDesktop}>
             <div className="flex items-center gap-2 bg-white border border-gray-300 rounded-lg overflow-hidden focus-within:border-[var(--color-primary)] focus-within:ring-2 focus-within:ring-[var(--color-neutral)]">
               <Input
                 placeholder="Find your consultant here, e.g., Legal, Business, TAX..."
                 className="flex-1 border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={openDropdownIfHasQuery}
+                onKeyDown={handleSearchKeyDown}
               />
               <Button 
                 className="bg-[var(--color-primary)] hover:opacity-90 text-white rounded-none border-0 px-4"
-                onClick={() => {
-                  // Add search functionality here if needed
-                }}
+                onClick={handleSearch}
               >
                 <Search className="w-5 h-5" />
               </Button>
             </div>
+            {showSearchDropdown && searchQuery.trim().length >= 2 && (
+              <div className="absolute left-0 right-0 top-full mt-1 z-[100] bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-600 overflow-hidden max-h-[min(70vh,360px)] overflow-y-auto">
+                {searchLoading ? (
+                  <div className="flex items-center justify-center gap-2 py-10 text-gray-500">
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <span className="text-sm">Searching...</span>
+                  </div>
+                ) : (searchCategories.length > 0 || searchSubcategories.length > 0 || searchResults.length > 0) ? (
+                  <>
+                    {searchCategories.length > 0 && (
+                      <>
+                        <div className="px-3 py-2 border-b border-gray-100 dark:border-gray-700">
+                          <p className="text-xs font-semibold text-[var(--color-primary)] dark:text-[var(--color-primary)] uppercase tracking-wide">Categories</p>
+                        </div>
+                        <ul className="py-1 px-1.5 space-y-0.5">
+                          {searchCategories.map((c) => (
+                            <li key={c.id}>
+                              <button
+                                type="button"
+                                onClick={() => goToCategory(c.id)}
+                                className="w-full text-left px-4 py-3 flex items-center gap-3 rounded-lg border-l-4 border-transparent hover:border-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 dark:hover:bg-[var(--color-primary)]/20 transition-all duration-200 group active:scale-[0.99]"
+                              >
+                                {c.icon && <span className="text-lg">{c.icon}</span>}
+                                <span className="font-semibold text-gray-900 dark:text-white truncate group-hover:text-[var(--color-primary)] transition-colors">{c.title}</span>
+                                <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-[var(--color-primary)] flex-shrink-0 ml-auto" />
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      </>
+                    )}
+                    {searchSubcategories.length > 0 && (
+                      <>
+                        <div className="px-3 py-2 border-b border-gray-100 dark:border-gray-700">
+                          <p className="text-xs font-semibold text-[var(--color-primary)] dark:text-[var(--color-primary)] uppercase tracking-wide">Subcategories</p>
+                        </div>
+                        <ul className="py-1 px-1.5 space-y-0.5">
+                          {searchSubcategories.map((sub) => (
+                            <li key={sub.id}>
+                              <button
+                                type="button"
+                                onClick={() => goToSubcategory(sub.categoryId, sub.id)}
+                                className="w-full text-left px-4 py-3 flex items-center gap-3 rounded-lg border-l-4 border-transparent hover:border-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 dark:hover:bg-[var(--color-primary)]/20 transition-all duration-200 group active:scale-[0.99]"
+                              >
+                                {sub.icon && <span className="text-base">{sub.icon}</span>}
+                                <div className="min-w-0 flex-1">
+                                  <p className="font-semibold text-gray-900 dark:text-white truncate group-hover:text-[var(--color-primary)] transition-colors">{sub.title}</p>
+                                  {sub.categoryTitle && (
+                                    <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">{sub.categoryTitle}</p>
+                                  )}
+                                </div>
+                                <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-[var(--color-primary)] flex-shrink-0" />
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      </>
+                    )}
+                    {searchResults.length > 0 && (
+                      <>
+                        <div className="px-3 py-2 border-b border-gray-100 dark:border-gray-700">
+                          <p className="text-xs font-semibold text-[var(--color-primary)] dark:text-[var(--color-primary)] uppercase tracking-wide">Services</p>
+                        </div>
+                        <ul className="py-1 px-1.5 space-y-0.5">
+                          {searchResults.map((s) => (
+                            <li key={s.id}>
+                              <button
+                                type="button"
+                                onClick={() => goToService(s.slug)}
+                                className="w-full text-left px-4 py-3 flex items-center justify-between gap-3 rounded-lg border-l-4 border-transparent hover:border-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 dark:hover:bg-[var(--color-primary)]/20 transition-all duration-200 group active:scale-[0.99]"
+                              >
+                                <div className="min-w-0 flex-1">
+                                  <p className="font-semibold text-gray-900 dark:text-white truncate group-hover:text-[var(--color-primary)] transition-colors">{s.title}</p>
+                                  {(s.categoryTitle || s.subCategoryTitle) && (
+                                    <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5 group-hover:text-[var(--color-primary)]/90 transition-colors">
+                                      {[s.categoryTitle, s.subCategoryTitle].filter(Boolean).join(' › ')}
+                                    </p>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-2 flex-shrink-0">
+                                  {s.startingPrice && (
+                                    <span className="text-sm font-bold text-[var(--color-primary)] group-hover:text-[var(--color-primary)] group-hover:drop-shadow-sm">From {s.startingPrice}</span>
+                                  )}
+                                  <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-[var(--color-primary)] group-hover:translate-x-0.5 transition-all" />
+                                </div>
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      </>
+                    )}
+                    <div className="border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/80">
+                      <button
+                        type="button"
+                        onClick={goToAllResults}
+                        className="w-full text-left px-4 py-3 flex items-center justify-between gap-2 text-[var(--color-primary)] font-semibold rounded-lg hover:bg-[var(--color-primary)]/10 dark:hover:bg-[var(--color-primary)]/20 transition-all duration-200 group"
+                      >
+                        View all results for &quot;{searchQuery.trim()}&quot;
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <div className="px-4 py-10 text-center text-gray-500 dark:text-gray-400 text-sm">
+                    No services or categories found. Try different keywords or{' '}
+                    <button type="button" onClick={goToAllResults} className="text-[var(--color-primary)] font-medium hover:underline">
+                      browse all services
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Right Section - Actions */}

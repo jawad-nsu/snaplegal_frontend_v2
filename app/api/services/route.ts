@@ -2,8 +2,18 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionFromRequest } from '@/lib/middleware-auth'
 
+/** Normalize string for search so Unicode (e.g. Bangla) matches regardless of NFC/NFD form */
+function normalizeForSearch(str: string): string {
+  if (typeof str !== 'string') return ''
+  return str.trim().normalize('NFC').toLowerCase()
+}
+
 export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url)
+    const rawSearch = (searchParams.get('search') || '').trim()
+    const search = rawSearch ? normalizeForSearch(rawSearch) : ''
+
     const services = await prisma.service.findMany({
       include: {
         lastModifiedBy: {
@@ -32,9 +42,18 @@ export async function GET(request: NextRequest) {
       ],
     })
 
+    let filtered = services
+    if (search) {
+      filtered = services.filter(
+        (s) =>
+          normalizeForSearch(s.title).includes(search) ||
+          (s.keywords || []).some((k) => typeof k === 'string' && normalizeForSearch(k).includes(search))
+      )
+    }
+
     return NextResponse.json({
       success: true,
-      services: services.map(service => ({
+      services: filtered.map(service => ({
         id: service.id,
         title: service.title,
         slug: service.slug,
@@ -45,7 +64,9 @@ export async function GET(request: NextRequest) {
         deliveryTime: service.deliveryTime || '',
         startingPrice: service.startingPrice || '',
         categoryId: service.categoryId,
+        categoryTitle: service.category?.title || '',
         subCategoryId: service.subCategoryId || undefined,
+        subCategoryTitle: service.subCategory?.title || '',
         status: service.status || 'active',
         // Overview fields
         shortDescription: service.shortDescription || '',
@@ -53,6 +74,7 @@ export async function GET(request: NextRequest) {
         providerAuthority: service.providerAuthority || '',
         infoSource: service.infoSource || '',
         requiredDocuments: service.requiredDocuments || [],
+        keywords: service.keywords || [],
         whatsIncluded: service.whatsIncluded || '',
         whatsNotIncluded: service.whatsNotIncluded || '',
         timeline: service.timeline || '',
@@ -110,7 +132,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { 
       title, slug, serialNumber, image, rating, description, deliveryTime, startingPrice, categoryId, subCategoryId, status,
-      shortDescription, detailedDescription, providerAuthority, infoSource, requiredDocuments, whatsIncluded, whatsNotIncluded,
+      shortDescription, detailedDescription, providerAuthority, infoSource, requiredDocuments, keywords, whatsIncluded, whatsNotIncluded,
       timeline, additionalNotes, processFlow, videoUrl, communityDiscussions, faqs, consultantQualifications, whyChooseConsultants, howWeSelectConsultants, packages,
       coreFiling, coreStamps, coreCourtFee, clientFiling, clientStamps, clientCourtFee, clientConsultantFee
     } = body
@@ -211,6 +233,7 @@ export async function POST(request: NextRequest) {
         providerAuthority: providerAuthority && providerAuthority.trim() ? providerAuthority.trim() : null,
         infoSource: infoSource && infoSource.trim() ? infoSource.trim() : null,
         requiredDocuments: Array.isArray(requiredDocuments) ? requiredDocuments : [],
+        keywords: Array.isArray(keywords) ? keywords.filter((k: string) => typeof k === 'string' && k.trim()).map((k: string) => k.trim()) : [],
         whatsIncluded: whatsIncluded && whatsIncluded.trim() ? whatsIncluded.trim() : null,
         whatsNotIncluded: whatsNotIncluded && whatsNotIncluded.trim() ? whatsNotIncluded.trim() : null,
         timeline: timeline && timeline.trim() ? timeline.trim() : null,
@@ -281,6 +304,7 @@ export async function POST(request: NextRequest) {
         providerAuthority: service.providerAuthority || '',
         infoSource: service.infoSource || '',
         requiredDocuments: service.requiredDocuments || [],
+        keywords: service.keywords || [],
         whatsIncluded: service.whatsIncluded || '',
         whatsNotIncluded: service.whatsNotIncluded || '',
         timeline: service.timeline || '',

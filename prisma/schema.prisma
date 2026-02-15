@@ -155,6 +155,7 @@ model Service {
   detailedDescription      String?
   providerAuthority        String?
   requiredDocuments        String[]     @default([])
+  keywords                 String[]     @default([])
   whatsIncluded            String?
   whatsNotIncluded         String?
   timeline                 String?

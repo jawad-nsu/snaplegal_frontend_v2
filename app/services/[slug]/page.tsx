@@ -186,11 +186,18 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                   return undefined
                 }
 
+                // Normalize features: API may return string[] or newline-separated string
+                const rawFeatures = pkg.features as string[] | string | undefined
+                const featuresArray = Array.isArray(rawFeatures)
+                  ? rawFeatures
+                  : typeof rawFeatures === 'string' && rawFeatures.trim()
+                    ? rawFeatures.split('\n').map((f: string) => f.trim()).filter(Boolean)
+                    : []
                 return {
                   name: pkg.name || '',
                   price: parsePrice(pkg.price),
                   originalPrice: parseOriginalPrice(pkg.originalPrice),
-                  features: Array.isArray(pkg.features) ? pkg.features : [],
+                  features: featuresArray,
                   popular: pkg.popular || false
                 }
               })
@@ -362,6 +369,7 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
       date?: string
       timeSlot?: string
       selected?: boolean
+      whatsIncluded?: string
     }
     let existingCart: CartItem[] = []
     
@@ -393,6 +401,7 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
       date: '', // Will be set later
       timeSlot: '', // Will be set later
       selected: true,
+      whatsIncluded: (selectedPkg.features?.length ? selectedPkg.features.join('\n') : null) || (service.features?.length ? service.features.join('\n') : '') || '',
     }
 
     // Add new item to cart

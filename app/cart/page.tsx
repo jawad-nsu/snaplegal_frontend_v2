@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -11,6 +11,9 @@ interface CartItem {
   id: string
   parentService?: string
   serviceName: string
+  serviceId?: string | null
+  serviceSlug?: string
+  packageName?: string
   image: string
   tonnage: string
   quantity: number
@@ -20,6 +23,7 @@ interface CartItem {
   date: string
   timeSlot: string
   selected: boolean
+  whatsIncluded?: string
 }
 
 interface StoredCartItem {
@@ -36,6 +40,7 @@ interface StoredCartItem {
   date?: string
   timeSlot?: string
   selected?: boolean
+  whatsIncluded?: string
 }
 
 export default function CartPage() {
@@ -71,8 +76,11 @@ export default function CartPage() {
     
     return {
       id: stored.id,
-      parentService: stored.packageName ? `Hire ${stored.serviceName} for` : undefined,
+      parentService: stored.packageName ? `Book a consultant for ${stored.serviceName}` : undefined,
       serviceName: stored.packageName || stored.serviceName,
+      serviceId: stored.serviceId,
+      serviceSlug: stored.serviceSlug,
+      packageName: stored.packageName,
       image: stored.image || '/placeholder.svg',
       tonnage: stored.tonnage || '1-2.5 Ton',
       quantity: stored.quantity || 1,
@@ -82,6 +90,7 @@ export default function CartPage() {
       date: formattedDate,
       timeSlot: stored.timeSlot || '',
       selected: stored.selected !== undefined ? stored.selected : true,
+      whatsIncluded: stored.whatsIncluded,
     }
   }
 
@@ -116,6 +125,58 @@ export default function CartPage() {
     loadCartItems()
   }, [])
 
+  // Fetch and fill missing whatsIncluded from API for items that have serviceSlug
+  const hydratedIdsRef = useRef<Set<string>>(new Set())
+  useEffect(() => {
+    if (isLoading || cartItems.length === 0) return
+    const itemsNeedingWhatsIncluded = cartItems.filter(
+      (item) =>
+        item.serviceSlug &&
+        (!item.whatsIncluded || !item.whatsIncluded.trim()) &&
+        !hydratedIdsRef.current.has(item.id)
+    )
+    if (itemsNeedingWhatsIncluded.length === 0) return
+
+    let cancelled = false
+    const fetchAndFill = async () => {
+      for (const item of itemsNeedingWhatsIncluded) {
+        if (cancelled || !item.serviceSlug) continue
+        hydratedIdsRef.current.add(item.id)
+        try {
+          const res = await fetch(`/api/services/slug/${item.serviceSlug}`)
+          if (!res.ok || cancelled) continue
+          const data = await res.json()
+          const service = data?.service
+          if (!service?.packages && !service?.whatsIncluded) continue
+
+          let whatsIncluded = ''
+          if (Array.isArray(service.packages) && item.packageName) {
+            const pkg = service.packages.find(
+              (p: { name?: string; features?: string[] | string }) => p.name === item.packageName
+            )
+            if (pkg?.features) {
+              whatsIncluded = Array.isArray(pkg.features) ? pkg.features.join('\n') : (typeof pkg.features === 'string' ? pkg.features : '')
+            }
+          }
+          if (!whatsIncluded && service.whatsIncluded) {
+            whatsIncluded = typeof service.whatsIncluded === 'string' ? service.whatsIncluded : (Array.isArray(service.whatsIncluded) ? service.whatsIncluded.join('\n') : '')
+          }
+          if (whatsIncluded.trim() && !cancelled) {
+            setCartItems((prev) =>
+              prev.map((i) => (i.id === item.id ? { ...i, whatsIncluded: whatsIncluded.trim() } : i))
+            )
+          }
+        } catch {
+          hydratedIdsRef.current.delete(item.id)
+        }
+      }
+    }
+    fetchAndFill()
+    return () => { cancelled = true }
+    // Intentionally omit cartItems to avoid re-running when we update whatsIncluded
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading, cartItems.length])
+
   // Save cart items to localStorage whenever they change
   useEffect(() => {
     if (!isLoading) {
@@ -141,7 +202,10 @@ export default function CartPage() {
           
           return {
             id: item.id,
-            serviceName: item.serviceName,
+            serviceId: item.serviceId ?? undefined,
+            serviceSlug: item.serviceSlug,
+            serviceName: item.packageName && item.parentService ? item.parentService.replace(/^Book a consultant for /, '') : item.serviceName,
+            packageName: item.packageName,
             image: item.image,
             price: item.price,
             originalPrice: item.originalPrice,
@@ -150,6 +214,7 @@ export default function CartPage() {
             date: dateToStore,
             timeSlot: item.timeSlot,
             selected: item.selected,
+            whatsIncluded: item.whatsIncluded,
           }
         })
         
@@ -282,7 +347,7 @@ export default function CartPage() {
                         type="checkbox"
                         checked={selectAll}
                         onChange={handleSelectAll}
-                        className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--color-primary)] border-gray-300 rounded focus:ring-[var(--color-primary)]"
+                        className="w-4 h-4 sm:w-5 sm:h-5 accent-[var(--color-primary)] border-gray-300 rounded focus:ring-[var(--color-primary)]"
                       />
                       <span className="text-xs sm:text-sm text-gray-700">Select all items</span>
                     </label>
@@ -324,7 +389,7 @@ export default function CartPage() {
                             type="checkbox"
                             checked={item.selected}
                             onChange={() => handleItemSelect(item.id)}
-                            className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--color-primary)] border-gray-300 rounded focus:ring-[var(--color-primary)] flex-shrink-0"
+                            className="w-4 h-4 sm:w-5 sm:h-5 accent-[var(--color-primary)] border-gray-300 rounded focus:ring-[var(--color-primary)] flex-shrink-0"
                           />
                           <span className="text-xs sm:text-sm font-medium text-gray-700">
                             {item.parentService}
@@ -339,21 +404,22 @@ export default function CartPage() {
                           type="checkbox"
                           checked={item.selected}
                           onChange={() => handleItemSelect(item.id)}
-                          className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--color-primary)] border-gray-300 rounded focus:ring-[var(--color-primary)] mt-1 flex-shrink-0"
+                          className="w-4 h-4 sm:w-5 sm:h-5 accent-[var(--color-primary)] border-gray-300 rounded focus:ring-[var(--color-primary)] mt-1 flex-shrink-0"
                         />
-                        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 flex-1 min-w-0">
-                          <div className="relative w-full sm:w-24 sm:h-24 h-40 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
-                            <Image
-                              src={item.image}
-                              alt={item.serviceName}
-                              fill
-                              className="object-cover"
-                            />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-gray-900 mb-1.5 text-sm sm:text-base">
-                              {item.serviceName} <span className="text-gray-500">× {item.quantity}</span>
-                            </h3>
+                        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 flex-1 min-w-0 sm:grid sm:grid-cols-[1fr_minmax(280px,380px)] sm:gap-4">
+                          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 flex-1 min-w-0">
+                            <div className="relative w-full sm:w-24 sm:h-24 h-40 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
+                              <Image
+                                src={item.image}
+                                alt={item.serviceName}
+                                fill
+                                className="object-cover"
+                              />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-gray-900 mb-1.5 text-sm sm:text-base break-words">
+                                {item.serviceName} <span className="text-gray-500">× {item.quantity}</span>
+                              </h3>
                             {/* <div className="mb-2">
                               <select
                                 value={item.tonnage}
@@ -366,12 +432,12 @@ export default function CartPage() {
                             </div> */}
                             <div className="flex flex-wrap items-center gap-2 mb-2">
                               <span className="text-base sm:text-lg font-bold text-green-600">
-                                ৳{item.price.toFixed(3)}
+                                ৳{item.price.toFixed(2)}
                               </span>
                               {appliedPromo && (
                                 <>
                                   <span className="text-xs sm:text-sm text-gray-400 line-through">
-                                    ৳{item.originalPrice.toFixed(3)}
+                                    ৳{item.originalPrice.toFixed(2)}
                                   </span>
                                   <span className="text-xs sm:text-sm text-red-600 font-medium bg-red-50 px-2 py-0.5 rounded">
                                     {item.discount} BDT off
@@ -425,6 +491,19 @@ export default function CartPage() {
                             </div>
                           </div>
                         </div>
+                        <div className="w-full sm:min-w-0 sm:flex-shrink-0 sm:border-l sm:border-gray-100 pl-0 sm:pl-4 pt-3 sm:pt-0 border-t border-gray-100 sm:border-t-0">
+                          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">What&apos;s included</p>
+                          {item.whatsIncluded?.trim() ? (
+                            <ul className="text-xs text-gray-600 space-y-1 list-disc list-inside max-h-32 overflow-y-auto flex flex-col">
+                              {item.whatsIncluded.split('\n').filter((line) => line.trim()).map((line, i) => (
+                                <li key={i} className="break-words block w-full">{line.trim()}</li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p className="text-xs text-gray-400 italic">—</p>
+                          )}
+                        </div>
+                      </div>
                       </label>
                     </div>
                   </div>
@@ -443,35 +522,32 @@ export default function CartPage() {
               {selectedItems.length > 0 && (
                 <div className="space-y-2 mb-4 text-xs sm:text-sm max-h-40 overflow-y-auto">
                   {selectedItems.map((item) => (
-                    <div key={item.id} className="text-gray-700">
-                      {item.parentService && (
-                        <div className="font-medium mb-1 text-gray-800">{item.parentService}</div>
-                      )}
-                      <div className="ml-2 sm:ml-4 text-gray-600">
-                        → {item.serviceName} - ৳
-                        {item.originalPrice.toFixed(3)}
-                      </div>
+                    <div key={item.id} className="flex justify-between items-baseline gap-2 text-gray-700">
+                      <span className="text-gray-600 truncate">→ {item.serviceName} × {item.quantity}</span>
+                      <span className="text-gray-700 font-medium shrink-0">৳{(item.originalPrice * item.quantity).toFixed(2)}</span>
                     </div>
                   ))}
                 </div>
               )}
 
               <div className="border-t pt-4 space-y-2.5 mb-4">
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between items-baseline text-sm">
                   <span className="text-gray-600">Subtotal</span>
-                  <span className="font-medium">৳{subtotal.toFixed(2)}</span>
+                  <span className="font-medium text-right">৳{subtotal.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between items-baseline text-sm">
                   <span className="text-gray-600">Delivery Charge</span>
-                  <span className="font-medium">৳{deliveryCharge.toFixed(2)}</span>
+                  <span className="font-medium text-right">৳{deliveryCharge.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-green-600 font-medium">Discount!</span>
-                  <span className="font-medium text-green-600">-৳{totalDiscount.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-base sm:text-lg font-bold pt-3 border-t mt-3">
+                {appliedPromo && totalDiscount > 0 && (
+                  <div className="flex justify-between items-baseline text-sm">
+                    <span className="text-green-600 font-medium">Discount!</span>
+                    <span className="font-medium text-green-600 text-right">-৳{totalDiscount.toFixed(2)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between items-baseline text-base sm:text-lg font-bold pt-3 border-t mt-3">
                   <span>Amount to be paid</span>
-                  <span className="text-[var(--color-primary)]">৳{total.toFixed(2)}</span>
+                  <span className="text-[var(--color-primary)] text-right">৳{total.toFixed(2)}</span>
                 </div>
               </div>
 
@@ -564,15 +640,15 @@ export default function CartPage() {
                     type="checkbox"
                     checked={agreeToTerms}
                     onChange={(e) => setAgreeToTerms(e.target.checked)}
-                    className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--color-primary)] border-gray-300 rounded focus:ring-[var(--color-primary)] mt-0.5 flex-shrink-0"
+                    className="w-4 h-4 sm:w-5 sm:h-5 accent-[var(--color-primary)] border-gray-300 rounded focus:ring-[var(--color-primary)] mt-0.5 flex-shrink-0"
                   />
                   <span className="text-xs sm:text-sm text-gray-700 leading-relaxed">
                     By placing order, I agree to the{' '}
-                    <Link href="#" className="text-[var(--color-primary)] hover:opacity-80 underline">
+                    <Link href="/terms" target="_blank" rel="noopener noreferrer" className="text-[var(--color-primary)] hover:opacity-80 underline">
                       Terms & conditions
                     </Link>{' '}
                     &{' '}
-                    <Link href="#" className="text-[var(--color-primary)] hover:opacity-80 underline">
+                    <Link href="/privacy" target="_blank" rel="noopener noreferrer" className="text-[var(--color-primary)] hover:opacity-80 underline">
                       Privacy policy
                     </Link>
                   </span>
