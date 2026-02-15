@@ -142,6 +142,7 @@ model Service {
   id                       String       @id @default(uuid())
   title                    String
   slug                     String       @unique
+  serialNumber             Int?
   image                    String?
   rating                   String?      @default("0")
   description              String?

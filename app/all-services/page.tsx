@@ -35,6 +35,7 @@ interface Service {
   id: string
   title: string
   slug: string
+  serialNumber?: number | null
   image: string
   rating: string
   description: string
@@ -424,7 +425,7 @@ export default function AllServicesPage() {
           <aside className="w-full lg:w-64 flex-shrink-0">
             <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm lg:sticky lg:top-8 lg:max-h-[calc(100vh-6rem)] lg:flex lg:flex-col">
               <h3 className="font-semibold text-gray-900 mb-4 text-sm sm:text-base flex-shrink-0">Categories</h3>
-              <nav ref={categoriesNavRef} className="space-y-1 overflow-y-auto min-h-0 lg:max-h-[calc(100vh-12rem)] pr-1 -mr-1">
+              <nav ref={categoriesNavRef} className="space-y-1 overflow-y-auto min-h-0 lg:max-h-[calc(100vh-12rem)] scrollbar-hide">
                 {serviceCategories.map((category) => (
                   <div key={category.id}>
                     <a

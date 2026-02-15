@@ -82,6 +82,7 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
   const [serviceSortBy, setServiceSortBy] = useState<'rating' | 'date'>('rating')
   const [isInfoSourceExpanded, setIsInfoSourceExpanded] = useState(false)
   const [isMobilePackageExpanded, setIsMobilePackageExpanded] = useState(false)
+  const [expandedPackageFeatures, setExpandedPackageFeatures] = useState<Set<number>>(new Set())
   const [service, setService] = useState<ServiceData | null>(null)
   const [serviceId, setServiceId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -1290,14 +1291,30 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                         </div>
                       </div>
                       <ul className="space-y-0.5 text-xs text-gray-600 mt-2">
-                        {pkg.features.slice(0, 3).map((feature, fIndex) => (
+                        {(expandedPackageFeatures.has(index) ? pkg.features : pkg.features.slice(0, 3)).map((feature, fIndex) => (
                           <li key={fIndex} className="flex items-start gap-1">
                             <CheckCircle className="w-3 h-3 text-green-500 flex-shrink-0 mt-0.5" />
                             <span className="line-clamp-1">{feature}</span>
                           </li>
                         ))}
                         {pkg.features.length > 3 && (
-                          <li className="text-xs text-gray-500 pl-4">+{pkg.features.length - 3} more</li>
+                          <li>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setExpandedPackageFeatures(prev => {
+                                  const next = new Set(prev)
+                                  if (next.has(index)) next.delete(index)
+                                  else next.add(index)
+                                  return next
+                                })
+                              }}
+                              className="text-xs text-[var(--color-primary)] hover:underline font-medium pl-4 text-left"
+                            >
+                              {expandedPackageFeatures.has(index) ? 'Show less' : `Show ${pkg.features.length - 3} more`}
+                            </button>
+                          </li>
                         )}
                       </ul>
                     </div>
@@ -1425,14 +1442,30 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                     </div>
                   </div>
                   <ul className="space-y-0.5 text-xs text-gray-600 mt-2">
-                    {pkg.features.slice(0, 3).map((feature, fIndex) => (
+                    {(expandedPackageFeatures.has(index) ? pkg.features : pkg.features.slice(0, 3)).map((feature, fIndex) => (
                       <li key={fIndex} className="flex items-start gap-1">
                         <CheckCircle className="w-3 h-3 text-green-500 flex-shrink-0 mt-0.5" />
                         <span className="line-clamp-1">{feature}</span>
                       </li>
                     ))}
                     {pkg.features.length > 3 && (
-                      <li className="text-xs text-gray-500 pl-4">+{pkg.features.length - 3} more</li>
+                      <li>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setExpandedPackageFeatures(prev => {
+                              const next = new Set(prev)
+                              if (next.has(index)) next.delete(index)
+                              else next.add(index)
+                              return next
+                            })
+                          }}
+                          className="text-xs text-[var(--color-primary)] hover:underline font-medium pl-4 text-left"
+                        >
+                          {expandedPackageFeatures.has(index) ? 'Show less' : `Show ${pkg.features.length - 3} more`}
+                        </button>
+                      </li>
                     )}
                   </ul>
                 </div>

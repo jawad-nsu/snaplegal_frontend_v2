@@ -10,6 +10,7 @@ function toHomepageService(service: {
   image: string | null
   rating: string | null
   description: string | null
+  shortDescription: string | null
   deliveryTime: string | null
   startingPrice: string | null
 }) {
@@ -19,13 +20,13 @@ function toHomepageService(service: {
     slug: service.slug,
     image: service.image || '/placeholder.svg',
     rating: service.rating || '0',
-    description: service.description || '',
+    description: service.shortDescription || service.description || '',
     deliveryTime: service.deliveryTime || '',
     startingPrice: service.startingPrice || '',
   }
 }
 
-// GET – public: returns trending (by category) and recommended for the homepage
+// GET – public: returns trending and recommended for the homepage
 export async function GET() {
   try {
     const sections = await prisma.homepageSection.findMany({
@@ -52,26 +53,22 @@ export async function GET() {
               image: true,
               rating: true,
               description: true,
+              shortDescription: true,
               deliveryTime: true,
               startingPrice: true,
             },
           })
     const serviceMap = Object.fromEntries(services.map((s) => [s.id, s]))
 
-    const trendingRows = sections
-      .filter((s) => s.type === 'trending' && s.categoryId)
+    // Single trending row: merge all trending sections by sortOrder, then preserve serviceIds order (serial)
+    const trendingSectionRows = sections
+      .filter((s) => s.type === 'trending')
       .sort((a, b) => a.sortOrder - b.sortOrder)
-      .map((s) => {
-        const category = s.category!
-        const servicesForRow = s.serviceIds
-          .map((id) => serviceMap[id])
-          .filter(Boolean)
-        return {
-          categoryId: category.id,
-          categoryTitle: category.title,
-          services: servicesForRow.map(toHomepageService),
-        }
-      })
+    const trendingServiceIds = trendingSectionRows.flatMap((s) => s.serviceIds)
+    const trending = trendingServiceIds
+      .map((id) => serviceMap[id])
+      .filter(Boolean)
+      .map(toHomepageService)
 
     const recommendedSection = sections.find((s) => s.type === 'recommended')
     const recommended = (recommendedSection?.serviceIds ?? [])
@@ -79,10 +76,24 @@ export async function GET() {
       .filter(Boolean)
       .map(toHomepageService)
 
+    // Legal Services: one row per category, ordered by sortOrder; items in row by serviceIds order
+    const legalSections = sections
+      .filter((s) => s.type === 'legal_services' && s.categoryId)
+      .sort((a, b) => a.sortOrder - b.sortOrder)
+    const legalServices = legalSections.map((sec) => {
+      const categoryTitle = sec.category?.title ?? ''
+      const services = (sec.serviceIds ?? [])
+        .map((id) => serviceMap[id])
+        .filter(Boolean)
+        .map(toHomepageService)
+      return { categoryId: sec.categoryId!, categoryTitle, services }
+    })
+
     return NextResponse.json({
       success: true,
-      trending: trendingRows,
+      trending,
       recommended,
+      legalServices,
     })
   } catch (error) {
     console.error('Fetch homepage sections error:', error)
@@ -103,25 +114,28 @@ export async function PUT(request: NextRequest) {
 
     const body = await request.json()
     const {
-      trending = [],
+      trendingServiceIds = [],
       recommendedServiceIds = [],
+      legalServicesRows = [],
     }: {
-      trending?: Array<{ categoryId: string; serviceIds: string[] }>
+      trendingServiceIds?: string[]
       recommendedServiceIds?: string[]
+      legalServicesRows?: { categoryId: string; serviceIds: string[] }[]
     } = body
+
+    const trendingIds = Array.isArray(trendingServiceIds) ? trendingServiceIds : []
+    const legalRows = Array.isArray(legalServicesRows) ? legalServicesRows : []
 
     await prisma.$transaction(async (tx) => {
       await tx.homepageSection.deleteMany({})
 
-      let sortOrder = 0
-      for (const row of trending) {
-        if (!row.categoryId || !Array.isArray(row.serviceIds)) continue
+      if (trendingIds.length > 0) {
         await tx.homepageSection.create({
           data: {
             type: 'trending',
-            categoryId: row.categoryId,
-            serviceIds: row.serviceIds,
-            sortOrder: sortOrder++,
+            categoryId: null,
+            serviceIds: trendingIds,
+            sortOrder: 0,
           },
         })
       }
@@ -135,6 +149,20 @@ export async function PUT(request: NextRequest) {
             sortOrder: 0,
           },
         })
+      }
+
+      for (let i = 0; i < legalRows.length; i++) {
+        const row = legalRows[i]
+        if (row?.categoryId && Array.isArray(row.serviceIds)) {
+          await tx.homepageSection.create({
+            data: {
+              type: 'legal_services',
+              categoryId: row.categoryId,
+              serviceIds: row.serviceIds,
+              sortOrder: i,
+            },
+          })
+        }
       }
     })
 

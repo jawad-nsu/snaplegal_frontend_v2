@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { NextAuthSessionProvider } from "@/components/providers/session-provider";
 import { AuthProvider } from "@/components/providers/auth-provider";
+import { ScrollToTop } from "@/components/scroll-to-top";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,6 +33,7 @@ export default function RootLayout({
         <NextAuthSessionProvider>
           <AuthProvider>
             {children}
+            <ScrollToTop />
           </AuthProvider>
         </NextAuthSessionProvider>
       </body>

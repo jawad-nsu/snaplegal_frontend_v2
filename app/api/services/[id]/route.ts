@@ -46,6 +46,7 @@ export async function GET(
         id: service.id,
         title: service.title,
         slug: service.slug,
+        serialNumber: service.serialNumber ?? undefined,
         image: service.image || '',
         rating: service.rating || '0',
         description: service.description || '',
@@ -120,7 +121,7 @@ export async function PUT(
     const { id } = await params
     const body = await request.json()
     const { 
-      title, slug, image, rating, description, deliveryTime, startingPrice, categoryId, subCategoryId, status,
+      title, slug, serialNumber, image, rating, description, deliveryTime, startingPrice, categoryId, subCategoryId, status,
       shortDescription, detailedDescription, providerAuthority, infoSource, requiredDocuments, whatsIncluded, whatsNotIncluded,
       timeline, additionalNotes, processFlow, videoUrl, communityDiscussions, faqs, consultantQualifications, whyChooseConsultants, howWeSelectConsultants, packages,
       coreFiling, coreStamps, coreCourtFee, clientFiling, clientStamps, clientCourtFee, clientConsultantFee
@@ -218,6 +219,7 @@ export async function PUT(
       data: {
         title: title.trim(),
         slug: slug.trim(),
+        serialNumber: serialNumber !== undefined ? (serialNumber != null && !Number.isNaN(Number(serialNumber)) ? Number(serialNumber) : null) : existingService.serialNumber,
         image: image && image.trim() ? image.trim() : null,
         rating: rating && rating.trim() ? rating.trim() : existingService.rating || '0',
         description: description && description.trim() ? description.trim() : null,
@@ -288,6 +290,7 @@ export async function PUT(
         id: service.id,
         title: service.title,
         slug: service.slug,
+        serialNumber: service.serialNumber ?? undefined,
         image: service.image || '',
         rating: service.rating || '0',
         description: service.description || '',

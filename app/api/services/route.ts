@@ -26,9 +26,10 @@ export async function GET(request: NextRequest) {
           },
         },
       },
-      orderBy: {
-        createdAt: 'desc',
-      },
+      orderBy: [
+        { serialNumber: 'asc' },
+        { createdAt: 'desc' },
+      ],
     })
 
     return NextResponse.json({
@@ -37,6 +38,7 @@ export async function GET(request: NextRequest) {
         id: service.id,
         title: service.title,
         slug: service.slug,
+        serialNumber: service.serialNumber ?? undefined,
         image: service.image || '',
         rating: service.rating || '0',
         description: service.description || '',
@@ -107,7 +109,7 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json()
     const { 
-      title, slug, image, rating, description, deliveryTime, startingPrice, categoryId, subCategoryId, status,
+      title, slug, serialNumber, image, rating, description, deliveryTime, startingPrice, categoryId, subCategoryId, status,
       shortDescription, detailedDescription, providerAuthority, infoSource, requiredDocuments, whatsIncluded, whatsNotIncluded,
       timeline, additionalNotes, processFlow, videoUrl, communityDiscussions, faqs, consultantQualifications, whyChooseConsultants, howWeSelectConsultants, packages,
       coreFiling, coreStamps, coreCourtFee, clientFiling, clientStamps, clientCourtFee, clientConsultantFee
@@ -194,6 +196,7 @@ export async function POST(request: NextRequest) {
       data: {
         title: title.trim(),
         slug: slug.trim(),
+        serialNumber: serialNumber != null && !Number.isNaN(Number(serialNumber)) ? Number(serialNumber) : null,
         image: image && image.trim() ? image.trim() : null,
         rating: rating && rating.trim() ? rating.trim() : '0',
         description: description && description.trim() ? description.trim() : null,

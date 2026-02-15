@@ -206,6 +206,20 @@
   }
 }
 
+/* Scroll-to-top button: subtle bounce */
+@keyframes scroll-to-top-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+.animate-scroll-to-top-bounce {
+  animation: scroll-to-top-bounce 2s ease-in-out infinite;
+}
+
 @layer utilities {
   .scrollbar-hide {
     -ms-overflow-style: none;  /* IE and Edge */

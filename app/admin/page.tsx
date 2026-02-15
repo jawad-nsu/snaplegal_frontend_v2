@@ -28,6 +28,8 @@ import {
   Upload,
   ChevronLeft,
   ChevronRight,
+  ChevronUp,
+  ChevronDown,
   Copy,
   Home,
   GripVertical
@@ -97,6 +99,7 @@ interface Service {
   id: string
   title: string
   slug: string
+  serialNumber?: number | null
   image: string
   rating: string
   description: string
@@ -270,11 +273,7 @@ interface Lead {
 
 type TabType = 'leads' | 'users' | 'vendors' | 'categories' | 'subcategories' | 'services' | 'homepage' | 'service-requests' | 'chats' | 'orders' | 'reviews'
 
-interface HomepageTrendingRow {
-  categoryId: string
-  categoryTitle: string
-  serviceIds: string[]
-}
+// Trending is a single ordered list of service IDs (serial = array index on homepage)
 
 // Helper function to sort categories: first by serialNumber (ascending), then by updatedAt (descending) for those without serial numbers
 const sortCategories = (categoriesToSort: ServiceCategory[]): ServiceCategory[] => {
@@ -542,13 +541,14 @@ export default function AdminDashboard() {
     isVerified: false,
   })
 
-  // Homepage (Trending & Recommended)
-  const [homepageTrendingRows, setHomepageTrendingRows] = useState<HomepageTrendingRow[]>([])
+  // Homepage (Trending = single row, ordered by serial; Recommended; Legal Services = one row per category)
+  const [homepageTrendingIds, setHomepageTrendingIds] = useState<string[]>([])
   const [homepageRecommendedIds, setHomepageRecommendedIds] = useState<string[]>([])
+  const [homepageLegalServicesRows, setHomepageLegalServicesRows] = useState<{ categoryId: string; serviceIds: string[] }[]>([])
+  const [homepageTrendingCategoryId, setHomepageTrendingCategoryId] = useState<string>('')
+  const [homepageRecommendedCategoryId, setHomepageRecommendedCategoryId] = useState<string>('')
   const [homepageLoading, setHomepageLoading] = useState(false)
   const [homepageSaving, setHomepageSaving] = useState(false)
-  const [homepageAddCategoryId, setHomepageAddCategoryId] = useState<string>('')
-  const [homepageAddServiceIds, setHomepageAddServiceIds] = useState<string[]>([])
 
   useEffect(() => {
     if (activeTab !== 'homepage') return
@@ -558,12 +558,12 @@ export default function AdminDashboard() {
         const res = await fetch('/api/homepage-sections')
         const data = await res.json()
         if (data.success) {
-          setHomepageTrendingRows((data.trending || []).map((r: { categoryId: string; categoryTitle: string; services: { id: string }[] }) => ({
+          setHomepageTrendingIds((data.trending || []).map((s: { id: string }) => s.id))
+          setHomepageRecommendedIds((data.recommended || []).map((s: { id: string }) => s.id))
+          setHomepageLegalServicesRows((data.legalServices || []).map((r: { categoryId: string; services: { id: string }[] }) => ({
             categoryId: r.categoryId,
-            categoryTitle: r.categoryTitle,
             serviceIds: (r.services || []).map((s: { id: string }) => s.id),
           })))
-          setHomepageRecommendedIds((data.recommended || []).map((s: { id: string }) => s.id))
         }
       } catch (e) {
         console.error('Fetch homepage sections failed', e)
@@ -999,7 +999,7 @@ export default function AdminDashboard() {
     status: 'active' as 'active' | 'inactive'
   })
   const [serviceForm, setServiceForm] = useState({
-    title: '', slug: '', image: '', rating: '', description: '', deliveryTime: '', startingPrice: '', categoryId: '', subCategoryId: '',
+    title: '', slug: '', serialNumber: '', image: '', rating: '', description: '', deliveryTime: '', startingPrice: '', categoryId: '', subCategoryId: '',
     // Overview fields
     shortDescription: '', detailedDescription: '', providerAuthority: '', infoSource: '', requiredDocuments: [] as string[], whatsIncluded: '', whatsNotIncluded: '',
     timeline: '', additionalNotes: '',
@@ -1035,7 +1035,7 @@ export default function AdminDashboard() {
     } else if (activeTab === 'services') {
       setIsCloningService(false)
       setServiceForm({
-        title: '', slug: '', image: '', rating: '', description: '', deliveryTime: '', startingPrice: '', categoryId: '', subCategoryId: '',
+        title: '', slug: '', serialNumber: '', image: '', rating: '', description: '', deliveryTime: '', startingPrice: '', categoryId: '', subCategoryId: '',
         shortDescription: '', detailedDescription: '', providerAuthority: '', infoSource: '', requiredDocuments: [], whatsIncluded: '', whatsNotIncluded: '',
         timeline: '', additionalNotes: '', processFlow: '', videoUrl: '', communityDiscussions: [], faqs: [], consultantQualifications: '', whyChooseConsultants: [], howWeSelectConsultants: [], packages: [],
         coreFiling: '', coreStamps: '', coreCourtFee: '', clientFiling: '', clientStamps: '', clientCourtFee: '', clientConsultantFee: ''
@@ -1084,7 +1084,7 @@ export default function AdminDashboard() {
     } else if (activeTab === 'services' && 'slug' in item) {
       const serviceItem = item as Service
       setServiceForm({
-        title: serviceItem.title, slug: serviceItem.slug, image: serviceItem.image, rating: serviceItem.rating, description: serviceItem.description,
+        title: serviceItem.title, slug: serviceItem.slug, serialNumber: serviceItem.serialNumber != null ? String(serviceItem.serialNumber) : '', image: serviceItem.image, rating: serviceItem.rating, description: serviceItem.description,
         deliveryTime: serviceItem.deliveryTime, startingPrice: serviceItem.startingPrice, categoryId: serviceItem.categoryId, subCategoryId: serviceItem.subCategoryId || '',
         shortDescription: serviceItem.shortDescription || '', detailedDescription: serviceItem.detailedDescription || '', providerAuthority: serviceItem.providerAuthority || '', infoSource: serviceItem.infoSource || '',
         requiredDocuments: serviceItem.requiredDocuments || [], whatsIncluded: serviceItem.whatsIncluded || '', whatsNotIncluded: serviceItem.whatsNotIncluded || '',
@@ -1119,6 +1119,7 @@ export default function AdminDashboard() {
     setServiceForm({
       title: `${service.title} (Copy)`,
       slug: `${service.slug}-copy`,
+      serialNumber: service.serialNumber != null ? String(service.serialNumber) : '',
       image: service.image,
       rating: service.rating,
       description: service.description,
@@ -1438,6 +1439,7 @@ export default function AdminDashboard() {
           body: JSON.stringify({
             title: serviceForm.title,
             slug: serviceForm.slug,
+            serialNumber: (() => { const v = serviceForm.serialNumber.trim(); if (v === '') return null; const n = parseInt(v, 10); return Number.isNaN(n) ? null : n; })(),
             image: serviceForm.image,
             rating: serviceForm.rating,
             description: serviceForm.description,
@@ -3113,8 +3115,9 @@ export default function AdminDashboard() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          trending: homepageTrendingRows.map((r) => ({ categoryId: r.categoryId, serviceIds: r.serviceIds })),
+          trendingServiceIds: homepageTrendingIds,
           recommendedServiceIds: homepageRecommendedIds,
+          legalServicesRows: homepageLegalServicesRows,
         }),
       })
       const data = await res.json()
@@ -3128,125 +3131,296 @@ export default function AdminDashboard() {
   }
 
   const renderHomepageTab = () => {
-    const usedCategoryIds = new Set(homepageTrendingRows.map((r) => r.categoryId))
-    const availableCategories = categories.filter((c) => c.status === 'active' && !usedCategoryIds.has(c.id))
     const getServiceTitle = (id: string) => services.find((s) => s.id === id)?.title || id
+    const moveTrending = (fromIdx: number, direction: 'up' | 'down') => {
+      const toIdx = direction === 'up' ? fromIdx - 1 : fromIdx + 1
+      if (toIdx < 0 || toIdx >= homepageTrendingIds.length) return
+      const next = [...homepageTrendingIds]
+      ;[next[fromIdx], next[toIdx]] = [next[toIdx], next[fromIdx]]
+      setHomepageTrendingIds(next)
+    }
+    const moveRecommended = (fromIdx: number, direction: 'up' | 'down') => {
+      const toIdx = direction === 'up' ? fromIdx - 1 : fromIdx + 1
+      if (toIdx < 0 || toIdx >= homepageRecommendedIds.length) return
+      const next = [...homepageRecommendedIds]
+      ;[next[fromIdx], next[toIdx]] = [next[toIdx], next[fromIdx]]
+      setHomepageRecommendedIds(next)
+    }
     return (
       <div className="space-y-8">
-        <p className="text-sm text-gray-600">Configure what appears in <strong>Trending</strong> (one row per category) and <strong>Recommended</strong> on the homepage.</p>
-        {/* Trending: one row per category */}
+        <p className="text-sm text-gray-600">Configure what appears in <strong>Trending</strong>, <strong>Recommended</strong>, and <strong>Legal Services</strong> on the homepage. Legal Services: one row per category; items in each row follow the order you add them.</p>
+        {/* Trending: single row, order by serial */}
         <div>
-          <h3 className="text-lg font-semibold mb-3">Trending (by category)</h3>
+          <h3 className="text-lg font-semibold mb-3">Trending</h3>
           {homepageLoading ? (
             <p className="text-gray-500">Loading…</p>
           ) : (
             <>
-              <div className="space-y-3 mb-4">
-                {homepageTrendingRows.map((row, idx) => (
-                  <div key={row.categoryId} className="flex items-start gap-2 p-3 border border-gray-200 rounded-lg bg-gray-50">
-                    <GripVertical className="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-gray-900">{row.categoryTitle}</p>
-                      <p className="text-sm text-gray-500">
-                        {row.serviceIds.length} service(s): {row.serviceIds.map(getServiceTitle).join(', ') || '—'}
-                      </p>
+              <div className="space-y-2 mb-4">
+                {homepageTrendingIds.map((id, idx) => (
+                  <div key={`${id}-${idx}`} className="flex items-center gap-2 p-3 border border-gray-200 rounded-lg bg-gray-50">
+                    <span className="text-sm font-medium text-gray-500 w-6 flex-shrink-0">{idx + 1}</span>
+                    <GripVertical className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                    <span className="flex-1 min-w-0 text-gray-900">{getServiceTitle(id)}</span>
+                    <div className="flex items-center gap-0.5 flex-shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => moveTrending(idx, 'up')}
+                        disabled={idx === 0}
+                        className="p-1 text-gray-600 hover:text-gray-900 disabled:opacity-40"
+                        title="Move up"
+                      >
+                        <ChevronUp size={18} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => moveTrending(idx, 'down')}
+                        disabled={idx === homepageTrendingIds.length - 1}
+                        className="p-1 text-gray-600 hover:text-gray-900 disabled:opacity-40"
+                        title="Move down"
+                      >
+                        <ChevronDown size={18} />
+                      </button>
                     </div>
                     <button
                       type="button"
-                      onClick={() => setHomepageTrendingRows((prev) => prev.filter((_, i) => i !== idx))}
+                      onClick={() => setHomepageTrendingIds((prev) => prev.filter((_, i) => i !== idx))}
                       className="text-red-600 hover:text-red-800 p-1"
-                      title="Remove row"
+                      title="Remove"
                     >
                       <Trash2 size={18} />
                     </button>
                   </div>
                 ))}
               </div>
-              <div className="flex flex-wrap items-end gap-2 p-3 border border-dashed border-gray-300 rounded-lg bg-white">
-                <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">Category</label>
+              <div className="flex flex-col gap-3 p-3 border border-dashed border-gray-300 rounded-lg bg-white">
+                <div className="flex flex-col gap-2">
+                  <label className="block text-xs font-medium text-gray-500">Category</label>
                   <select
-                    value={homepageAddCategoryId}
-                    onChange={(e) => setHomepageAddCategoryId(e.target.value)}
-                    className="border border-gray-300 rounded px-3 py-2 text-sm min-w-[180px]"
+                    value={homepageTrendingCategoryId}
+                    onChange={(e) => setHomepageTrendingCategoryId(e.target.value)}
+                    className="border border-gray-300 rounded px-3 py-2 text-sm min-w-[240px]"
                   >
-                    <option value="">Select category</option>
-                    {availableCategories.map((c) => (
+                    <option value="">All categories</option>
+                    {categories.filter((c) => c.status === 'active').map((c) => (
                       <option key={c.id} value={c.id}>{c.title}</option>
                     ))}
                   </select>
                 </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">Services (order = display order)</label>
+                <div className="flex flex-col gap-2">
+                  <label className="block text-xs font-medium text-gray-500">Add services (order = serial on homepage)</label>
                   <select
                     multiple
-                    value={homepageAddServiceIds}
-                    onChange={(e) => setHomepageAddServiceIds(Array.from(e.target.selectedOptions, (o) => o.value))}
-                    className="border border-gray-300 rounded px-3 py-2 text-sm min-w-[200px] h-24"
+                    className="border border-gray-300 rounded px-3 py-2 text-sm min-w-[240px] h-24"
+                    onChange={(e) => {
+                      const added = Array.from(e.target.selectedOptions, (o) => o.value).filter((id) => !homepageTrendingIds.includes(id))
+                      if (added.length) setHomepageTrendingIds((prev) => [...prev, ...added])
+                      e.target.selectedIndex = -1
+                    }}
                   >
-                    {services.filter((s) => s.status === 'active').map((s) => (
-                      <option key={s.id} value={s.id}>{s.title}</option>
-                    ))}
+                    {services
+                      .filter((s) => s.status === 'active' && !homepageTrendingIds.includes(s.id))
+                      .filter((s) => !homepageTrendingCategoryId || s.categoryId === homepageTrendingCategoryId)
+                      .map((s) => (
+                        <option key={s.id} value={s.id}>{s.title}</option>
+                      ))}
                   </select>
                 </div>
-                <Button
-                  type="button"
-                  disabled={!homepageAddCategoryId}
-                  onClick={() => {
-                    const cat = categories.find((c) => c.id === homepageAddCategoryId)
-                    if (!cat) return
-                    setHomepageTrendingRows((prev) => [...prev, { categoryId: cat.id, categoryTitle: cat.title, serviceIds: homepageAddServiceIds }])
-                    setHomepageAddCategoryId('')
-                    setHomepageAddServiceIds([])
-                  }}
-                  className="bg-[var(--color-primary)] hover:opacity-90"
-                >
-                  Add row
-                </Button>
+                <span className="text-xs text-gray-500">Select one or more to add to the end</span>
               </div>
             </>
           )}
         </div>
-        {/* Recommended */}
+        {/* Recommended: same UI and ordering as Trending */}
         <div>
           <h3 className="text-lg font-semibold mb-3">Recommended</h3>
-          <div className="flex flex-wrap gap-2 mb-2">
-            {homepageRecommendedIds.map((id, idx) => (
-              <span
-                key={id}
-                className="inline-flex items-center gap-1 px-2 py-1 rounded bg-gray-100 text-sm"
-              >
-                {getServiceTitle(id)}
+          {homepageLoading ? (
+            <p className="text-gray-500">Loading…</p>
+          ) : (
+            <>
+              <div className="space-y-2 mb-4">
+                {homepageRecommendedIds.map((id, idx) => (
+                  <div key={`${id}-${idx}`} className="flex items-center gap-2 p-3 border border-gray-200 rounded-lg bg-gray-50">
+                    <span className="text-sm font-medium text-gray-500 w-6 flex-shrink-0">{idx + 1}</span>
+                    <GripVertical className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                    <span className="flex-1 min-w-0 text-gray-900">{getServiceTitle(id)}</span>
+                    <div className="flex items-center gap-0.5 flex-shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => moveRecommended(idx, 'up')}
+                        disabled={idx === 0}
+                        className="p-1 text-gray-600 hover:text-gray-900 disabled:opacity-40"
+                        title="Move up"
+                      >
+                        <ChevronUp size={18} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => moveRecommended(idx, 'down')}
+                        disabled={idx === homepageRecommendedIds.length - 1}
+                        className="p-1 text-gray-600 hover:text-gray-900 disabled:opacity-40"
+                        title="Move down"
+                      >
+                        <ChevronDown size={18} />
+                      </button>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setHomepageRecommendedIds((prev) => prev.filter((_, i) => i !== idx))}
+                      className="text-red-600 hover:text-red-800 p-1"
+                      title="Remove"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <div className="flex flex-col gap-3 p-3 border border-dashed border-gray-300 rounded-lg bg-white">
+                <div className="flex flex-col gap-2">
+                  <label className="block text-xs font-medium text-gray-500">Category</label>
+                  <select
+                    value={homepageRecommendedCategoryId}
+                    onChange={(e) => setHomepageRecommendedCategoryId(e.target.value)}
+                    className="border border-gray-300 rounded px-3 py-2 text-sm min-w-[240px]"
+                  >
+                    <option value="">All categories</option>
+                    {categories.filter((c) => c.status === 'active').map((c) => (
+                      <option key={c.id} value={c.id}>{c.title}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="block text-xs font-medium text-gray-500">Add services (order = serial on homepage)</label>
+                  <select
+                    multiple
+                    className="border border-gray-300 rounded px-3 py-2 text-sm min-w-[240px] h-24"
+                    onChange={(e) => {
+                      const added = Array.from(e.target.selectedOptions, (o) => o.value).filter((id) => !homepageRecommendedIds.includes(id))
+                      if (added.length) setHomepageRecommendedIds((prev) => [...prev, ...added])
+                      e.target.selectedIndex = -1
+                    }}
+                  >
+                    {services
+                      .filter((s) => s.status === 'active' && !homepageRecommendedIds.includes(s.id))
+                      .filter((s) => !homepageRecommendedCategoryId || s.categoryId === homepageRecommendedCategoryId)
+                      .map((s) => (
+                        <option key={s.id} value={s.id}>{s.title}</option>
+                      ))}
+                  </select>
+                </div>
+                <span className="text-xs text-gray-500">Select one or more to add to the end</span>
+              </div>
+            </>
+          )}
+        </div>
+        {/* Legal Services: one row per category, order = add order */}
+        <div>
+          <h3 className="text-lg font-semibold mb-3">Legal Services (by category)</h3>
+          {homepageLoading ? (
+            <p className="text-gray-500">Loading…</p>
+          ) : (
+            <>
+              <div className="space-y-6 mb-4">
+                {homepageLegalServicesRows.map((row, rowIdx) => {
+                  const moveRow = (dir: 'up' | 'down') => {
+                    const toIdx = dir === 'up' ? rowIdx - 1 : rowIdx + 1
+                    if (toIdx < 0 || toIdx >= homepageLegalServicesRows.length) return
+                    const next = [...homepageLegalServicesRows]
+                    ;[next[rowIdx], next[toIdx]] = [next[toIdx], next[rowIdx]]
+                    setHomepageLegalServicesRows(next)
+                  }
+                  const setRowCategory = (categoryId: string) => {
+                    setHomepageLegalServicesRows((prev) => prev.map((r, i) => (i === rowIdx ? { ...r, categoryId } : r)))
+                  }
+                  const moveService = (fromIdx: number, dir: 'up' | 'down') => {
+                    const toIdx = dir === 'up' ? fromIdx - 1 : fromIdx + 1
+                    if (toIdx < 0 || toIdx >= row.serviceIds.length) return
+                    const next = [...row.serviceIds]
+                    ;[next[fromIdx], next[toIdx]] = [next[toIdx], next[fromIdx]]
+                    setHomepageLegalServicesRows((prev) => prev.map((r, i) => (i === rowIdx ? { ...r, serviceIds: next } : r)))
+                  }
+                  const removeService = (idx: number) => {
+                    setHomepageLegalServicesRows((prev) => prev.map((r, i) =>
+                      i === rowIdx ? { ...r, serviceIds: r.serviceIds.filter((_, si) => si !== idx) } : r
+                    ))
+                  }
+                  const addServicesToRow = (ids: string[]) => {
+                    const existing = new Set(row.serviceIds)
+                    const added = ids.filter((id) => !existing.has(id))
+                    if (added.length) setHomepageLegalServicesRows((prev) => prev.map((r, i) => (i === rowIdx ? { ...r, serviceIds: [...r.serviceIds, ...added] } : r)))
+                  }
+                  const removeRow = () => setHomepageLegalServicesRows((prev) => prev.filter((_, i) => i !== rowIdx))
+                  return (
+                    <div key={`legal-${rowIdx}-${row.categoryId}`} className="border border-gray-200 rounded-lg p-4 bg-gray-50/50">
+                      <div className="flex items-center gap-3 mb-3 flex-wrap">
+                        <span className="text-sm font-medium text-gray-500">Row {rowIdx + 1}</span>
+                        <select
+                          value={row.categoryId}
+                          onChange={(e) => setRowCategory(e.target.value)}
+                          className="border border-gray-300 rounded px-3 py-2 text-sm min-w-[200px]"
+                        >
+                          <option value="">Select category</option>
+                          {categories.filter((c) => c.status === 'active').map((c) => (
+                            <option key={c.id} value={c.id}>{c.title}</option>
+                          ))}
+                        </select>
+                        <div className="flex items-center gap-0.5">
+                          <button type="button" onClick={() => moveRow('up')} disabled={rowIdx === 0} className="p-1 text-gray-600 hover:text-gray-900 disabled:opacity-40" title="Move row up"><ChevronUp size={18} /></button>
+                          <button type="button" onClick={() => moveRow('down')} disabled={rowIdx === homepageLegalServicesRows.length - 1} className="p-1 text-gray-600 hover:text-gray-900 disabled:opacity-40" title="Move row down"><ChevronDown size={18} /></button>
+                        </div>
+                        <button type="button" onClick={removeRow} className="text-red-600 hover:text-red-800 p-1" title="Remove row"><Trash2 size={18} /></button>
+                      </div>
+                      <div className="space-y-2 mb-3">
+                        {row.serviceIds.map((id, sIdx) => (
+                          <div key={`${id}-${sIdx}`} className="flex items-center gap-2 p-2 border border-gray-200 rounded bg-white">
+                            <span className="text-sm text-gray-500 w-5 flex-shrink-0">{sIdx + 1}</span>
+                            <GripVertical className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                            <span className="flex-1 min-w-0 text-gray-900 text-sm">{getServiceTitle(id)}</span>
+                            <div className="flex items-center gap-0.5 flex-shrink-0">
+                              <button type="button" onClick={() => moveService(sIdx, 'up')} disabled={sIdx === 0} className="p-1 text-gray-600 hover:text-gray-900 disabled:opacity-40"><ChevronUp size={16} /></button>
+                              <button type="button" onClick={() => moveService(sIdx, 'down')} disabled={sIdx === row.serviceIds.length - 1} className="p-1 text-gray-600 hover:text-gray-900 disabled:opacity-40"><ChevronDown size={16} /></button>
+                            </div>
+                            <button type="button" onClick={() => removeService(sIdx)} className="text-red-600 hover:text-red-800 p-1"><Trash2 size={16} /></button>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <label className="block text-xs font-medium text-gray-500">Add services to this row</label>
+                        <select
+                          multiple
+                          className="border border-gray-300 rounded px-3 py-2 text-sm min-w-[240px] h-20"
+                          onChange={(e) => {
+                            const added = Array.from(e.target.selectedOptions, (o) => o.value).filter((id) => !row.serviceIds.includes(id))
+                            if (added.length) addServicesToRow(added)
+                            e.target.selectedIndex = -1
+                          }}
+                        >
+                          {services
+                            .filter((s) => s.status === 'active' && !row.serviceIds.includes(s.id))
+                            .filter((s) => !row.categoryId || s.categoryId === row.categoryId)
+                            .map((s) => (
+                              <option key={s.id} value={s.id}>{s.title}</option>
+                            ))}
+                        </select>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+              <div className="mb-4">
                 <button
                   type="button"
-                  onClick={() => setHomepageRecommendedIds((prev) => prev.filter((_, i) => i !== idx))}
-                  className="text-red-600 hover:text-red-800"
+                  onClick={() => setHomepageLegalServicesRows((prev) => [...prev, { categoryId: '', serviceIds: [] }])}
+                  className="text-sm border border-dashed border-gray-400 rounded px-3 py-2 text-gray-600 hover:bg-gray-100"
                 >
-                  <X size={14} />
+                  + Add category row
                 </button>
-              </span>
-            ))}
-          </div>
-          <div className="flex items-center gap-2">
-            <select
-              multiple
-              value={[]}
-              onChange={(e) => {
-                const added = Array.from(e.target.selectedOptions, (o) => o.value).filter((id) => !homepageRecommendedIds.includes(id))
-                if (added.length) setHomepageRecommendedIds((prev) => [...prev, ...added])
-                e.target.selectedIndex = -1
-              }}
-              className="border border-gray-300 rounded px-3 py-2 text-sm min-w-[200px] h-24"
-            >
-              {services.filter((s) => s.status === 'active' && !homepageRecommendedIds.includes(s.id)).map((s) => (
-                <option key={s.id} value={s.id}>{s.title}</option>
-              ))}
-            </select>
-            <span className="text-xs text-gray-500">Select one or more to add</span>
-          </div>
+              </div>
+            </>
+          )}
         </div>
-        <Button onClick={saveHomepageSections} disabled={homepageSaving} className="bg-[var(--color-primary)] hover:opacity-90">
-          {homepageSaving ? 'Saving…' : 'Save Trending & Recommended'}
+        <Button onClick={saveHomepageSections} disabled={homepageSaving} className="bg-[var(--color-primary)] hover:opacity-90 text-white dark:text-white">
+          {homepageSaving ? 'Saving…' : 'Save Trending, Recommended & Legal Services'}
         </Button>
       </div>
     )
@@ -4042,6 +4216,10 @@ export default function AdminDashboard() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Slug *</label>
                       <Input value={serviceForm.slug} onChange={(e) => setServiceForm({ ...serviceForm, slug: e.target.value })} placeholder="ac-servicing" required />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Serial Number (order on All Services)</label>
+                      <Input type="number" value={serviceForm.serialNumber} onChange={(e) => setServiceForm({ ...serviceForm, serialNumber: e.target.value })} placeholder="e.g. 1" min={0} />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Category *</label>

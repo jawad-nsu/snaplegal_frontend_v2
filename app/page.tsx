@@ -23,8 +23,9 @@ interface HomepageService {
 export default function HomePage() {
   const router = useRouter()
   const categoriesScrollRef = useRef<HTMLDivElement>(null)
-  const [trendingRows, setTrendingRows] = useState<{ categoryTitle: string; services: HomepageService[] }[]>([])
+  const [trendingServices, setTrendingServices] = useState<HomepageService[]>([])
   const [recommended, setRecommended] = useState<HomepageService[]>([])
+  const [legalServicesRows, setLegalServicesRows] = useState<{ categoryId: string; categoryTitle: string; services: HomepageService[] }[]>([])
   const [sectionsLoading, setSectionsLoading] = useState(true)
 
   useEffect(() => {
@@ -33,8 +34,9 @@ export default function HomePage() {
         const res = await fetch('/api/homepage-sections')
         const data = await res.json()
         if (data.success) {
-          setTrendingRows(data.trending || [])
+          setTrendingServices(data.trending || [])
           setRecommended(data.recommended || [])
+          setLegalServicesRows(data.legalServices || [])
         }
       } catch (e) {
         console.error('Fetch homepage sections failed', e)
@@ -85,41 +87,6 @@ const categories = [
   { name: 'Explore more', icon: Grid2X2 },
 ]
 
-
-  const homeServices = [
-    {
-      title: 'Plumbing & Sanitary Services',
-      image: '/plumbing.jpg',
-      rating: '4.8',
-      description: 'Professional plumbing and sanitary services for your home. Expert technicians available 24/7.',
-      deliveryTime: '2-4 hours',
-      startingPrice: '৳500',
-    },
-    {
-      title: 'House Shifting Services',
-      image: '/moving_service.webp',
-      rating: '4.9',
-      description: 'Complete house shifting solutions with packing, moving, and unpacking services.',
-      deliveryTime: 'Same day',
-      startingPrice: '৳3,000',
-    },
-    {
-      title: 'Home Cleaning',
-      image: '/cleaning_service.jpg',
-      rating: '4.7',
-      description: 'Thorough home cleaning services including deep cleaning, regular maintenance, and more.',
-      deliveryTime: '3-5 hours',
-      startingPrice: '৳1,500',
-    },
-    {
-      title: 'Gaz Stove/Burner Services',
-      image: '/gas-cooker-repair.jpg',
-      rating: '4.6',
-      description: 'Expert gas stove and burner repair, installation, and maintenance services.',
-      deliveryTime: '1-2 hours',
-      startingPrice: '৳400',
-    },
-  ]
 
   return (
     <div className="min-h-screen">
@@ -204,8 +171,8 @@ const categories = [
         </div>
       </section>
 
-      {/* Trending – one row per category (fetched from admin) */}
-      {!sectionsLoading && trendingRows.length > 0 && (
+      {/* Trending – single row, order by serial (admin list order) */}
+      {!sectionsLoading && trendingServices.length > 0 && (
         <section className="container mx-auto px-4 py-12">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold">Trending</h2>
@@ -213,51 +180,44 @@ const categories = [
               View All <ChevronRight size={20} />
             </button>
           </div>
-          <div className="space-y-10">
-            {trendingRows.map((row) => (
-              <div key={row.categoryTitle}>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">{row.categoryTitle}</h3>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-                  {row.services.map((service) => (
-                    <div
-                      key={service.id}
-                      className="group cursor-pointer rounded-xl md:rounded-2xl overflow-hidden bg-white shadow-sm md:shadow-md hover:shadow-md md:hover:shadow-2xl transition-all duration-300 border border-gray-100"
-                      onClick={() => router.push(`/services/${service.slug}`)}
-                    >
-                      <div className="md:hidden">
-                        <div className="relative h-32 sm:h-40 overflow-hidden">
-                          <Image src={service.image || '/placeholder.svg'} alt={service.title} fill className="object-cover group-hover:scale-110 transition-transform duration-300" />
-                        </div>
-                        <div className="p-3 sm:p-4 text-center">
-                          <h3 className="text-sm sm:text-base font-medium text-gray-900 leading-tight">{service.title}</h3>
-                        </div>
-                      </div>
-                      <div className="hidden md:block">
-                        <div className="relative h-56 overflow-hidden p-3">
-                          <div className="relative h-full w-full rounded-xl overflow-hidden">
-                            <Image src={service.image || '/placeholder.svg'} alt={service.title} fill className="object-cover group-hover:scale-110 transition-transform duration-300" />
-                          </div>
-                        </div>
-                        <div className="p-5">
-                          <div className="flex items-start justify-between mb-2">
-                            <h3 className="font-bold text-lg text-gray-900 leading-tight">{service.title}</h3>
-                            <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg flex-shrink-0 ml-2">
-                              <Star size={16} className="fill-yellow-400 text-yellow-400" />
-                              <span className="font-semibold text-sm">{service.rating}</span>
-                            </div>
-                          </div>
-                          <p className="text-sm text-gray-600 mb-4 line-clamp-2">{service.description}</p>
-                          <div className="flex items-center justify-between mb-4">
-                            <span className="text-sm text-gray-600"><Clock size={16} className="inline mr-1" />{service.deliveryTime}</span>
-                            <span className="text-sm font-semibold text-gray-900">Starting at {service.startingPrice}</span>
-                          </div>
-                          <button onClick={(e) => handleBookNow(e, service)} className="w-full mt-6 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer">
-                            Book Now
-                          </button>
-                        </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            {trendingServices.map((service) => (
+              <div
+                key={service.id}
+                className="group cursor-pointer rounded-xl md:rounded-2xl overflow-hidden bg-white shadow-sm md:shadow-md hover:shadow-md md:hover:shadow-2xl transition-all duration-300 border border-gray-100"
+                onClick={() => router.push(`/services/${service.slug}`)}
+              >
+                <div className="md:hidden">
+                  <div className="relative h-32 sm:h-40 overflow-hidden">
+                    <Image src={service.image || '/placeholder.svg'} alt={service.title} fill className="object-cover group-hover:scale-110 transition-transform duration-300" />
+                  </div>
+                  <div className="p-3 sm:p-4 text-center">
+                    <h3 className="text-sm sm:text-base font-medium text-gray-900 leading-tight">{service.title}</h3>
+                  </div>
+                </div>
+                <div className="hidden md:block">
+                  <div className="relative h-56 overflow-hidden p-3">
+                    <div className="relative h-full w-full rounded-xl overflow-hidden">
+                      <Image src={service.image || '/placeholder.svg'} alt={service.title} fill className="object-cover group-hover:scale-110 transition-transform duration-300" />
+                    </div>
+                  </div>
+                  <div className="p-5">
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className="font-bold text-lg text-gray-900 leading-tight">{service.title}</h3>
+                      <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg flex-shrink-0 ml-2">
+                        <Star size={16} className="fill-yellow-400 text-yellow-400" />
+                        <span className="font-semibold text-sm">{service.rating}</span>
                       </div>
                     </div>
-                  ))}
+                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">{service.description}</p>
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-sm text-gray-600"><Clock size={16} className="inline mr-1" />{service.deliveryTime}</span>
+                      <span className="text-sm font-semibold text-gray-900">Starting at {service.startingPrice}</span>
+                    </div>
+                    <button onClick={(e) => handleBookNow(e, service)} className="w-full mt-6 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer">
+                      Book Now
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -281,70 +241,58 @@ const categories = [
         </div>
       </section> */}
 
-      {/* For Your Home */}
-      <section className="container mx-auto px-4 py-12">
-        <h2 className="text-2xl font-bold mb-6">Legal Services</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          {homeServices.map((service, index) => (
-            <div
-              key={index}
-              className="group cursor-pointer rounded-xl md:rounded-2xl overflow-hidden bg-white shadow-sm md:shadow-md hover:shadow-md md:hover:shadow-2xl transition-all duration-300 border border-gray-100"
-              onClick={() => router.push('/all-services')}
-            >
-              {/* Mobile: Simple design */}
-              <div className="md:hidden">
-                <div className="relative h-32 sm:h-40 overflow-hidden">
-                  <Image
-                    src={service.image || "/placeholder.svg"}
-                    alt={service.title}
-                    fill
-                    className="object-cover group-hover:scale-110 transition-transform duration-300"
-                  />
-                </div>
-                <div className="p-3 sm:p-4 text-center">
-                  <h3 className="text-sm sm:text-base font-medium text-gray-900 leading-tight">{service.title}</h3>
-                </div>
-              </div>
-              {/* Desktop: Full design */}
-              <div className="hidden md:block">
-                <div className="relative h-56 overflow-hidden p-3">
-                  <div className="relative h-full w-full rounded-xl overflow-hidden">
-                    <Image
-                      src={service.image || "/placeholder.svg"}
-                      alt={service.title}
-                      fill
-                      className="object-cover group-hover:scale-110 transition-transform duration-300"
-                    />
-                  </div>
-                </div>
-                <div className="p-5">
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-bold text-lg text-gray-900 leading-tight">{service.title}</h3>
-                    <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg flex-shrink-0 ml-2">
-                      <Star size={16} className="fill-yellow-400 text-yellow-400" />
-                      <span className="font-semibold text-sm">{service.rating}</span>
+      {/* Legal Services – one row per category, from admin homepage tab */}
+      {!sectionsLoading && legalServicesRows.length > 0 && (
+        <section className="container mx-auto px-4 py-12">
+          {legalServicesRows.map((row, rowIdx) => (
+            <div key={`legal-${rowIdx}-${row.categoryId}`} className="mb-10 last:mb-0">
+              <h2 className="text-2xl font-bold mb-6">{row.categoryTitle || 'Legal Services'}</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                {row.services.map((service) => (
+                  <div
+                    key={service.id}
+                    className="group cursor-pointer rounded-xl md:rounded-2xl overflow-hidden bg-white shadow-sm md:shadow-md hover:shadow-md md:hover:shadow-2xl transition-all duration-300 border border-gray-100"
+                    onClick={() => router.push(`/services/${service.slug}`)}
+                  >
+                    <div className="md:hidden">
+                      <div className="relative h-32 sm:h-40 overflow-hidden">
+                        <Image src={service.image || '/placeholder.svg'} alt={service.title} fill className="object-cover group-hover:scale-110 transition-transform duration-300" />
+                      </div>
+                      <div className="p-3 sm:p-4 text-center">
+                        <h3 className="text-sm sm:text-base font-medium text-gray-900 leading-tight">{service.title}</h3>
+                      </div>
+                    </div>
+                    <div className="hidden md:block">
+                      <div className="relative h-56 overflow-hidden p-3">
+                        <div className="relative h-full w-full rounded-xl overflow-hidden">
+                          <Image src={service.image || '/placeholder.svg'} alt={service.title} fill className="object-cover group-hover:scale-110 transition-transform duration-300" />
+                        </div>
+                      </div>
+                      <div className="p-5">
+                        <div className="flex items-start justify-between mb-2">
+                          <h3 className="font-bold text-lg text-gray-900 leading-tight">{service.title}</h3>
+                          <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg flex-shrink-0 ml-2">
+                            <Star size={16} className="fill-yellow-400 text-yellow-400" />
+                            <span className="font-semibold text-sm">{service.rating}</span>
+                          </div>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-4 line-clamp-2">{service.description}</p>
+                        <div className="flex items-center justify-between mb-4">
+                          <span className="text-sm text-gray-600"><Clock size={16} className="inline mr-1" />{service.deliveryTime}</span>
+                          <span className="text-sm font-semibold text-gray-900">Starting at {service.startingPrice}</span>
+                        </div>
+                        <button onClick={(e) => handleBookNow(e, service)} className="w-full mt-6 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer">
+                          Book Now
+                        </button>
+                      </div>
                     </div>
                   </div>
-                  <p className="text-sm text-gray-600 mb-4 line-clamp-2">{service.description}</p>
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-sm text-gray-600">
-                      <Clock size={16} className="inline mr-1" />
-                      {service.deliveryTime}
-                    </span>
-                    <span className="text-sm font-semibold text-gray-900">Starting at {service.startingPrice}</span>
-                  </div>
-                  <button 
-                    onClick={(e) => handleBookNow(e, { title: service.title })}
-                    className="w-full mt-6 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
-                  >
-                    Book Now
-                  </button>
-                </div>
+                ))}
               </div>
             </div>
           ))}
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Recommended (fetched from admin) */}
       {!sectionsLoading && recommended.length > 0 && (
