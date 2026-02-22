@@ -116,7 +116,7 @@ export async function GET(request: NextRequest) {
     const transformedOrders = orders.map((order) => {
       // Get first item's service for display
       const firstItem = order.items[0]
-      const serviceImage = firstItem?.service?.image || '/legal_service_image.jpg'
+      const serviceImage = firstItem?.service?.image || '/legal_service_img.jpg'
       const serviceName = firstItem?.serviceName || 'Service'
 
       // Format scheduled date/time
