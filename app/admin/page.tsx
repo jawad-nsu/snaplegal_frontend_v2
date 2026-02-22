@@ -133,7 +133,7 @@ interface Service {
   whyChooseConsultants?: Array<{ title: string; description: string }>
   howWeSelectConsultants?: Array<{ title: string; description: string }>
   // Price Packages
-  packages?: Array<{ name: string; price: string; originalPrice?: string; features: string[]; description?: string }>
+  packages?: Array<{ name: string; price: string; originalPrice?: string; features: string[]; description?: string; recommended?: boolean }>
   // Core cost breakdown
   coreFiling?: string
   coreStamps?: string
@@ -1016,7 +1016,7 @@ export default function AdminDashboard() {
     whyChooseConsultants: [] as Array<{ title: string; description: string }>,
     howWeSelectConsultants: [] as Array<{ title: string; description: string }>,
     // Price Packages
-    packages: [] as Array<{ name: string; price: string; originalPrice?: string; features: string[]; description?: string }>,
+    packages: [] as Array<{ name: string; price: string; originalPrice?: string; features: string[]; description?: string; recommended?: boolean }>,
     // Core cost breakdown
     coreFiling: '', coreStamps: '', coreCourtFee: '',
     // Presented cost breakdown
@@ -1092,7 +1092,17 @@ export default function AdminDashboard() {
         shortDescription: serviceItem.shortDescription || '', detailedDescription: serviceItem.detailedDescription || '', providerAuthority: serviceItem.providerAuthority || '', infoSource: serviceItem.infoSource || '',
         requiredDocuments: serviceItem.requiredDocuments || [], keywords: serviceItem.keywords || [], whatsIncluded: serviceItem.whatsIncluded || '', whatsNotIncluded: serviceItem.whatsNotIncluded || '',
         timeline: serviceItem.timeline || '', additionalNotes: serviceItem.additionalNotes || '', processFlow: serviceItem.processFlow || '', videoUrl: serviceItem.videoUrl || '',
-        communityDiscussions: serviceItem.communityDiscussions ?? [], faqs: serviceItem.faqs || [], consultantQualifications: serviceItem.consultantQualifications || '', whyChooseConsultants: serviceItem.whyChooseConsultants ?? [], howWeSelectConsultants: serviceItem.howWeSelectConsultants ?? [], packages: serviceItem.packages || [],
+        communityDiscussions: serviceItem.communityDiscussions ?? [], faqs: serviceItem.faqs || [], consultantQualifications: serviceItem.consultantQualifications || '', whyChooseConsultants: serviceItem.whyChooseConsultants ?? [], howWeSelectConsultants: serviceItem.howWeSelectConsultants ?? [],         packages: (() => {
+          type Pkg = { name: string; price: string; originalPrice?: string; features: string[]; description?: string; recommended?: boolean }
+          const packs: Pkg[] = serviceItem.packages || []
+          const withRec: Pkg[] = packs.map((p) => ({ ...p, recommended: !!p.recommended }))
+          const hasAny = withRec.some((p) => p.recommended)
+          if (!hasAny && withRec.length > 0) {
+            const secondIdx = withRec.length > 1 ? 1 : 0
+            withRec[secondIdx].recommended = true
+          }
+          return withRec
+        })(),
         coreFiling: serviceItem.coreFiling || '', coreStamps: serviceItem.coreStamps || '', coreCourtFee: serviceItem.coreCourtFee || '',
         clientFiling: serviceItem.clientFiling || '', clientStamps: serviceItem.clientStamps || '', clientCourtFee: serviceItem.clientCourtFee || '',
         clientConsultantFee: serviceItem.clientConsultantFee || ''
@@ -1149,7 +1159,7 @@ export default function AdminDashboard() {
       consultantQualifications: service.consultantQualifications || '',
       whyChooseConsultants: (service.whyChooseConsultants ?? []).map(c => ({ ...c })),
       howWeSelectConsultants: (service.howWeSelectConsultants ?? []).map(c => ({ ...c })),
-      packages: (service.packages || []).map(p => ({ ...p, features: [...(p.features || [])] })),
+      packages: (service.packages || []).map(p => ({ ...p, features: [...(p.features || [])], recommended: !!p.recommended })),
       coreFiling: service.coreFiling || '',
       coreStamps: service.coreStamps || '',
       coreCourtFee: service.coreCourtFee || '',
@@ -1477,7 +1487,7 @@ export default function AdminDashboard() {
             whyChooseConsultants: serviceForm.whyChooseConsultants,
             howWeSelectConsultants: serviceForm.howWeSelectConsultants,
             // Price Packages
-            packages: serviceForm.packages.map(p => ({ ...p, features: p.features.filter((f: string) => f.trim()) })),
+            packages: serviceForm.packages.map(p => ({ ...p, features: p.features.filter((f: string) => f.trim()), recommended: !!p.recommended })),
             // Core cost breakdown
             coreFiling: serviceForm.coreFiling,
             coreStamps: serviceForm.coreStamps,
@@ -4651,13 +4661,30 @@ export default function AdminDashboard() {
                       <div key={index} className="border p-4 rounded-lg">
                         <div className="flex justify-between items-center mb-2">
                           <span className="text-sm font-medium text-gray-700">Package {index + 1}</span>
-                          <button
-                            type="button"
-                            onClick={() => setServiceForm({ ...serviceForm, packages: serviceForm.packages.filter((_, i) => i !== index) })}
-                            className="text-red-600 hover:text-red-800 text-sm"
-                          >
-                            Remove
-                          </button>
+                          <div className="flex items-center gap-3">
+                            <label className="flex items-center gap-1.5 text-sm text-gray-600 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={!!pkg.recommended}
+                                onChange={(e) => {
+                                  const newPackages = serviceForm.packages.map((p, i) => ({
+                                    ...p,
+                                    recommended: e.target.checked ? i === index : (i === index ? false : !!p.recommended)
+                                  }))
+                                  setServiceForm({ ...serviceForm, packages: newPackages })
+                                }}
+                                className="rounded border-gray-300"
+                              />
+                              Set as recommended
+                            </label>
+                            <button
+                              type="button"
+                              onClick={() => setServiceForm({ ...serviceForm, packages: serviceForm.packages.filter((_, i) => i !== index) })}
+                              className="text-red-600 hover:text-red-800 text-sm"
+                            >
+                              Remove
+                            </button>
+                          </div>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
                           <Input
@@ -4721,7 +4748,7 @@ export default function AdminDashboard() {
                     ))}
                     <button
                       type="button"
-                      onClick={() => setServiceForm({ ...serviceForm, packages: [...serviceForm.packages, { name: '', price: '', originalPrice: '', features: [] }] })}
+                      onClick={() => setServiceForm({ ...serviceForm, packages: [...serviceForm.packages, { name: '', price: '', originalPrice: '', features: [], recommended: false }] })}
                       className="text-sm text-blue-600 hover:text-blue-800"
                     >
                       + Add Package

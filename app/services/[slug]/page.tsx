@@ -25,6 +25,7 @@ interface ServiceData {
     originalPrice?: number
     features: string[]
     popular?: boolean
+    recommended?: boolean
   }[]
   processFlow?: string
   videoUrl?: string
@@ -180,7 +181,7 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
               }))
             : [],
           packages: Array.isArray(apiService.packages)
-            ? apiService.packages.map((pkg: { name?: string; price?: string | number; originalPrice?: string | number; features?: string[]; popular?: boolean }) => {
+            ? apiService.packages.map((pkg: { name?: string; price?: string | number; originalPrice?: string | number; features?: string[]; popular?: boolean; recommended?: boolean }) => {
                 // Helper function to parse price values
                 const parsePrice = (value: string | number | null | undefined): number => {
                   if (value === null || value === undefined) return 0
@@ -227,8 +228,14 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                   price: parsePrice(pkg.price),
                   originalPrice: parseOriginalPrice(pkg.originalPrice),
                   features: featuresArray,
-                  popular: pkg.popular || false
+                  popular: pkg.popular || false,
+                  recommended: pkg.recommended
                 }
+              }).map((p: { name: string; price: number; originalPrice?: number; features: string[]; popular?: boolean; recommended?: boolean }, i: number, arr: { recommended?: boolean }[]) => {
+                const firstRecommended = arr.findIndex((x: { recommended?: boolean }) => x.recommended)
+                const defaultIdx = arr.length > 1 ? 1 : 0
+                const onlyOne = firstRecommended >= 0 ? firstRecommended : defaultIdx
+                return { ...p, recommended: i === onlyOne }
               })
             : [],
           processFlow: apiService.processFlow || undefined,
@@ -257,9 +264,10 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
         }
 
         setService(transformedService)
-        // Reset selectedPackage to 0 if it's out of bounds
+        // Default selected package to the recommended one (or Standard), else first
         if (transformedService.packages.length > 0) {
-          setSelectedPackage(0)
+          const recommendedIdx = transformedService.packages.findIndex((p) => p.recommended)
+          setSelectedPackage(recommendedIdx >= 0 ? recommendedIdx : 0)
         }
 
         // Fetch reviews if service ID is available
@@ -1290,15 +1298,15 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                     <div
                       key={index}
                       onClick={() => setSelectedPackage(index)}
-                      className={`border-2 rounded-lg p-3 cursor-pointer transition-all ${
+                      className={`border-2 rounded-lg p-3 cursor-pointer transition-all relative ${pkg.recommended ? 'pt-4' : ''} ${
                         selectedPackage === index
                           ? 'border-[var(--color-primary)] bg-[var(--color-neutral)]'
                           : 'border-gray-200 hover:border-[var(--color-primary)]/50'
-                      } ${pkg.popular ? 'relative' : ''}`}
+                      }`}
                     >
-                      {pkg.popular && (
+                      {pkg.recommended && (
                         <div className="absolute -top-2 left-3 bg-[var(--color-primary)] text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                          POPULAR
+                          Recommended
                         </div>
                       )}
                       <div className="flex items-start justify-between mb-1">
@@ -1420,15 +1428,15 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                     setSelectedPackage(index)
                     setIsMobilePackageExpanded(false)
                   }}
-                  className={`border-2 rounded-lg p-3 cursor-pointer transition-all bg-white ${
+                  className={`border-2 rounded-lg p-3 cursor-pointer transition-all bg-white relative ${pkg.recommended ? 'pt-4' : ''} ${
                     selectedPackage === index
                       ? 'border-[var(--color-primary)] bg-[var(--color-neutral)]'
                       : 'border-gray-200 hover:border-[var(--color-primary)]/50'
-                  } ${pkg.popular ? 'relative' : ''}`}
+                  }`}
                 >
-                  {pkg.popular && (
+                  {pkg.recommended && (
                     <div className="absolute -top-2 left-3 bg-[var(--color-primary)] text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                      POPULAR
+                      Recommended
                     </div>
                   )}
                   <div className="flex items-start justify-between mb-1">
