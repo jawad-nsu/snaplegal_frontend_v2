@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function Footer() {
   return (
@@ -7,7 +8,15 @@ export default function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Categories Column */}
           <div>
-            <h3 className="bg-[var(--color-primary)] text-white font-bold text-xl px-3 py-1 rounded">SNAPLEGAL</h3>
+            <Link href="/" className="inline-block mb-4">
+              <Image
+                src="/logo_without_tm.png"
+                alt="SnapLegal"
+                width={600}
+                height={200}
+                className="h-10 sm:h-12 w-auto max-w-full object-contain"
+              />
+            </Link>
             <ul className="space-y-2">
               <li>
                 <Link href="https://www.google.com/maps/place/SnapLegal/@23.7805327,90.4117023,17z/data=!3m1!4b1!4m6!3m5!1s0x3755c723c29b9d63:0xb47650183455f358!8m2!3d23.7805279!4d90.4163104!16s%2Fg%2F11ylqymddq?entry=ttu&g_ep=EgoyMDI1MTEyMy4xIKXMDSoASAFQAw%3D%3D" target='blank' className="text-gray-600 hover:text-[var(--color-primary)] text-sm">

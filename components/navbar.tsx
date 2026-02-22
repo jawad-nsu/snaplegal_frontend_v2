@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter, usePathname } from 'next/navigation'
 import { useSession, signOut } from 'next-auth/react'
 import { MapPin, Search, ShoppingCart, User, LayoutDashboard, Menu, X, Package, LogOut, ArrowRight, Loader2 } from 'lucide-react'
@@ -226,8 +227,15 @@ export default function Navbar() {
         {/* Mobile Layout */}
         <div className="flex md:hidden items-center justify-between gap-3">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-            <span className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">SnapLegal</span>
+          <Link href="/" className="flex items-center flex-shrink-0">
+            <Image
+              src="/logo_without_tm.png"
+              alt="SnapLegal"
+              width={600}
+              height={200}
+              className="h-6 sm:h-12 w-auto max-w-full object-contain"
+              priority
+            />
           </Link>
 
           {/* Search Bar - Mobile */}
@@ -381,8 +389,14 @@ export default function Navbar() {
         <div className="hidden md:flex items-center justify-between gap-4">
           {/* Left Section - Logo and Location */}
           <div className="flex items-center gap-4">
-            <Link href="/" className="flex items-center gap-2">
-              <span className="text-xl font-bold text-gray-900 dark:text-white">SnapLegal</span>
+            <Link href="/" className="flex items-center flex-shrink-0">
+              <Image
+                src="/logo_without_tm.png"
+                alt="SnapLegal"
+                width={300}
+                height={100}
+                className="h-8 w-auto object-contain"
+              />
             </Link>
             
             <button className="flex items-center gap-1 text-gray-700 hover:text-[var(--color-primary)] dark:text-white dark:hover:text-white transition-colors">

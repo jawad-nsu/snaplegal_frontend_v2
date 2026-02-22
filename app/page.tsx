@@ -472,8 +472,8 @@ const categories = [
             Looking for something else? We&apos;re here always.
           </h2>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Button className="bg-[var(--color-primary)] hover:opacity-90 text-white px-8 py-6 text-lg font-semibold">
-              Book an Appointment
+            <Button asChild className="bg-[var(--color-primary)] hover:opacity-90 text-white px-8 py-6 text-lg font-semibold">
+              <Link href="/contact-sales">Book an Appointment</Link>
             </Button>
 
             <Button
