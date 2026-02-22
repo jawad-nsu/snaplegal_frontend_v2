@@ -165,7 +165,7 @@ export async function GET(
 
     // Get first item's service image for display
     const firstItem = order.items[0]
-    const serviceImage = firstItem?.service?.image || '/legal_service_img.jpg'
+    const serviceImage = firstItem?.service?.image || '/legal_service_img.png'
     const serviceName = firstItem?.serviceName || 'Service'
 
     // Transform order for frontend
@@ -395,7 +395,7 @@ export async function PUT(
 
     // Get first item's service image for display
     const firstItem = updatedOrder.items[0]
-    const serviceImage = firstItem?.service?.image || '/legal_service_img.jpg'
+    const serviceImage = firstItem?.service?.image || '/legal_service_img.png'
     const serviceName = firstItem?.serviceName || 'Service'
 
     // Transform order for frontend

@@ -93,7 +93,7 @@ export default function ServiceOrdersPage() {
           status: order.status || 'Unknown',
           statusEnum: order.statusEnum,
           service: order.service || 'Service',
-          serviceImage: order.serviceImage || '/legal_service_img.jpg',
+          serviceImage: order.serviceImage || '/legal_service_img.png',
           schedule: order.schedule || 'Not scheduled',
           duePrice: order.duePrice || order.total || 0,
           total: order.total,
@@ -285,7 +285,7 @@ export default function ServiceOrdersPage() {
                             <div className="flex items-center gap-3">
                               <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-gray-200">
                                 <Image
-                                  src={order.serviceImage || '/legal_service_img.jpg'}
+                                  src={order.serviceImage || '/legal_service_img.png'}
                                   alt={order.service || 'Service'}
                                   fill
                                   className="object-cover"
@@ -352,7 +352,7 @@ export default function ServiceOrdersPage() {
                       <div className="flex items-center gap-3 mb-3">
                         <div className="relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-gray-200">
                           <Image
-                            src={order.serviceImage || '/legal_service_img.jpg'}
+                            src={order.serviceImage || '/legal_service_img.png'}
                             alt={order.service || 'Service'}
                             fill
                             className="object-cover"
