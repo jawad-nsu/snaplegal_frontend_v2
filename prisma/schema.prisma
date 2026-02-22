@@ -217,6 +217,8 @@ model Order {
   additionalCost Float         @default(0)
   deliveryCharge Float         @default(0)
   discount       Float         @default(0)
+  promoCode      String?
+  promoDiscount  Float         @default(0)
   total          Float
   scheduledDate  DateTime?
   scheduledTime  String?
@@ -347,4 +349,27 @@ enum PaymentStatus {
   Paid
   Refunded
   Failed
+}
+
+enum PromotionType {
+  Percentage
+  Fixed
+}
+
+model Promotion {
+  id          String         @id @default(uuid())
+  code        String         @unique
+  type        PromotionType
+  value       Float
+  minPurchase Float?
+  maxDiscount Float?
+  validFrom   DateTime
+  validTo     DateTime
+  usageLimit  Int?
+  usedCount   Int            @default(0)
+  isActive    Boolean        @default(true)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@map("promotions")
 }

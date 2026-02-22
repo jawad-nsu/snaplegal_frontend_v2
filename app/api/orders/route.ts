@@ -153,6 +153,8 @@ export async function GET(request: NextRequest) {
         additionalCost: order.additionalCost,
         deliveryCharge: order.deliveryCharge,
         discount: order.discount,
+        promoCode: order.promoCode,
+        promoDiscount: order.promoDiscount ?? 0,
         total: order.total,
         scheduledDate: order.scheduledDate?.toISOString(),
         scheduledTime: order.scheduledTime,
@@ -225,6 +227,8 @@ export async function POST(request: NextRequest) {
       notes,
       paymentMethod,
       orderNumber,
+      promoCode,
+      promoDiscount,
     } = body
 
     // Validate required fields
@@ -288,7 +292,14 @@ export async function POST(request: NextRequest) {
     const additionalCost = 0
     const deliveryCharge = 0
     const discount = totalDiscount
-    const total = subtotal - discount + additionalCost + deliveryCharge
+    const promoDiscountAmount =
+      typeof promoDiscount === 'number' && promoDiscount >= 0 ? promoDiscount : 0
+    const total =
+      subtotal -
+      discount -
+      promoDiscountAmount +
+      additionalCost +
+      deliveryCharge
 
     // Generate order number if not provided
     let finalOrderNumber = orderNumber
@@ -352,6 +363,11 @@ export async function POST(request: NextRequest) {
       })
     }
 
+    const promoCodeStr =
+      typeof promoCode === 'string' && promoCode.trim()
+        ? promoCode.trim().toUpperCase()
+        : null
+
     // Create order with items
     const order = await prisma.order.create({
       data: {
@@ -364,6 +380,8 @@ export async function POST(request: NextRequest) {
         additionalCost,
         deliveryCharge,
         discount,
+        promoCode: promoCodeStr,
+        promoDiscount: promoDiscountAmount,
         total,
         scheduledDate: scheduledDate ? new Date(scheduledDate) : null,
         scheduledTime: scheduledTime || null,
@@ -396,6 +414,17 @@ export async function POST(request: NextRequest) {
         },
       },
     })
+
+    if (promoCodeStr && promoDiscountAmount > 0) {
+      try {
+        await prisma.promotion.updateMany({
+          where: { code: promoCodeStr },
+          data: { usedCount: { increment: 1 } },
+        })
+      } catch (e) {
+        console.error('Failed to increment promo usedCount:', e)
+      }
+    }
 
     return NextResponse.json({
       success: true,

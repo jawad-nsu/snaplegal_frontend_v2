@@ -32,7 +32,8 @@ import {
   ChevronDown,
   Copy,
   Home,
-  GripVertical
+  GripVertical,
+  Tag
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -234,6 +235,8 @@ interface Order {
   additionalCost: number
   deliveryCharge: number
   discount: number
+  promoCode?: string | null
+  promoDiscount?: number
   total: number
   paymentStatus: 'pending' | 'paid' | 'refunded'
   items: Array<{
@@ -274,7 +277,23 @@ interface Lead {
   createdAt: string
 }
 
-type TabType = 'leads' | 'users' | 'vendors' | 'categories' | 'subcategories' | 'services' | 'homepage' | 'service-requests' | 'chats' | 'orders' | 'reviews'
+interface Promotion {
+  id: string
+  code: string
+  type: string
+  value: number
+  minPurchase: number | null
+  maxDiscount: number | null
+  validFrom: string
+  validTo: string
+  usageLimit: number | null
+  usedCount: number
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+type TabType = 'leads' | 'users' | 'vendors' | 'categories' | 'subcategories' | 'services' | 'homepage' | 'service-requests' | 'chats' | 'orders' | 'reviews' | 'promotions'
 
 // Trending is a single ordered list of service IDs (serial = array index on homepage)
 
@@ -323,7 +342,7 @@ const sortSubCategories = (subCategoriesToSort: SubCategory[]): SubCategory[] =>
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<TabType>('leads')
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [editingItem, setEditingItem] = useState<User | Vendor | ServiceCategory | SubCategory | Service | Review | null>(null)
+  const [editingItem, setEditingItem] = useState<User | Vendor | ServiceCategory | SubCategory | Service | Review | Promotion | null>(null)
   const [isCloningService, setIsCloningService] = useState(false)
 
   // Filter states for Users
@@ -544,6 +563,20 @@ export default function AdminDashboard() {
     isVerified: false,
   })
 
+  // Promotions
+  const [promotions, setPromotions] = useState<Promotion[]>([])
+  const [promotionsLoading, setPromotionsLoading] = useState(false)
+  const [promotionForm, setPromotionForm] = useState({
+    code: '',
+    type: 'Fixed' as 'Fixed' | 'Percentage',
+    value: '',
+    validFrom: '',
+    validTo: '',
+    minPurchase: '',
+    maxDiscount: '',
+    usageLimit: '',
+  })
+
   // Homepage (Trending = single row, ordered by serial; Recommended; Legal Services = one row per category)
   const [homepageTrendingIds, setHomepageTrendingIds] = useState<string[]>([])
   const [homepageRecommendedIds, setHomepageRecommendedIds] = useState<string[]>([])
@@ -677,6 +710,8 @@ export default function AdminDashboard() {
             additionalCost: number
             deliveryCharge: number
             discount: number
+            promoCode?: string | null
+            promoDiscount?: number
             total: number
             paymentStatus: string
             address?: string
@@ -740,6 +775,8 @@ export default function AdminDashboard() {
               additionalCost: order.additionalCost || 0,
               deliveryCharge: order.deliveryCharge || 0,
               discount: order.discount || 0,
+              promoCode: order.promoCode ?? null,
+              promoDiscount: order.promoDiscount ?? 0,
               total: order.total || 0,
               paymentStatus: order.paymentStatus?.toLowerCase() || 'pending',
               items: transformedItems,
@@ -762,6 +799,30 @@ export default function AdminDashboard() {
     // Fetch orders when orders tab is active
     if (activeTab === 'orders') {
       fetchOrders()
+    }
+  }, [activeTab])
+
+  // Fetch promotions when promotions tab is active
+  useEffect(() => {
+    const fetchPromotions = async () => {
+      try {
+        setPromotionsLoading(true)
+        const response = await fetch('/api/promotions')
+        const data = await response.json()
+        if (data.success && data.promotions) {
+          setPromotions(data.promotions)
+        } else {
+          setPromotions([])
+        }
+      } catch (error) {
+        console.error('Error fetching promotions:', error)
+        setPromotions([])
+      } finally {
+        setPromotionsLoading(false)
+      }
+    }
+    if (activeTab === 'promotions') {
+      fetchPromotions()
     }
   }, [activeTab])
 
@@ -1054,6 +1115,17 @@ export default function AdminDashboard() {
         comment: '',
         images: [],
         isVerified: false,
+      })
+    } else if (activeTab === 'promotions') {
+      setPromotionForm({
+        code: '',
+        type: 'Fixed',
+        value: '',
+        validFrom: '',
+        validTo: '',
+        minPurchase: '',
+        maxDiscount: '',
+        usageLimit: '',
       })
     }
   }
@@ -1595,6 +1667,69 @@ export default function AdminDashboard() {
         console.error('Error saving review:', error)
         const errorMsg = error instanceof Error ? error.message : 'Network error or server unavailable'
         alert(`Failed to save review: ${errorMsg}`)
+      }
+    } else if (activeTab === 'promotions') {
+      try {
+        if (!promotionForm.code.trim()) {
+          alert('Promo code is required')
+          return
+        }
+        const valueNum = parseFloat(promotionForm.value)
+        if (isNaN(valueNum) || valueNum <= 0) {
+          alert('Discount value must be a positive number')
+          return
+        }
+        if (promotionForm.type === 'Percentage' && valueNum > 100) {
+          alert('Percentage cannot exceed 100')
+          return
+        }
+        if (!promotionForm.validFrom || !promotionForm.validTo) {
+          alert('Valid from and valid to dates are required')
+          return
+        }
+        const fromDate = new Date(promotionForm.validFrom)
+        const toDate = new Date(promotionForm.validTo)
+        if (isNaN(fromDate.getTime()) || isNaN(toDate.getTime())) {
+          alert('Invalid date format')
+          return
+        }
+        if (toDate < fromDate) {
+          alert('Valid to must be after valid from')
+          return
+        }
+
+        const response = await fetch('/api/promotions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            code: promotionForm.code.trim(),
+            type: promotionForm.type,
+            value: valueNum,
+            validFrom: promotionForm.validFrom,
+            validTo: promotionForm.validTo,
+            minPurchase: promotionForm.minPurchase ? parseFloat(promotionForm.minPurchase) : null,
+            maxDiscount: promotionForm.maxDiscount ? parseFloat(promotionForm.maxDiscount) : null,
+            usageLimit: promotionForm.usageLimit ? parseInt(promotionForm.usageLimit, 10) : null,
+          }),
+        })
+
+        const data = await response.json()
+        if (!response.ok) {
+          alert(data.error || 'Failed to create promotion')
+          return
+        }
+        if (data.success) {
+          const refreshResponse = await fetch('/api/promotions')
+          const refreshData = await refreshResponse.json()
+          if (refreshData.success && refreshData.promotions) {
+            setPromotions(refreshData.promotions)
+          }
+          setIsModalOpen(false)
+          setEditingItem(null)
+        }
+      } catch (error) {
+        console.error('Error saving promotion:', error)
+        alert(error instanceof Error ? error.message : 'Failed to create promotion')
       }
     }
   }
@@ -2345,6 +2480,44 @@ export default function AdminDashboard() {
     </div>
   )
 
+  const renderPromotionsTab = () => (
+    <div className="space-y-4">
+      {promotionsLoading ? (
+        <div className="text-center py-8 sm:py-12 px-4">
+          <p className="text-sm sm:text-base text-gray-600">Loading promotions...</p>
+        </div>
+      ) : promotions.length === 0 ? (
+        <div className="text-center py-8 sm:py-12 px-4">
+          <p className="text-sm sm:text-base text-gray-600">No promotions yet. Add your first promo code!</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {promotions.map((promo) => (
+            <div key={promo.id} className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 font-mono">{promo.code}</h3>
+                  <p className="text-sm text-gray-500">
+                    {promo.type === 'Percentage'
+                      ? `${promo.value}% off${promo.maxDiscount != null ? ` (up to ৳${promo.maxDiscount.toLocaleString()})` : ''}${promo.minPurchase != null ? ` · Min. purchase: ৳${promo.minPurchase.toLocaleString()}` : ''}`
+                      : `৳${promo.value} off${promo.minPurchase != null ? ` · Min. purchase: ৳${promo.minPurchase.toLocaleString()}` : ''}`}
+                  </p>
+                </div>
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${promo.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                  {promo.isActive ? 'Active' : 'Inactive'}
+                </span>
+              </div>
+              <div className="space-y-2 text-xs text-gray-600">
+                <p>Valid: {new Date(promo.validFrom).toLocaleDateString()} – {new Date(promo.validTo).toLocaleDateString()}</p>
+                {promo.usageLimit != null && <p>Used: {promo.usedCount} / {promo.usageLimit}</p>}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+
   const renderSubCategoriesTab = () => (
     <div className="space-y-4">
       {subCategoriesLoading ? (
@@ -2808,6 +2981,7 @@ export default function AdminDashboard() {
                   <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
                   <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                   <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment</th>
+                  <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Promo</th>
                   <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
                   <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                   <th className="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -2816,7 +2990,7 @@ export default function AdminDashboard() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredOrders.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="px-3 md:px-6 py-8 text-center text-gray-500">
+                    <td colSpan={10} className="px-3 md:px-6 py-8 text-center text-gray-500">
                       No orders found matching the filters
                     </td>
                   </tr>
@@ -2860,6 +3034,15 @@ export default function AdminDashboard() {
                         {order.paymentStatus}
                       </span>
                     </td>
+                    <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                      {order.promoCode && (order.promoDiscount ?? 0) > 0 ? (
+                        <span className="font-mono text-green-700" title={`Promo: ${order.promoCode}, -৳${(order.promoDiscount ?? 0).toLocaleString()}`}>
+                          {order.promoCode} -৳{(order.promoDiscount ?? 0).toLocaleString()}
+                        </span>
+                      ) : (
+                        <span className="text-gray-400">—</span>
+                      )}
+                    </td>
                     <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">৳{order.total.toLocaleString()}</td>
                     <td className="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       <div>{order.orderDate}</div>
@@ -2872,7 +3055,7 @@ export default function AdminDashboard() {
                         <button
                           onClick={() => {
                             // View order details - could open a modal or navigate
-                            alert(`Order Details:\n\nOrder: ${order.orderNumber}\nService: ${order.serviceName}\nVendor: ${order.vendorName}\nClient: ${order.clientName}\nStatus: ${order.status}\nTotal: ৳${order.total}\n\nItems:\n${order.items.map(item => `- ${item.name} (${item.details}): ৳${item.price}`).join('\n')}`)
+                            alert(`Order Details:\n\nOrder: ${order.orderNumber}\nService: ${order.serviceName}\nVendor: ${order.vendorName}\nClient: ${order.clientName}\nStatus: ${order.status}\n${order.promoCode && (order.promoDiscount ?? 0) > 0 ? `Promo: ${order.promoCode} (-৳${(order.promoDiscount ?? 0).toLocaleString()})\n` : ''}Total: ৳${order.total}\n\nItems:\n${order.items.map(item => `- ${item.name} (${item.details}): ৳${item.price}`).join('\n')}`)
                           }}
                           className="text-indigo-600 hover:text-indigo-900"
                         >
@@ -3986,7 +4169,7 @@ export default function AdminDashboard() {
         <div className={`bg-white rounded-lg shadow-xl ${activeTab === 'services' ? 'max-w-6xl' : 'max-w-2xl'} w-full max-h-[90vh] overflow-y-auto`}>
           <div className="flex items-center justify-between p-4 md:p-6 border-b sticky top-0 bg-white z-10">
             <h2 className="text-lg md:text-xl font-bold">
-              {activeTab === 'services' && isCloningService ? 'Clone Service' : editingItem ? 'Edit' : 'Add New'} {activeTab === 'users' ? 'User' : activeTab === 'vendors' ? 'Vendor' : activeTab === 'categories' ? 'Category' : activeTab === 'subcategories' ? 'Sub-Category' : activeTab === 'services' ? 'Service' : activeTab === 'reviews' ? 'Review' : ''}
+              {activeTab === 'services' && isCloningService ? 'Clone Service' : editingItem ? 'Edit' : 'Add New'} {activeTab === 'users' ? 'User' : activeTab === 'vendors' ? 'Vendor' : activeTab === 'categories' ? 'Category' : activeTab === 'subcategories' ? 'Sub-Category' : activeTab === 'services' ? 'Service' : activeTab === 'reviews' ? 'Review' : activeTab === 'promotions' ? 'Promotion' : ''}
             </h2>
             <button onClick={() => { setIsModalOpen(false); if (activeTab === 'services') setIsCloningService(false) }} className="text-gray-400 hover:text-gray-600">
               <X size={24} />
@@ -4249,6 +4432,95 @@ export default function AdminDashboard() {
                   <label htmlFor="isVerified" className="text-sm font-medium text-gray-700">
                     Mark as Verified Purchase
                   </label>
+                </div>
+              </>
+            )}
+
+            {activeTab === 'promotions' && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Promo Code *</label>
+                  <Input
+                    value={promotionForm.code}
+                    onChange={(e) => setPromotionForm({ ...promotionForm, code: e.target.value.toUpperCase() })}
+                    placeholder="e.g. SAVE20"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Discount Type *</label>
+                  <select
+                    value={promotionForm.type}
+                    onChange={(e) => setPromotionForm({ ...promotionForm, type: e.target.value as 'Fixed' | 'Percentage' })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea"
+                  >
+                    <option value="Fixed">Fixed amount (৳)</option>
+                    <option value="Percentage">Percentage (%)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Discount Value *</label>
+                  <Input
+                    type="number"
+                    min={0}
+                    step={promotionForm.type === 'Percentage' ? 1 : 0.01}
+                    value={promotionForm.value}
+                    onChange={(e) => setPromotionForm({ ...promotionForm, value: e.target.value })}
+                    placeholder={promotionForm.type === 'Percentage' ? 'e.g. 10' : 'e.g. 500'}
+                    required
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Valid From *</label>
+                    <Input
+                      type="date"
+                      value={promotionForm.validFrom}
+                      onChange={(e) => setPromotionForm({ ...promotionForm, validFrom: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Valid To *</label>
+                    <Input
+                      type="date"
+                      value={promotionForm.validTo}
+                      onChange={(e) => setPromotionForm({ ...promotionForm, validTo: e.target.value })}
+                      required
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Min. Purchase (optional)</label>
+                  <Input
+                    type="number"
+                    min={0}
+                    step={0.01}
+                    value={promotionForm.minPurchase}
+                    onChange={(e) => setPromotionForm({ ...promotionForm, minPurchase: e.target.value })}
+                    placeholder="Minimum order amount"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Max Discount (optional, for %)</label>
+                  <Input
+                    type="number"
+                    min={0}
+                    step={0.01}
+                    value={promotionForm.maxDiscount}
+                    onChange={(e) => setPromotionForm({ ...promotionForm, maxDiscount: e.target.value })}
+                    placeholder="Cap discount amount"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Usage Limit (optional)</label>
+                  <Input
+                    type="number"
+                    min={1}
+                    value={promotionForm.usageLimit}
+                    onChange={(e) => setPromotionForm({ ...promotionForm, usageLimit: e.target.value })}
+                    placeholder="Total uses allowed"
+                  />
                 </div>
               </>
             )}
@@ -4879,6 +5151,15 @@ export default function AdminDashboard() {
               <span className="hidden sm:inline">Services</span>
             </button>
             <button
+              onClick={() => setActiveTab('promotions')}
+              className={`px-4 md:px-6 py-3 md:py-4 font-medium text-xs md:text-sm flex items-center gap-1 md:gap-2 border-b-2 transition-colors whitespace-nowrap ${
+                activeTab === 'promotions' ? 'border-[var(--color-primary)] text-[var(--color-primary)] font-bold dark:border-white dark:text-white' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+              }`}
+            >
+              <Tag size={18} className="md:w-5 md:h-5" />
+              <span className="hidden sm:inline">Promotions</span>
+            </button>
+            <button
               onClick={() => setActiveTab('homepage')}
               className={`px-4 md:px-6 py-3 md:py-4 font-medium text-xs md:text-sm flex items-center gap-1 md:gap-2 border-b-2 transition-colors whitespace-nowrap ${
                 activeTab === 'homepage' ? 'border-[var(--color-primary)] text-[var(--color-primary)] font-bold dark:border-white dark:text-white' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
@@ -4941,6 +5222,7 @@ export default function AdminDashboard() {
               {activeTab === 'chats' && 'Vendor-Client Chats'}
               {activeTab === 'orders' && 'All Orders'}
               {activeTab === 'reviews' && 'All Reviews'}
+              {activeTab === 'promotions' && 'Promotions'}
             </h2>
             {(activeTab !== 'leads' && activeTab !== 'homepage' && activeTab !== 'service-requests' && activeTab !== 'chats' && activeTab !== 'orders') && (
               <Button onClick={handleAdd} className="bg-[var(--color-primary)] hover:opacity-90 text-white w-full sm:w-auto">
@@ -4961,6 +5243,7 @@ export default function AdminDashboard() {
           {activeTab === 'chats' && renderChatsTab()}
           {activeTab === 'orders' && renderOrdersTab()}
           {activeTab === 'reviews' && renderReviewsTab()}
+          {activeTab === 'promotions' && renderPromotionsTab()}
         </div>
       </div>
 

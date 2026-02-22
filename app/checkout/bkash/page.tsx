@@ -123,21 +123,39 @@ export default function BkashPaymentPage() {
         scheduledTime = firstItem.timeSlot
       }
 
-      // Create order
+      let promoCode: string | null = null
+      let promoDiscount = 0
+      try {
+        const stored = localStorage.getItem('snaplegal_cart_promo')
+        if (stored) {
+          const parsed = JSON.parse(stored) as { code: string; discount: number }
+          if (parsed?.code && typeof parsed.discount === 'number' && parsed.discount >= 0) {
+            promoCode = parsed.code
+            promoDiscount = parsed.discount
+          }
+        }
+      } catch {
+        // ignore
+      }
+
+      const body: Record<string, unknown> = {
+        items: orderItems,
+        paymentMethod: 'bKash',
+        orderNumber: orderNumber,
+        address: null,
+        scheduledDate: scheduledDate,
+        scheduledTime: scheduledTime,
+        notes: null,
+      }
+      if (promoCode) body.promoCode = promoCode
+      if (promoDiscount > 0) body.promoDiscount = promoDiscount
+
       const response = await fetch('/api/orders', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          items: orderItems,
-          paymentMethod: 'bKash',
-          orderNumber: orderNumber,
-          address: null, // Can be added later if needed
-          scheduledDate: scheduledDate,
-          scheduledTime: scheduledTime,
-          notes: null,
-        }),
+        body: JSON.stringify(body),
       })
 
       const data = await response.json()
@@ -146,8 +164,9 @@ export default function BkashPaymentPage() {
         throw new Error(data.error || 'Failed to create order')
       }
 
-      // Clear cart after successful order creation
+      // Clear cart and applied promo after successful order creation
       localStorage.removeItem('snaplegal_cart')
+      localStorage.removeItem('snaplegal_cart_promo')
 
       // Redirect to orders page
       router.push('/account/service-orders')

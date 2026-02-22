@@ -147,7 +147,7 @@ function AllServicesContent() {
     if (discountedPrice && saveLabel) {
       return (
         <div className="flex flex-col gap-0.5">
-          <span className="inline-flex w-fit items-center rounded-md bg-green-500 px-2 py-0.5 text-xs font-medium text-white">
+          <span className="inline-flex w-fit items-center rounded-md bg-[#8EDC8A] px-2 py-0.5 text-xs font-medium text-[#0F3D1E]">
             {saveLabel}
           </span>
           <span className="flex flex-wrap items-baseline gap-1.5">

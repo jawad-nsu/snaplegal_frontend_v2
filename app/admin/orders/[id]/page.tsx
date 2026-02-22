@@ -52,6 +52,8 @@ interface Order {
   scheduledTime?: string
   address?: string
   notes?: string
+  promoCode?: string | null
+  promoDiscount?: number
   createdAt: string
   updatedAt: string
 }
@@ -512,6 +514,12 @@ export default function AdminOrderDetailsPage({ params }: { params: Promise<{ id
                   <span className="text-green-600">Discount</span>
                   <span className="font-medium text-green-600">-৳{order.discount.toFixed(2)}</span>
                 </div>
+                {order.promoCode && (order.promoDiscount ?? 0) > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Promo ({order.promoCode})</span>
+                    <span className="font-medium text-green-600">-৳{(order.promoDiscount ?? 0).toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-lg font-bold pt-2 border-t">
                   <span>Total</span>
                   <span>৳{order.total.toFixed(2)}</span>

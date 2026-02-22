@@ -54,6 +54,9 @@ export default function CartPage() {
   const [promoCode, setPromoCode] = useState('')
   const [isPromoExpanded, setIsPromoExpanded] = useState(false)
   const [appliedPromo, setAppliedPromo] = useState<string | null>(null)
+  const [appliedPromoDiscount, setAppliedPromoDiscount] = useState(0)
+  const [promoError, setPromoError] = useState<string | null>(null)
+  const [isPromoValidating, setIsPromoValidating] = useState(false)
 
   // Function to map stored cart item to CartItem interface
   const mapStoredToCartItem = (stored: StoredCartItem): CartItem => {
@@ -124,6 +127,23 @@ export default function CartPage() {
     }
 
     loadCartItems()
+  }, [])
+
+  // Load applied promo from localStorage on mount (one promo per cart)
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    try {
+      const stored = localStorage.getItem('snaplegal_cart_promo')
+      if (stored) {
+        const parsed = JSON.parse(stored) as { code: string; discount: number }
+        if (parsed?.code && typeof parsed.discount === 'number' && parsed.discount >= 0) {
+          setAppliedPromo(parsed.code)
+          setAppliedPromoDiscount(parsed.discount)
+        }
+      }
+    } catch {
+      // ignore
+    }
   }, [])
 
   // Fetch and fill missing whatsIncluded from API for items that have serviceSlug
@@ -269,17 +289,65 @@ export default function CartPage() {
     })
   }
 
-  const handleApplyPromo = () => {
-    if (promoCode.trim()) {
-      setAppliedPromo(promoCode.trim())
-      setIsPromoExpanded(false)
-      // TODO: Add API call to validate and apply promo code
+  const handleApplyPromo = async () => {
+    const code = promoCode.trim()
+    if (!code) return
+    setPromoError(null)
+    setIsPromoValidating(true)
+    try {
+      const selectedItemsForTotal = cartItems.filter(item => item.selected)
+      const subtotalForValidate = selectedItemsForTotal.reduce(
+        (sum, item) => sum + item.price * item.quantity,
+        0
+      )
+      const res = await fetch('/api/promotions/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, cartTotal: subtotalForValidate }),
+      })
+      const data = await res.json()
+      if (data.valid && typeof data.discount === 'number') {
+        setAppliedPromo(data.code || code)
+        setAppliedPromoDiscount(data.discount)
+        setIsPromoExpanded(false)
+        setPromoCode('')
+        try {
+          localStorage.setItem(
+            'snaplegal_cart_promo',
+            JSON.stringify({ code: data.code || code, discount: data.discount })
+          )
+        } catch {
+          // ignore
+        }
+      } else {
+        setAppliedPromo(null)
+        setAppliedPromoDiscount(0)
+        setPromoError(data.message || 'Invalid or expired promo code')
+        try {
+          localStorage.removeItem('snaplegal_cart_promo')
+        } catch {
+          // ignore
+        }
+      }
+    } catch {
+      setPromoError('Failed to validate promo code')
+      setAppliedPromo(null)
+      setAppliedPromoDiscount(0)
+    } finally {
+      setIsPromoValidating(false)
     }
   }
 
   const handleRemovePromo = () => {
     setAppliedPromo(null)
+    setAppliedPromoDiscount(0)
     setPromoCode('')
+    setPromoError(null)
+    try {
+      localStorage.removeItem('snaplegal_cart_promo')
+    } catch {
+      // ignore
+    }
   }
 
   const selectedItems = cartItems.filter(item => item.selected)
@@ -287,7 +355,7 @@ export default function CartPage() {
   const totalDiscount = selectedItems.reduce((sum, item) => sum + item.discount * item.quantity, 0)
   const subtotal = subtotalOriginal - totalDiscount // discounted subtotal (what customer pays for items)
   const deliveryCharge = 0
-  const total = subtotal + deliveryCharge
+  const total = Math.max(0, subtotal - appliedPromoDiscount + deliveryCharge)
 
   if (isLoading) {
     return (
@@ -541,6 +609,12 @@ export default function CartPage() {
                   <span className="text-gray-600">Subtotal</span>
                   <span className="font-medium text-right">৳{subtotal.toFixed(2)}</span>
                 </div>
+                {appliedPromoDiscount > 0 && (
+                  <div className="flex justify-between items-baseline text-sm text-green-600">
+                    <span>Promo ({appliedPromo})</span>
+                    <span className="font-medium text-right">-৳{appliedPromoDiscount.toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between items-baseline text-sm">
                   <span className="text-gray-600">Delivery Charge</span>
                   <span className="font-medium text-right">৳{deliveryCharge.toFixed(2)}</span>
@@ -593,11 +667,17 @@ export default function CartPage() {
                   </div>
                 ) : isPromoExpanded && (
                   <div className="mt-3 pt-3 border-t">
+                    {promoError && (
+                      <p className="text-xs sm:text-sm text-red-600 mb-2">{promoError}</p>
+                    )}
                     <div className="flex gap-2">
                       <input
                         type="text"
                         value={promoCode}
-                        onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                        onChange={(e) => {
+                          setPromoCode(e.target.value.toUpperCase())
+                          setPromoError(null)
+                        }}
                         placeholder="Enter promo code"
                         className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                         onKeyDown={(e) => {
@@ -607,11 +687,11 @@ export default function CartPage() {
                         }}
                       />
                       <button
-                        onClick={handleApplyPromo}
-                        disabled={!promoCode.trim()}
+                        onClick={() => handleApplyPromo()}
+                        disabled={!promoCode.trim() || isPromoValidating}
                         className="bg-[var(--color-primary)] text-white px-4 py-2 rounded-lg text-xs sm:text-sm font-medium hover:opacity-90 active:opacity-75 transition-all disabled:bg-gray-300 disabled:cursor-not-allowed whitespace-nowrap"
                       >
-                        Apply
+                        {isPromoValidating ? 'Checking…' : 'Apply'}
                       </button>
                     </div>
                   </div>

@@ -13,7 +13,6 @@ interface CartItem {
   id: string
   parentService?: string
   serviceName: string
-  tonnage: string
   quantity: number
   price: number
   originalPrice: number
@@ -30,7 +29,6 @@ interface StoredCartItem {
   price: number
   originalPrice: number
   quantity: number
-  tonnage?: string
   date?: string
   timeSlot?: string
   selected?: boolean
@@ -42,6 +40,8 @@ export default function CheckoutPage() {
   const [showBreakdown, setShowBreakdown] = useState(false)
   const [cartItems, setCartItems] = useState<CartItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [promoCode, setPromoCode] = useState<string | null>(null)
+  const [promoDiscount, setPromoDiscount] = useState(0)
 
   // Function to map stored cart item to CartItem interface
   const mapStoredToCartItem = (stored: StoredCartItem): CartItem => {
@@ -49,9 +49,8 @@ export default function CheckoutPage() {
     
     return {
       id: stored.id,
-      parentService: stored.packageName ? `Hire ${stored.serviceName} for` : undefined,
+      parentService: stored.packageName ? `Book ${stored.serviceName} for` : undefined,
       serviceName: stored.packageName || stored.serviceName,
-      tonnage: stored.tonnage || '1-2.5 Ton',
       quantity: stored.quantity || 1,
       price: stored.price,
       originalPrice: stored.originalPrice,
@@ -93,13 +92,31 @@ export default function CheckoutPage() {
     loadCartItems()
   }, [])
 
+  // Load applied promo from localStorage (one per cart, set on cart page)
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    try {
+      const stored = localStorage.getItem('snaplegal_cart_promo')
+      if (stored) {
+        const parsed = JSON.parse(stored) as { code: string; discount: number }
+        if (parsed?.code && typeof parsed.discount === 'number' && parsed.discount >= 0) {
+          setPromoCode(parsed.code)
+          setPromoDiscount(parsed.discount)
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }, [])
+
   // Calculate totals based on cart items (already filtered to selected items)
   const selectedItems = cartItems
   const itemTotal = selectedItems.reduce((sum, item) => sum + item.originalPrice * item.quantity, 0)
   const visitationFee = 0
   const deliveryCharge = 0
   const totalDiscount = selectedItems.reduce((sum, item) => sum + item.discount * item.quantity, 0)
-  const subtotal = itemTotal + visitationFee + deliveryCharge - totalDiscount
+  const subtotalBeforePromo = itemTotal + visitationFee + deliveryCharge - totalDiscount
+  const subtotal = Math.max(0, subtotalBeforePromo - promoDiscount)
   const amountToPay = subtotal
 
   // Redirect to cart if no items
@@ -179,10 +196,6 @@ export default function CheckoutPage() {
                       <div className="ml-1 space-y-0.5">
                         <div className="flex items-center gap-1.5 sm:gap-2 text-gray-500">
                           <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 flex-shrink-0" />
-                          <span className="break-words">{item.tonnage}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 sm:gap-2 text-gray-500">
-                          <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 flex-shrink-0" />
                           <span>Quantity: {item.quantity}</span>
                         </div>
                       </div>
@@ -211,6 +224,12 @@ export default function CheckoutPage() {
                 <span className="text-green-600">Discount</span>
                 <span className="font-medium text-green-600">-৳{totalDiscount.toFixed(2)}</span>
               </div>
+              {promoDiscount > 0 && promoCode && (
+                <div className="flex justify-between text-xs sm:text-sm text-green-600">
+                  <span>Promo ({promoCode})</span>
+                  <span className="font-medium">-৳{promoDiscount.toFixed(2)}</span>
+                </div>
+              )}
               <div className="flex justify-between text-xs sm:text-sm font-semibold pt-2 border-t">
                 <span className="text-gray-900">Subtotal</span>
                 <span className="text-gray-900">৳{subtotal.toFixed(2)}</span>
