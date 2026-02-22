@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Search, ChevronDown, ChevronLeft, ChevronRight, Loader2, FileText } from 'lucide-react'
+import { Search, ChevronDown, ChevronLeft, ChevronRight, FileText } from 'lucide-react'
 import Navbar from '@/components/navbar'
+import { LogoSpinner } from '@/components/logo-spinner'
 import { useRouter } from 'next/navigation'
 
 interface Order {
@@ -223,8 +224,7 @@ export default function ServiceOrdersPage() {
               {/* Loading State */}
               {loading && (
                 <div className="flex items-center justify-center py-12">
-                  <Loader2 className="w-8 h-8 animate-spin text-[var(--color-primary)]" />
-                  <span className="ml-3 text-gray-600">Loading orders...</span>
+                  <LogoSpinner fullPage={false} size="sm" message="Loading orders..." />
                 </div>
               )}
 

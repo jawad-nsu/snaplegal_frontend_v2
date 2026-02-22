@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { User, Edit2, Home, FileText, Trash2, Upload, X, CheckCircle, Loader2 } from 'lucide-react'
+import { User, Edit2, Home, FileText, Trash2, Upload, X, CheckCircle } from 'lucide-react'
 import Navbar from '@/components/navbar'
+import { LogoSpinner } from '@/components/logo-spinner'
 
 type ServiceStatus = 'submitted' | 'under-review' | 'approved' | 'rejected'
 
@@ -494,8 +495,7 @@ export default function VendorProfilePage() {
 
                 {isLoading ? (
                   <div className="flex flex-col items-center justify-center py-12">
-                    <Loader2 className="w-8 h-8 text-[var(--color-primary)] animate-spin mb-4" />
-                    <p className="text-gray-600">Loading partner information...</p>
+                    <LogoSpinner fullPage={false} size="sm" message="Loading partner information..." />
                   </div>
                 ) : error ? (
                   <div className="flex flex-col items-center justify-center py-12">

@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import { User, Edit2, Home, FileText, Trash2, Upload, X, Tag, Gift, Sparkles, TrendingUp } from 'lucide-react'
 import Navbar from '@/components/navbar'
+import { LogoSpinner } from '@/components/logo-spinner'
 
 export default function AccountPage() {
   const { data: session, status } = useSession()
@@ -241,8 +242,8 @@ export default function AccountPage() {
                 <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 sm:mb-8">Personal Info</h1>
                 
                 {status === 'loading' && (
-                  <div className="text-center py-8">
-                    <p className="text-gray-600">Loading user information...</p>
+                  <div className="flex justify-center py-8">
+                    <LogoSpinner fullPage={false} size="sm" message="Loading user information..." />
                   </div>
                 )}
                 

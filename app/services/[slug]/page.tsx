@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { Star, ChevronDown, ChevronUp, CheckCircle, Info, MessageCircle, BookOpen, Reply, PlayCircle, Filter, ArrowUpDown } from 'lucide-react'
 import Navbar from '@/components/navbar'
 import Footer from '@/components/footer'
+import { LogoSpinner } from '@/components/logo-spinner'
 
 interface ServiceData {
   name: string
@@ -301,15 +302,10 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 flex flex-col">
         <Navbar />
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center justify-center min-h-[60vh]">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-primary)] mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading service...</p>
-            </div>
-          </div>
+        <div className="flex-1 flex items-center justify-center">
+          <LogoSpinner fullPage={false} message="Loading service..." />
         </div>
         <Footer />
       </div>

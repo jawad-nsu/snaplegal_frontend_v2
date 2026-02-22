@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import Image from 'next/image'
 import Navbar from '@/components/navbar'
 import Footer from '@/components/footer'
+import { LogoSpinner } from '@/components/logo-spinner'
 
 interface HomepageService {
   id: string
@@ -87,6 +88,17 @@ const categories = [
   { name: 'Explore more', icon: Grid2X2 },
 ]
 
+  if (sectionsLoading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+          <LogoSpinner fullPage={false} message="Loading..." />
+        </div>
+        <Footer />
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen">

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { ChevronDown, ChevronUp, ChevronRight, CreditCard, DollarSign, ArrowRight, ShoppingCart } from 'lucide-react'
 import Navbar from '@/components/navbar'
+import { LogoSpinner } from '@/components/logo-spinner'
 import Link from 'next/link'
 
 type PaymentMethod = 'bkash' | 'card' | 'cash'
@@ -127,15 +128,10 @@ export default function CheckoutPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 flex flex-col">
         <Navbar />
-        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8">
-          <div className="flex items-center justify-center min-h-[60vh]">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-primary)] mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading checkout...</p>
-            </div>
-          </div>
+        <div className="flex-1 flex items-center justify-center">
+          <LogoSpinner fullPage={false} message="Loading checkout..." />
         </div>
       </div>
     )

@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, Save, Loader2 } from 'lucide-react'
 import Navbar from '@/components/navbar'
+import { LogoSpinner } from '@/components/logo-spinner'
 
 type LeadStage = 'New' | 'Qualified' | 'Proposal' | 'Closed'
 type ClosedReason = 'Won' | 'Lost' | 'Lost (Unqualified)'
@@ -185,13 +186,10 @@ export default function EditLeadPage({ params }: { params: Promise<{ id: string 
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 flex flex-col">
         <Navbar />
-        <div className="container mx-auto px-4 py-8 max-w-4xl">
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-[var(--color-primary)]" />
-            <span className="ml-3 text-gray-600">Loading lead...</span>
-          </div>
+        <div className="flex-1 flex items-center justify-center">
+          <LogoSpinner fullPage={false} message="Loading lead..." />
         </div>
       </div>
     )

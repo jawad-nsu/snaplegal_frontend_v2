@@ -234,6 +234,32 @@
   animation: see-more-float 2.2s ease-in-out infinite;
 }
 
+/* Logo loading spinner: pulse + rotating ring */
+@keyframes logo-spinner-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.05);
+  }
+}
+@keyframes logo-spinner-ring {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+.animate-logo-spinner-pulse {
+  animation: logo-spinner-pulse 1.5s ease-in-out infinite;
+}
+.animate-logo-spinner-ring {
+  animation: logo-spinner-ring 1.2s linear infinite;
+}
+
 @layer utilities {
   .scrollbar-hide {
     -ms-overflow-style: none;  /* IE and Edge */

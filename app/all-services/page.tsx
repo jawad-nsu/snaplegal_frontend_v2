@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Star, Clock, ChevronDown } from 'lucide-react'
 import Navbar from '@/components/navbar'
 import Footer from '@/components/footer'
+import { LogoSpinner } from '@/components/logo-spinner'
 
 // Helper function to convert title to slug
 const titleToSlug = (title: string): string => {
@@ -448,15 +449,10 @@ function AllServicesContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100">
+      <div className="min-h-screen bg-gray-100 flex flex-col">
         <Navbar />
-        <main className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
-          <div className="flex items-center justify-center min-h-[60vh]">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-primary)] mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading services...</p>
-            </div>
-          </div>
+        <main className="flex-1 flex items-center justify-center">
+          <LogoSpinner fullPage={false} message="Loading services..." />
         </main>
         <Footer />
       </div>
@@ -726,15 +722,10 @@ function AllServicesContent() {
 
 function AllServicesPageFallback() {
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 flex flex-col">
       <Navbar />
-      <main className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-primary)] mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading services...</p>
-          </div>
-        </div>
+      <main className="flex-1 flex items-center justify-center">
+        <LogoSpinner fullPage={false} message="Loading services..." />
       </main>
       <Footer />
     </div>

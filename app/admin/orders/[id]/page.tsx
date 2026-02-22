@@ -3,8 +3,9 @@
 import { use, useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, CheckCircle, X, Loader2, Edit, Save } from 'lucide-react'
+import { ArrowLeft, CheckCircle, X, Edit, Save } from 'lucide-react'
 import Navbar from '@/components/navbar'
+import { LogoSpinner } from '@/components/logo-spinner'
 import { Button } from '@/components/ui/button'
 
 interface OrderItem {
@@ -278,13 +279,10 @@ export default function AdminOrderDetailsPage({ params }: { params: Promise<{ id
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 flex flex-col">
         <Navbar />
-        <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8 max-w-7xl">
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-[var(--color-primary)]" />
-            <span className="ml-3 text-gray-600">Loading order details...</span>
-          </div>
+        <div className="flex-1 flex items-center justify-center">
+          <LogoSpinner fullPage={false} message="Loading order details..." />
         </div>
       </div>
     )

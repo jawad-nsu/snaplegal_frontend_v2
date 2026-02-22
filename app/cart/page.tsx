@@ -6,6 +6,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Home, Trash2, ChevronDown, Tag, FileText, ShoppingCart } from 'lucide-react'
 import Navbar from '@/components/navbar'
+import { LogoSpinner } from '@/components/logo-spinner'
 
 interface CartItem {
   id: string
@@ -289,15 +290,10 @@ export default function CartPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 flex flex-col">
         <Navbar />
-        <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
-          <div className="flex items-center justify-center min-h-[60vh]">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-primary)] mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading cart...</p>
-            </div>
-          </div>
+        <div className="flex-1 flex items-center justify-center">
+          <LogoSpinner fullPage={false} message="Loading cart..." />
         </div>
       </div>
     )
