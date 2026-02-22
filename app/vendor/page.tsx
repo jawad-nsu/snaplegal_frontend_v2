@@ -59,14 +59,14 @@ export default function VendorDashboardPage() {
   const [ongoingServices, setOngoingServices] = useState<OngoingService[]>([
     { id: '1', serialNumber: 'ORD-001', serviceName: 'AC Servicing', status: 'In-Progress', clientName: 'Ahmed Rahman', clientPhone: '+8801712345678', clientEmail: 'ahmed@example.com', orderDate: '2024-01-15', unreadMessages: 3 },
     { id: '2', serialNumber: 'ORD-002', serviceName: 'Home Cleaning', status: 'Confirmed', clientName: 'Fatima Khan', clientPhone: '+8801723456789', clientEmail: 'fatima@example.com', orderDate: '2024-01-16', unreadMessages: 0 },
-    { id: '3', serialNumber: 'ORD-003', serviceName: 'Plumbing Services', status: 'Assigned', clientName: 'Karim Uddin', clientPhone: '+8801734567890', clientEmail: 'karim@example.com', orderDate: '2024-01-17', unreadMessages: 1 },
+    { id: '3', serialNumber: 'ORD-003', serviceName: 'legal_service_image Services', status: 'Assigned', clientName: 'Karim Uddin', clientPhone: '+8801734567890', clientEmail: 'karim@example.com', orderDate: '2024-01-17', unreadMessages: 1 },
     { id: '4', serialNumber: 'ORD-004', serviceName: 'Electrical Services', status: 'Review', clientName: 'Sadia Rahman', clientPhone: '+8801745678901', clientEmail: 'sadia@example.com', orderDate: '2024-01-18', unreadMessages: 0 },
     { id: '5', serialNumber: 'ORD-005', serviceName: 'House Shifting', status: 'Delivered', clientName: 'Hasan Ali', clientPhone: '+8801756789012', clientEmail: 'hasan@example.com', orderDate: '2024-01-19', unreadMessages: 0 },
     { id: '6', serialNumber: 'ORD-006', serviceName: 'Salon Care', status: 'Submitted', clientName: 'Nadia Islam', clientPhone: '+8801767890123', clientEmail: 'nadia@example.com', orderDate: '2024-01-20', unreadMessages: 2 },
     { id: '7', serialNumber: 'ORD-007', serviceName: 'Fridge Repair', status: 'Closed', clientName: 'Rashid Ahmed', clientPhone: '+8801778901234', clientEmail: 'rashid@example.com', orderDate: '2024-01-21', unreadMessages: 0 },
     { id: '8', serialNumber: 'ORD-008', serviceName: 'AC Servicing', status: 'In-Progress', clientName: 'Sara Khan', clientPhone: '+8801789012345', clientEmail: 'sara@example.com', orderDate: '2024-01-22', unreadMessages: 5 },
     { id: '9', serialNumber: 'ORD-009', serviceName: 'Home Cleaning', status: 'Confirmed', clientName: 'Tariq Hassan', clientPhone: '+8801790123456', clientEmail: 'tariq@example.com', orderDate: '2024-01-23', unreadMessages: 0 },
-    { id: '10', serialNumber: 'ORD-010', serviceName: 'Plumbing Services', status: 'Assigned', clientName: 'Zara Ahmed', clientPhone: '+8801701234567', clientEmail: 'zara@example.com', orderDate: '2024-01-24', unreadMessages: 1 },
+    { id: '10', serialNumber: 'ORD-010', serviceName: 'legal_service_image Services', status: 'Assigned', clientName: 'Zara Ahmed', clientPhone: '+8801701234567', clientEmail: 'zara@example.com', orderDate: '2024-01-24', unreadMessages: 1 },
   ])
   const [showChat, setShowChat] = useState(false)
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null)
@@ -111,14 +111,14 @@ export default function VendorDashboardPage() {
   const [payments] = useState<Payment[]>([
     { id: '1', orderId: 'ORD-001', serviceName: 'AC Servicing', orderDate: '2024-01-15', orderStatus: 'Delivered', totalFee: 800, vendorFee: 720, status: 'collected' },
     { id: '2', orderId: 'ORD-002', serviceName: 'Home Cleaning', orderDate: '2024-01-16', orderStatus: 'Delivered', totalFee: 1500, vendorFee: 1350, status: 'collected' },
-    { id: '3', orderId: 'ORD-003', serviceName: 'Plumbing Services', orderDate: '2024-01-17', orderStatus: 'Delivered', totalFee: 500, vendorFee: 450, status: 'collected' },
+    { id: '3', orderId: 'ORD-003', serviceName: 'legal_service_image Services', orderDate: '2024-01-17', orderStatus: 'Delivered', totalFee: 500, vendorFee: 450, status: 'collected' },
     { id: '4', orderId: 'ORD-004', serviceName: 'Electrical Services', orderDate: '2024-01-18', orderStatus: 'In-Progress', totalFee: 1200, vendorFee: 1080, status: 'processing' },
     { id: '5', orderId: 'ORD-005', serviceName: 'House Shifting', orderDate: '2024-01-19', orderStatus: 'Delivered', totalFee: 3000, vendorFee: 2700, status: 'ready' },
     { id: '6', orderId: 'ORD-006', serviceName: 'Salon Care', orderDate: '2024-01-20', orderStatus: 'Confirmed', totalFee: 1200, vendorFee: 1080, status: 'pending' },
     { id: '7', orderId: 'ORD-007', serviceName: 'Fridge Repair', orderDate: '2024-01-21', orderStatus: 'Delivered', totalFee: 600, vendorFee: 540, status: 'collected' },
     { id: '8', orderId: 'ORD-008', serviceName: 'AC Servicing', orderDate: '2024-01-22', orderStatus: 'In-Progress', totalFee: 800, vendorFee: 720, status: 'ready' },
     { id: '9', orderId: 'ORD-009', serviceName: 'Home Cleaning', orderDate: '2024-01-23', orderStatus: 'Assigned', totalFee: 1500, vendorFee: 1350, status: 'processing' },
-    { id: '10', orderId: 'ORD-010', serviceName: 'Plumbing Services', orderDate: '2024-01-24', orderStatus: 'Review', totalFee: 500, vendorFee: 450, status: 'pending' },
+    { id: '10', orderId: 'ORD-010', serviceName: 'legal_service_image Services', orderDate: '2024-01-24', orderStatus: 'Review', totalFee: 500, vendorFee: 450, status: 'pending' },
   ])
   const [paymentStatusFilter, setPaymentStatusFilter] = useState<'All' | 'pending' | 'processing' | 'ready' | 'collected'>('All')
   const [orderStatusFilter, setOrderStatusFilter] = useState<OrderStatus | 'All'>('All')
@@ -155,8 +155,8 @@ export default function VendorDashboardPage() {
     },
     { 
       id: '3', 
-      title: 'Plumbing Services Combo', 
-      description: '15% discount on plumbing and sanitary services', 
+      title: 'legal_service_image Services Combo', 
+      description: '15% discount on legal_service_image and sanitary services', 
       discountType: 'percentage', 
       discountValue: 15, 
       serviceCategory: 'Home Repair',

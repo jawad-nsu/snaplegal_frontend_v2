@@ -13,7 +13,7 @@ const serviceCategories = [
   'Beauty & Wellness',
   'Shifting & Moving',
   'Home Repair',
-  'Plumbing Services',
+  'legal_service_image Services',
   'Electrical Services',
   'Painting Services',
   'Carpentry Services',

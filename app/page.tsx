@@ -19,6 +19,8 @@ interface HomepageService {
   description: string
   deliveryTime: string
   startingPrice: string
+  discountType?: string
+  discountValue?: string
 }
 
 export default function HomePage() {
@@ -52,7 +54,7 @@ export default function HomePage() {
     const slugMap: Record<string, string> = {
       'AC Servicings': 'ac-servicing',
       'Home Cleaning': 'home-cleaning',
-      'Plumbing & Sanitary Services': 'plumbing-sanitary-services',
+      'legal_service_image & Sanitary Services': 'legal_service_image-sanitary-services',
       'House Shifting Services': 'house-shifting-services',
       'Gas Stove/Burner Services': 'gas-stove-burner-services',
       'DigiGO': 'digigo',
@@ -76,6 +78,56 @@ export default function HomePage() {
         behavior: 'smooth'
       })
     }
+  }
+
+  const pricePrefix = (str: string) => (str.match(/^[^\d]*/) || [''])[0] || '৳'
+
+  /** Get discounted starting price for display; returns null if no valid discount */
+  const getDiscountedStartingPrice = (originalPriceStr: string, discountType?: string, discountValue?: string): string | null => {
+    if (!discountType || !discountValue || (discountType !== 'amount' && discountType !== 'percentage')) return null
+    const raw = String(originalPriceStr).replace(/[^\d.]/g, '')
+    if (!raw) return null
+    const original = parseFloat(raw)
+    if (isNaN(original)) return null
+    const val = parseFloat(String(discountValue).replace(/[^\d.]/g, ''))
+    if (isNaN(val)) return null
+    let discounted = 0
+    if (discountType === 'amount') {
+      discounted = Math.max(0, original - val)
+    } else {
+      discounted = Math.max(0, original * (1 - val / 100))
+    }
+    return `${pricePrefix(originalPriceStr)}${Math.round(discounted)}`
+  }
+
+  /** Get "Save X%" or "Save ৳X" label for discount badge; returns null if no valid discount */
+  const getSaveLabel = (originalPriceStr: string, discountType?: string, discountValue?: string): string | null => {
+    if (!discountType || !discountValue || (discountType !== 'amount' && discountType !== 'percentage')) return null
+    const raw = String(originalPriceStr).replace(/[^\d.]/g, '')
+    if (!raw) return null
+    const val = parseFloat(String(discountValue).replace(/[^\d.]/g, ''))
+    if (isNaN(val)) return null
+    if (discountType === 'percentage') return `Save ${Math.round(val)}%`
+    return `Save ${pricePrefix(originalPriceStr)}${Math.round(val)}`
+  }
+
+  const renderStartingPrice = (service: HomepageService) => {
+    const discountedPrice = getDiscountedStartingPrice(service.startingPrice, service.discountType, service.discountValue)
+    const saveLabel = getSaveLabel(service.startingPrice, service.discountType, service.discountValue)
+    if (discountedPrice && saveLabel) {
+      return (
+        <div className="flex flex-col gap-0.5">
+          <span className="inline-flex w-fit items-center rounded-md bg-green-500 px-2 py-0.5 text-xs font-medium text-white">
+            {saveLabel}
+          </span>
+          <span className="flex flex-wrap items-baseline gap-1.5">
+            <span className="text-base font-bold text-gray-800">{discountedPrice}</span>
+            <span className="text-sm text-red-500 line-through">{service.startingPrice}</span>
+          </span>
+        </div>
+      )
+    }
+    return <span className="text-sm font-semibold text-gray-900">Starting at {service.startingPrice}</span>
   }
 
 const categories = [
@@ -205,6 +257,7 @@ const categories = [
                   </div>
                   <div className="p-3 sm:p-4 text-center">
                     <h3 className="text-sm sm:text-base font-medium text-gray-900 leading-tight">{service.title}</h3>
+                    <div className="mt-2 flex justify-center">{renderStartingPrice(service)}</div>
                   </div>
                 </div>
                 <div className="hidden md:flex md:flex-col md:flex-1 md:min-h-0">
@@ -225,7 +278,7 @@ const categories = [
                       <p className="text-sm text-gray-600 mb-4 line-clamp-2">{service.description}</p>
                       <div className="flex items-center justify-between mb-4">
                         <span className="text-sm text-gray-600"><Clock size={16} className="inline mr-1" />{service.deliveryTime}</span>
-                        <span className="text-sm font-semibold text-gray-900">Starting at {service.startingPrice}</span>
+                        {renderStartingPrice(service)}
                       </div>
                     </div>
                     <button onClick={(e) => handleBookNow(e, service)} className="w-full mt-auto bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer flex-shrink-0">
@@ -294,7 +347,7 @@ const categories = [
                           <p className="text-sm text-gray-600 mb-4 line-clamp-2">{service.description}</p>
                           <div className="flex items-center justify-between mb-4">
                             <span className="text-sm text-gray-600"><Clock size={16} className="inline mr-1" />{service.deliveryTime}</span>
-                            <span className="text-sm font-semibold text-gray-900">Starting at {service.startingPrice}</span>
+                            {renderStartingPrice(service)}
                           </div>
                         </div>
                         <button onClick={(e) => handleBookNow(e, service)} className="w-full mt-auto bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer flex-shrink-0">
@@ -332,6 +385,7 @@ const categories = [
                   </div>
                   <div className="p-3 sm:p-4 text-center">
                     <h3 className="text-sm sm:text-base font-medium text-gray-900 leading-tight">{service.title}</h3>
+                    <div className="mt-2 flex justify-center">{renderStartingPrice(service)}</div>
                   </div>
                 </div>
                 <div className="hidden md:flex md:flex-col md:flex-1 md:min-h-0">
@@ -352,7 +406,7 @@ const categories = [
                       <p className="text-sm text-gray-600 mb-4 line-clamp-2">{service.description}</p>
                       <div className="flex items-center justify-between mb-4">
                         <span className="text-sm text-gray-600"><Clock size={16} className="inline mr-1" />{service.deliveryTime}</span>
-                        <span className="text-sm font-semibold text-gray-900">Starting at {service.startingPrice}</span>
+                        {renderStartingPrice(service)}
                       </div>
                     </div>
                     <button onClick={(e) => handleBookNow(e, service)} className="w-full mt-auto bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer flex-shrink-0">

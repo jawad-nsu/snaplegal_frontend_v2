@@ -105,6 +105,8 @@ interface Service {
   description: string
   deliveryTime: string
   startingPrice: string
+  discountType?: string
+  discountValue?: string
   categoryId: string
   subCategoryId?: string
   status?: string
@@ -131,7 +133,7 @@ interface Service {
   whyChooseConsultants?: Array<{ title: string; description: string }>
   howWeSelectConsultants?: Array<{ title: string; description: string }>
   // Price Packages
-  packages?: Array<{ name: string; price: string; features: string[]; description?: string }>
+  packages?: Array<{ name: string; price: string; originalPrice?: string; features: string[]; description?: string }>
   // Core cost breakdown
   coreFiling?: string
   coreStamps?: string
@@ -400,7 +402,7 @@ export default function AdminDashboard() {
   const [vendors, setVendors] = useState<Vendor[]>([
     { id: '1', name: 'AC Repair Pro', email: 'acpro@example.com', phone: '+8801712345681', address: '123 Main St', district: 'Dhaka', serviceCategories: ['AC Repair Services'], createdAt: '2024-01-10', status: 'active' },
     { id: '2', name: 'Home Cleaners BD', email: 'cleaners@example.com', phone: '+8801712345682', address: '456 Park Ave', district: 'Chittagong', serviceCategories: ['Cleaning Solution'], createdAt: '2024-01-12', status: 'active' },
-    { id: '3', name: 'Plumbing Experts', email: 'plumbing@example.com', phone: '+8801712345683', address: '789 Oak Rd', district: 'Sylhet', serviceCategories: ['Home Repair'], createdAt: '2024-01-18', status: 'pending' },
+    { id: '3', name: 'legal_service_image Experts', email: 'legal_service_image@example.com', phone: '+8801712345683', address: '789 Oak Rd', district: 'Sylhet', serviceCategories: ['Home Repair'], createdAt: '2024-01-18', status: 'pending' },
   ])
 
   // Categories - Fetched from API
@@ -579,7 +581,7 @@ export default function AdminDashboard() {
   const [serviceRequests, setServiceRequests] = useState<VendorServiceRequest[]>([
     { id: '1', vendorId: '1', vendorName: 'AC Repair Pro', serviceName: 'AC Deep Cleaning', category: 'AC Repair Services', description: 'Comprehensive deep cleaning service for all AC units', status: 'submitted', submittedDate: '2024-01-20' },
     { id: '2', vendorId: '2', vendorName: 'Home Cleaners BD', serviceName: 'Office Deep Cleaning', category: 'Cleaning Solution', description: 'Professional office deep cleaning with eco-friendly products', status: 'under-review', submittedDate: '2024-01-18', reviewDate: '2024-01-19' },
-    { id: '3', vendorId: '3', vendorName: 'Plumbing Experts', serviceName: 'Water Heater Installation', category: 'Home Repair', subCategory: 'Plumbing Services', description: 'Expert water heater installation and maintenance', status: 'approved', submittedDate: '2024-01-15', reviewDate: '2024-01-16', reviewedBy: 'Admin User' },
+    { id: '3', vendorId: '3', vendorName: 'legal_service_image Experts', serviceName: 'Water Heater Installation', category: 'Home Repair', subCategory: 'legal_service_image Services', description: 'Expert water heater installation and maintenance', status: 'approved', submittedDate: '2024-01-15', reviewDate: '2024-01-16', reviewedBy: 'Admin User' },
     { id: '4', vendorId: '1', vendorName: 'AC Repair Pro', serviceName: 'AC Gas Refill', category: 'AC Repair Services', description: 'AC gas refill service for all brands', status: 'rejected', submittedDate: '2024-01-10', reviewDate: '2024-01-12', reviewedBy: 'Admin User', rejectionReason: 'Service already exists in the platform' },
   ])
 
@@ -605,15 +607,15 @@ export default function AdminDashboard() {
     {
       orderId: 'ORD-003',
       vendorId: '3',
-      vendorName: 'Plumbing Experts',
+      vendorName: 'legal_service_image Experts',
       clientId: '3',
       clientName: 'Karim Uddin',
-      serviceName: 'Plumbing Services',
+      serviceName: 'legal_service_image Services',
       lastMessage: 'Can you come earlier?',
       lastMessageTime: '2024-01-17 09:00',
       unreadCount: 1,
       messages: [
-        { id: '1', orderId: 'ORD-003', vendorId: '3', vendorName: 'Plumbing Experts', clientId: '3', clientName: 'Karim Uddin', serviceName: 'Plumbing Services', sender: 'client', message: 'Can you come earlier?', timestamp: '2024-01-17 09:00', read: false },
+        { id: '1', orderId: 'ORD-003', vendorId: '3', vendorName: 'legal_service_image Experts', clientId: '3', clientName: 'Karim Uddin', serviceName: 'legal_service_image Services', sender: 'client', message: 'Can you come earlier?', timestamp: '2024-01-17 09:00', read: false },
       ]
     },
     {
@@ -1000,7 +1002,7 @@ export default function AdminDashboard() {
     status: 'active' as 'active' | 'inactive'
   })
   const [serviceForm, setServiceForm] = useState({
-    title: '', slug: '', serialNumber: '', image: '', rating: '', description: '', deliveryTime: '', startingPrice: '', categoryId: '', subCategoryId: '',
+    title: '', slug: '', serialNumber: '', image: '', rating: '', description: '', deliveryTime: '', startingPrice: '', discountType: '' as '' | 'amount' | 'percentage', discountValue: '', categoryId: '', subCategoryId: '',
     // Overview fields
     shortDescription: '', detailedDescription: '', providerAuthority: '', infoSource: '', requiredDocuments: [] as string[], keywords: [] as string[], whatsIncluded: '', whatsNotIncluded: '',
     timeline: '', additionalNotes: '',
@@ -1014,7 +1016,7 @@ export default function AdminDashboard() {
     whyChooseConsultants: [] as Array<{ title: string; description: string }>,
     howWeSelectConsultants: [] as Array<{ title: string; description: string }>,
     // Price Packages
-    packages: [] as Array<{ name: string; price: string; features: string[]; description?: string }>,
+    packages: [] as Array<{ name: string; price: string; originalPrice?: string; features: string[]; description?: string }>,
     // Core cost breakdown
     coreFiling: '', coreStamps: '', coreCourtFee: '',
     // Presented cost breakdown
@@ -1036,7 +1038,7 @@ export default function AdminDashboard() {
     } else if (activeTab === 'services') {
       setIsCloningService(false)
       setServiceForm({
-        title: '', slug: '', serialNumber: '', image: '', rating: '', description: '', deliveryTime: '', startingPrice: '', categoryId: '', subCategoryId: '',
+        title: '', slug: '', serialNumber: '', image: '', rating: '', description: '', deliveryTime: '', startingPrice: '', discountType: '', discountValue: '', categoryId: '', subCategoryId: '',
         shortDescription: '', detailedDescription: '', providerAuthority: '', infoSource: '', requiredDocuments: [], keywords: [], whatsIncluded: '', whatsNotIncluded: '',
         timeline: '', additionalNotes: '', processFlow: '', videoUrl: '', communityDiscussions: [], faqs: [], consultantQualifications: '', whyChooseConsultants: [], howWeSelectConsultants: [], packages: [],
         coreFiling: '', coreStamps: '', coreCourtFee: '', clientFiling: '', clientStamps: '', clientCourtFee: '', clientConsultantFee: ''
@@ -1086,7 +1088,7 @@ export default function AdminDashboard() {
       const serviceItem = item as Service
       setServiceForm({
         title: serviceItem.title, slug: serviceItem.slug, serialNumber: serviceItem.serialNumber != null ? String(serviceItem.serialNumber) : '', image: serviceItem.image, rating: serviceItem.rating, description: serviceItem.description,
-        deliveryTime: serviceItem.deliveryTime, startingPrice: serviceItem.startingPrice, categoryId: serviceItem.categoryId, subCategoryId: serviceItem.subCategoryId || '',
+        deliveryTime: serviceItem.deliveryTime, startingPrice: serviceItem.startingPrice, discountType: (serviceItem.discountType === 'amount' || serviceItem.discountType === 'percentage') ? serviceItem.discountType : '', discountValue: serviceItem.discountValue || '', categoryId: serviceItem.categoryId, subCategoryId: serviceItem.subCategoryId || '',
         shortDescription: serviceItem.shortDescription || '', detailedDescription: serviceItem.detailedDescription || '', providerAuthority: serviceItem.providerAuthority || '', infoSource: serviceItem.infoSource || '',
         requiredDocuments: serviceItem.requiredDocuments || [], keywords: serviceItem.keywords || [], whatsIncluded: serviceItem.whatsIncluded || '', whatsNotIncluded: serviceItem.whatsNotIncluded || '',
         timeline: serviceItem.timeline || '', additionalNotes: serviceItem.additionalNotes || '', processFlow: serviceItem.processFlow || '', videoUrl: serviceItem.videoUrl || '',
@@ -1126,6 +1128,8 @@ export default function AdminDashboard() {
       description: service.description,
       deliveryTime: service.deliveryTime,
       startingPrice: service.startingPrice,
+      discountType: (service.discountType === 'amount' || service.discountType === 'percentage') ? service.discountType : '',
+      discountValue: service.discountValue || '',
       categoryId: service.categoryId,
       subCategoryId: service.subCategoryId || '',
       shortDescription: service.shortDescription || '',
@@ -1447,6 +1451,8 @@ export default function AdminDashboard() {
             description: serviceForm.description,
             deliveryTime: serviceForm.deliveryTime,
             startingPrice: serviceForm.startingPrice,
+            discountType: serviceForm.discountType && (serviceForm.discountType === 'amount' || serviceForm.discountType === 'percentage') ? serviceForm.discountType : null,
+            discountValue: serviceForm.discountValue?.trim() ? serviceForm.discountValue.trim() : null,
             categoryId: serviceForm.categoryId,
             subCategoryId: serviceForm.subCategoryId || null,
             // Overview fields
@@ -3581,6 +3587,29 @@ export default function AdminDashboard() {
     )
   }
 
+  /** Parse numeric value from price string (e.g. "৳800" or "800") */
+  const parsePriceNum = (s: string): number => {
+    if (!s || typeof s !== 'string') return 0
+    const n = parseFloat(s.replace(/[^\d.]/g, ''))
+    return Number.isNaN(n) ? 0 : n
+  }
+  /** Get discounted price for display; returns null if no valid discount */
+  const getDiscountedStartingPrice = (originalPriceStr: string, discountType?: string, discountValue?: string): string | null => {
+    if (!discountType || !discountValue || (discountType !== 'amount' && discountType !== 'percentage')) return null
+    const original = parsePriceNum(originalPriceStr)
+    if (original <= 0) return null
+    const val = parseFloat(String(discountValue).replace(/[^\d.]/g, ''))
+    if (Number.isNaN(val) || val < 0) return null
+    let discounted = 0
+    if (discountType === 'amount') {
+      discounted = Math.max(0, original - val)
+    } else {
+      discounted = Math.max(0, original * (1 - val / 100))
+    }
+    const prefix = (originalPriceStr.match(/^[^\d]*/) || [''])[0] || '৳'
+    return `${prefix}${Math.round(discounted)}`
+  }
+
   const renderServicesTab = () => (
     <div className="space-y-4">
       {servicesLoading ? (
@@ -3596,6 +3625,7 @@ export default function AdminDashboard() {
           {services.map((service) => {
           const category = categories.find(c => c.id === service.categoryId)
           const subCategory = service.subCategoryId ? subCategories.find(s => s.id === service.subCategoryId) : null
+          const discountedPrice = getDiscountedStartingPrice(service.startingPrice, service.discountType, service.discountValue)
           return (
             <div key={service.id} className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200">
               <div className="relative h-48">
@@ -3633,7 +3663,14 @@ export default function AdminDashboard() {
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <DollarSign size={16} />
-                    <span className="font-semibold">{service.startingPrice}</span>
+                    {discountedPrice ? (
+                      <span className="flex items-center gap-2 flex-wrap">
+                        <span className="line-through text-gray-500">{service.startingPrice}</span>
+                        <span className="font-semibold text-green-700 bg-green-50 px-1.5 py-0.5 rounded">{discountedPrice}</span>
+                      </span>
+                    ) : (
+                      <span className="font-semibold">{service.startingPrice}</span>
+                    )}
                   </div>
                 </div>
                 <div className="text-xs text-gray-500">
@@ -4244,7 +4281,7 @@ export default function AdminDashboard() {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
-                      <Input value={serviceForm.image} onChange={(e) => setServiceForm({ ...serviceForm, image: e.target.value })} placeholder="/plumbing.jpg" />
+                      <Input value={serviceForm.image} onChange={(e) => setServiceForm({ ...serviceForm, image: e.target.value })} placeholder="/legal_service_image.jpg" />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Rating</label>
@@ -4258,6 +4295,33 @@ export default function AdminDashboard() {
                       <label className="block text-sm font-medium text-gray-700 mb-1">Starting Price</label>
                       <Input value={serviceForm.startingPrice} onChange={(e) => setServiceForm({ ...serviceForm, startingPrice: e.target.value })} placeholder="৳800" />
                     </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Discount</label>
+                      <select
+                        value={serviceForm.discountType}
+                        onChange={(e) => setServiceForm({ ...serviceForm, discountType: (e.target.value === 'amount' || e.target.value === 'percentage') ? e.target.value : '' })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea"
+                      >
+                        <option value="">None</option>
+                        <option value="amount">Amount (৳ off)</option>
+                        <option value="percentage">Percentage (%)</option>
+                      </select>
+                    </div>
+                    {(serviceForm.discountType === 'amount' || serviceForm.discountType === 'percentage') && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          {serviceForm.discountType === 'amount' ? 'Discount amount (৳)' : 'Discount (%)'}
+                        </label>
+                        <Input
+                          type="number"
+                          min={0}
+                          step={serviceForm.discountType === 'percentage' ? 1 : undefined}
+                          value={serviceForm.discountValue}
+                          onChange={(e) => setServiceForm({ ...serviceForm, discountValue: e.target.value })}
+                          placeholder={serviceForm.discountType === 'amount' ? 'e.g. 100' : 'e.g. 10'}
+                        />
+                      </div>
+                    )}
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                       <textarea value={serviceForm.description} onChange={(e) => setServiceForm({ ...serviceForm, description: e.target.value })} className="w-full px-3 py-2 border border-gray-300 rounded-md admin-textarea" rows={3} />
@@ -4612,7 +4676,18 @@ export default function AdminDashboard() {
                               newPackages[index].price = e.target.value
                               setServiceForm({ ...serviceForm, packages: newPackages })
                             }}
-                            placeholder="Price"
+                            placeholder="Price (৳)"
+                          />
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
+                          <Input
+                            value={pkg.originalPrice ?? ''}
+                            onChange={(e) => {
+                              const newPackages = [...serviceForm.packages]
+                              newPackages[index] = { ...newPackages[index], originalPrice: e.target.value }
+                              setServiceForm({ ...serviceForm, packages: newPackages })
+                            }}
+                            placeholder="Original price (optional, for strike-through)"
                           />
                         </div>
                         <div className="mb-2">
@@ -4646,7 +4721,7 @@ export default function AdminDashboard() {
                     ))}
                     <button
                       type="button"
-                      onClick={() => setServiceForm({ ...serviceForm, packages: [...serviceForm.packages, { name: '', price: '', features: [] }] })}
+                      onClick={() => setServiceForm({ ...serviceForm, packages: [...serviceForm.packages, { name: '', price: '', originalPrice: '', features: [] }] })}
                       className="text-sm text-blue-600 hover:text-blue-800"
                     >
                       + Add Package

@@ -283,10 +283,11 @@ export default function CartPage() {
   }
 
   const selectedItems = cartItems.filter(item => item.selected)
-  const subtotal = selectedItems.reduce((sum, item) => sum + item.originalPrice * item.quantity, 0)
+  const subtotalOriginal = selectedItems.reduce((sum, item) => sum + item.originalPrice * item.quantity, 0)
   const totalDiscount = selectedItems.reduce((sum, item) => sum + item.discount * item.quantity, 0)
+  const subtotal = subtotalOriginal - totalDiscount // discounted subtotal (what customer pays for items)
   const deliveryCharge = 0
-  const total = subtotal - totalDiscount + deliveryCharge
+  const total = subtotal + deliveryCharge
 
   if (isLoading) {
     return (
@@ -426,19 +427,28 @@ export default function CartPage() {
                                 <option>Above 5 Ton</option>
                               </select>
                             </div> */}
-                            <div className="flex flex-wrap items-center gap-2 mb-2">
-                              <span className="text-base sm:text-lg font-bold text-green-600">
-                                ৳{item.price.toFixed(2)}
-                              </span>
-                              {appliedPromo && (
-                                <>
-                                  <span className="text-xs sm:text-sm text-gray-400 line-through">
+                            <div className="flex flex-col gap-0.5 mb-2">
+                              {item.discount > 0 && (
+                                <span className="inline-flex w-fit items-center rounded-md bg-green-500 px-2 py-0.5 text-xs font-medium text-white">
+                                  {item.originalPrice > 0 && Math.round((item.discount / item.originalPrice) * 100) > 0
+                                    ? `Save ${Math.round((item.discount / item.originalPrice) * 100)}%`
+                                    : `Save ৳${Math.round(item.discount)}`}
+                                </span>
+                              )}
+                              <span className="flex flex-wrap items-baseline gap-1.5">
+                                <span className="text-sm sm:text-base font-bold text-gray-800">
+                                  ৳{item.price.toFixed(2)}
+                                </span>
+                                {item.discount > 0 && (
+                                  <span className="text-xs sm:text-sm text-red-500 line-through">
                                     ৳{item.originalPrice.toFixed(2)}
                                   </span>
-                                  <span className="text-xs sm:text-sm text-red-600 font-medium bg-red-50 px-2 py-0.5 rounded">
-                                    {item.discount} BDT off
-                                  </span>
-                                </>
+                                )}
+                              </span>
+                              {appliedPromo && item.discount > 0 && (
+                                <span className="text-xs sm:text-sm text-red-600 font-medium bg-red-50 px-2 py-0.5 rounded w-fit">
+                                  {item.discount} BDT off
+                                </span>
                               )}
                             </div>
                             {(item.date || item.timeSlot) && (
@@ -520,7 +530,7 @@ export default function CartPage() {
                   {selectedItems.map((item) => (
                     <div key={item.id} className="flex justify-between items-baseline gap-2 text-gray-700">
                       <span className="text-gray-600 truncate">→ {item.serviceName} × {item.quantity}</span>
-                      <span className="text-gray-700 font-medium shrink-0">৳{(item.originalPrice * item.quantity).toFixed(2)}</span>
+                      <span className="text-gray-700 font-medium shrink-0">৳{(item.price * item.quantity).toFixed(2)}</span>
                     </div>
                   ))}
                 </div>
@@ -535,12 +545,6 @@ export default function CartPage() {
                   <span className="text-gray-600">Delivery Charge</span>
                   <span className="font-medium text-right">৳{deliveryCharge.toFixed(2)}</span>
                 </div>
-                {appliedPromo && totalDiscount > 0 && (
-                  <div className="flex justify-between items-baseline text-sm">
-                    <span className="text-green-600 font-medium">Discount!</span>
-                    <span className="font-medium text-green-600 text-right">-৳{totalDiscount.toFixed(2)}</span>
-                  </div>
-                )}
                 <div className="flex justify-between items-baseline text-base sm:text-lg font-bold pt-3 border-t mt-3">
                   <span>Amount to be paid</span>
                   <span className="text-[var(--color-primary)] text-right">৳{total.toFixed(2)}</span>

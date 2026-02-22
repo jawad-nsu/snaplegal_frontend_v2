@@ -39,7 +39,7 @@ This document outlines all API routes and CRUD operations that should be impleme
 
 ### 1. Services Management (`/api/services`)
 
-**Purpose:** Manage service offerings (AC repair, cleaning, plumbing, etc.)
+**Purpose:** Manage service offerings (AC repair, cleaning, legal_service_image, etc.)
 
 **Routes:**
 - `GET /api/services` - List all services

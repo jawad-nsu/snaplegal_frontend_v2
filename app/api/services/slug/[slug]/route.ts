@@ -67,6 +67,8 @@ export async function GET(
         description: service.description || '',
         deliveryTime: service.deliveryTime || '',
         startingPrice: service.startingPrice || '',
+        discountType: (service as { discountType?: string | null }).discountType ?? undefined,
+        discountValue: (service as { discountValue?: string | null }).discountValue ?? undefined,
         categoryId: service.categoryId,
         categoryTitle: service.category.title,
         subCategoryId: service.subCategoryId || undefined,

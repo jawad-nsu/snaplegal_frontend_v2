@@ -63,6 +63,8 @@ export async function GET(request: NextRequest) {
         description: service.description || '',
         deliveryTime: service.deliveryTime || '',
         startingPrice: service.startingPrice || '',
+        discountType: (service as { discountType?: string | null }).discountType ?? undefined,
+        discountValue: (service as { discountValue?: string | null }).discountValue ?? undefined,
         categoryId: service.categoryId,
         categoryTitle: service.category?.title || '',
         subCategoryId: service.subCategoryId || undefined,
@@ -131,7 +133,7 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json()
     const { 
-      title, slug, serialNumber, image, rating, description, deliveryTime, startingPrice, categoryId, subCategoryId, status,
+      title, slug, serialNumber, image, rating, description, deliveryTime, startingPrice, discountType, discountValue, categoryId, subCategoryId, status,
       shortDescription, detailedDescription, providerAuthority, infoSource, requiredDocuments, keywords, whatsIncluded, whatsNotIncluded,
       timeline, additionalNotes, processFlow, videoUrl, communityDiscussions, faqs, consultantQualifications, whyChooseConsultants, howWeSelectConsultants, packages,
       coreFiling, coreStamps, coreCourtFee, clientFiling, clientStamps, clientCourtFee, clientConsultantFee
@@ -224,6 +226,8 @@ export async function POST(request: NextRequest) {
         description: description && description.trim() ? description.trim() : null,
         deliveryTime: deliveryTime && deliveryTime.trim() ? deliveryTime.trim() : null,
         startingPrice: startingPrice && startingPrice.trim() ? startingPrice.trim() : null,
+        discountType: discountType && (discountType === 'amount' || discountType === 'percentage') ? discountType : null,
+        discountValue: discountValue != null && String(discountValue).trim() ? String(discountValue).trim() : null,
         categoryId: categoryId,
         subCategoryId: subCategoryId && subCategoryId.trim() ? subCategoryId.trim() : null,
         status: (status || 'active') as string,
@@ -295,6 +299,8 @@ export async function POST(request: NextRequest) {
         description: service.description || '',
         deliveryTime: service.deliveryTime || '',
         startingPrice: service.startingPrice || '',
+        discountType: (service as { discountType?: string | null }).discountType ?? undefined,
+        discountValue: (service as { discountValue?: string | null }).discountValue ?? undefined,
         categoryId: service.categoryId,
         subCategoryId: service.subCategoryId || undefined,
         status: service.status || 'active',

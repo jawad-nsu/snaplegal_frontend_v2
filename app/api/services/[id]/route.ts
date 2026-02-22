@@ -52,6 +52,8 @@ export async function GET(
         description: service.description || '',
         deliveryTime: service.deliveryTime || '',
         startingPrice: service.startingPrice || '',
+        discountType: (service as { discountType?: string | null }).discountType ?? undefined,
+        discountValue: (service as { discountValue?: string | null }).discountValue ?? undefined,
         categoryId: service.categoryId,
         subCategoryId: service.subCategoryId || undefined,
         status: service.status || 'active',
@@ -122,7 +124,7 @@ export async function PUT(
     const { id } = await params
     const body = await request.json()
     const { 
-      title, slug, serialNumber, image, rating, description, deliveryTime, startingPrice, categoryId, subCategoryId, status,
+      title, slug, serialNumber, image, rating, description, deliveryTime, startingPrice, discountType, discountValue, categoryId, subCategoryId, status,
       shortDescription, detailedDescription, providerAuthority, infoSource, requiredDocuments, keywords, whatsIncluded, whatsNotIncluded,
       timeline, additionalNotes, processFlow, videoUrl, communityDiscussions, faqs, consultantQualifications, whyChooseConsultants, howWeSelectConsultants, packages,
       coreFiling, coreStamps, coreCourtFee, clientFiling, clientStamps, clientCourtFee, clientConsultantFee
@@ -226,6 +228,8 @@ export async function PUT(
         description: description && description.trim() ? description.trim() : null,
         deliveryTime: deliveryTime && deliveryTime.trim() ? deliveryTime.trim() : null,
         startingPrice: startingPrice && startingPrice.trim() ? startingPrice.trim() : null,
+        discountType: discountType !== undefined ? (discountType && (discountType === 'amount' || discountType === 'percentage') ? discountType : null) : existingService.discountType,
+        discountValue: discountValue !== undefined ? (discountValue != null && String(discountValue).trim() ? String(discountValue).trim() : null) : existingService.discountValue,
         categoryId: categoryId || existingService.categoryId,
         subCategoryId: subCategoryId && subCategoryId.trim() ? subCategoryId.trim() : null,
         status: status || existingService.status || 'active',
@@ -298,6 +302,8 @@ export async function PUT(
         description: service.description || '',
         deliveryTime: service.deliveryTime || '',
         startingPrice: service.startingPrice || '',
+        discountType: (service as { discountType?: string | null }).discountType ?? undefined,
+        discountValue: (service as { discountValue?: string | null }).discountValue ?? undefined,
         categoryId: service.categoryId,
         subCategoryId: service.subCategoryId || undefined,
         status: service.status || 'active',

@@ -13,6 +13,8 @@ function toHomepageService(service: {
   shortDescription: string | null
   deliveryTime: string | null
   startingPrice: string | null
+  discountType?: string | null
+  discountValue?: string | null
 }) {
   return {
     id: service.id,
@@ -23,6 +25,8 @@ function toHomepageService(service: {
     description: service.shortDescription || service.description || '',
     deliveryTime: service.deliveryTime || '',
     startingPrice: service.startingPrice || '',
+    discountType: service.discountType ?? undefined,
+    discountValue: service.discountValue ?? undefined,
   }
 }
 
@@ -56,6 +60,9 @@ export async function GET() {
               shortDescription: true,
               deliveryTime: true,
               startingPrice: true,
+              // @ts-expect-error - discountType/discountValue exist on Service model; Prisma types may need regenerate
+              discountType: true,
+              discountValue: true,
             },
           })
     const serviceMap = Object.fromEntries(services.map((s) => [s.id, s]))

@@ -103,6 +103,34 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
   
   const { slug } = use(params)
 
+  /** Get "Save X%" or "Save ৳X" for a package with originalPrice; returns null if no discount */
+  const getPackageSaveLabel = (price: number, originalPrice?: number): string | null => {
+    if (originalPrice == null || originalPrice <= 0 || originalPrice <= price) return null
+    const amount = originalPrice - price
+    if (amount <= 0) return null
+    const percent = Math.round((amount / originalPrice) * 100)
+    if (percent >= 1) return `Save ${percent}%`
+    return `Save ৳${Math.round(amount)}`
+  }
+
+  /** Render package price: new price, old price strikethrough, Save badge on the right */
+  const renderPackagePrice = (pkg: { price: number; originalPrice?: number }, size: 'sm' | 'md' | 'lg' = 'md') => {
+    const saveLabel = getPackageSaveLabel(pkg.price, pkg.originalPrice)
+    const priceSize = size === 'sm' ? 'text-base' : size === 'lg' ? 'text-xl' : 'text-lg'
+    if (saveLabel && pkg.originalPrice != null) {
+      return (
+        <span className="flex flex-wrap items-baseline gap-1.5">
+          <span className={`${priceSize} font-bold text-gray-800`}>৳{pkg.price}</span>
+          <span className="text-sm text-red-500 line-through">৳{pkg.originalPrice}</span>
+          <span className="inline-flex items-center rounded-md bg-green-500 px-2 py-0.5 text-xs font-medium text-white">
+            {saveLabel}
+          </span>
+        </span>
+      )
+    }
+    return <span className={`${priceSize} font-bold text-[var(--color-primary)]`}>৳{pkg.price}</span>
+  }
+
   useEffect(() => {
     const fetchService = async () => {
       try {
@@ -1276,12 +1304,7 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                       <div className="flex items-start justify-between mb-1">
                         <div className="flex-1">
                           <div className="font-semibold text-sm">{pkg.name}</div>
-                          <div className="flex items-center gap-2 mt-1">
-                            <span className="text-lg font-bold text-[var(--color-primary)]">৳{pkg.price}</span>
-                            {pkg.originalPrice && (
-                              <span className="text-xs text-gray-400 line-through">৳{pkg.originalPrice}</span>
-                            )}
-                          </div>
+                          <div className="mt-1">{renderPackagePrice(pkg)}</div>
                         </div>
                         <div
                           className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ml-2 ${
@@ -1333,14 +1356,7 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                   <div className="mb-3">
                     <p className="text-xs text-gray-600 mb-1">Selected Package</p>
                     <p className="font-semibold text-sm text-gray-900">{service.packages[selectedPackage].name}</p>
-                    <p className="text-xl font-bold text-[var(--color-primary)] mt-1">
-                      ৳{service.packages[selectedPackage].price}
-                      {service.packages[selectedPackage].originalPrice && (
-                        <span className="text-sm text-gray-400 line-through ml-2">
-                          ৳{service.packages[selectedPackage].originalPrice}
-                        </span>
-                      )}
-                    </p>
+                    <div className="mt-1">{renderPackagePrice(service.packages[selectedPackage], 'lg')}</div>
                   </div>
                 )}
                 <button 
@@ -1378,16 +1394,7 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
               {service.packages.length > 0 && service.packages[selectedPackage] ? (
                 <>
                   <p className="text-sm font-semibold text-gray-900">{service.packages[selectedPackage].name}</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <p className="text-lg font-bold text-[var(--color-primary)]">
-                      ৳{service.packages[selectedPackage].price}
-                    </p>
-                    {service.packages[selectedPackage].originalPrice && (
-                      <span className="text-xs text-gray-400 line-through">
-                        ৳{service.packages[selectedPackage].originalPrice}
-                      </span>
-                    )}
-                  </div>
+                  <div className="mt-1">{renderPackagePrice(service.packages[selectedPackage], 'sm')}</div>
                 </>
               ) : (
                 <p className="text-sm text-gray-500">No packages available</p>
@@ -1427,12 +1434,7 @@ export default function ServiceDetailsPage({ params }: { params: Promise<{ slug:
                   <div className="flex items-start justify-between mb-1">
                     <div className="flex-1">
                       <div className="font-semibold text-sm">{pkg.name}</div>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-base font-bold text-[var(--color-primary)]">৳{pkg.price}</span>
-                        {pkg.originalPrice && (
-                          <span className="text-xs text-gray-400 line-through">৳{pkg.originalPrice}</span>
-                        )}
-                      </div>
+                      <div className="mt-1">{renderPackagePrice(pkg, 'sm')}</div>
                     </div>
                     <div
                       className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ml-2 ${

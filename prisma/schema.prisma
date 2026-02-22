@@ -148,6 +148,8 @@ model Service {
   description              String?
   deliveryTime             String?
   startingPrice            String?
+  discountType             String?      // 'amount' | 'percentage'
+  discountValue            String?     // e.g. "500" for ৳500 off, "10" for 10% off
   categoryId               String
   subCategoryId            String?
   status                   String       @default("active")

@@ -124,7 +124,7 @@ const serviceCategories = [
     title: 'Home Repair',
     icon: '🏠',
     services: [
-      { title: 'Plumbing Services', slug: 'plumbing-services' },
+      { title: 'legal_service_image Services', slug: 'legal_service_image-services' },
       { title: 'Electrical Services', slug: 'electrical-services' },
       { title: 'Painting Services', slug: 'painting-services' },
       { title: 'Carpentry Services', slug: 'carpentry-services' },
