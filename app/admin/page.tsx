@@ -4281,7 +4281,7 @@ export default function AdminDashboard() {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
-                      <Input value={serviceForm.image} onChange={(e) => setServiceForm({ ...serviceForm, image: e.target.value })} placeholder="/legal_service_img.png" />
+                      <Input value={serviceForm.image} onChange={(e) => setServiceForm({ ...serviceForm, image: e.target.value })} placeholder="/legal_service_img.jpg" />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Rating</label>
