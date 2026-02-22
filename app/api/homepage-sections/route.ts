@@ -60,7 +60,6 @@ export async function GET() {
               shortDescription: true,
               deliveryTime: true,
               startingPrice: true,
-              // @ts-expect-error - discountType/discountValue exist on Service model; Prisma types may need regenerate
               discountType: true,
               discountValue: true,
             },
