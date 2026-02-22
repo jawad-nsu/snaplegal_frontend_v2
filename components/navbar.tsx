@@ -36,6 +36,7 @@ const SEARCH_DEBOUNCE_MS = 300
 const MAX_DROPDOWN_RESULTS = 8
 const MAX_CATEGORIES = 4
 const MAX_SUBCATEGORIES = 4
+const CURRENT_ADDRESS_KEY = 'snaplegal_current_address'
 
 export default function Navbar() {
   const router = useRouter()
@@ -63,6 +64,34 @@ export default function Navbar() {
   const [searchLoading, setSearchLoading] = useState(false)
   const [showSearchDropdown, setShowSearchDropdown] = useState(false)
   const mobileMenuRef = useRef<HTMLDivElement>(null)
+  const [currentAddress, setCurrentAddress] = useState<{ type: string; location: string } | null>(null)
+
+  const readCurrentAddress = useCallback(() => {
+    if (typeof window === 'undefined') return
+    try {
+      const raw = localStorage.getItem(CURRENT_ADDRESS_KEY)
+      if (raw) {
+        const data = JSON.parse(raw) as { id: string; type?: string; location?: string }
+        if (data?.type || data?.location) {
+          setCurrentAddress({ type: data.type ?? '', location: data.location ?? '' })
+          return
+        }
+      }
+    } catch {
+      // ignore
+    }
+    setCurrentAddress(null)
+  }, [])
+
+  useEffect(() => {
+    readCurrentAddress()
+    window.addEventListener('snaplegal_current_address_updated', readCurrentAddress)
+    window.addEventListener('storage', readCurrentAddress)
+    return () => {
+      window.removeEventListener('snaplegal_current_address_updated', readCurrentAddress)
+      window.removeEventListener('storage', readCurrentAddress)
+    }
+  }, [readCurrentAddress])
 
   const fetchSearchResults = useCallback(async (q: string) => {
     if (!q.trim()) {
@@ -399,10 +428,16 @@ export default function Navbar() {
               />
             </Link>
             
-            <button className="flex items-center gap-1 text-gray-700 hover:text-[var(--color-primary)] dark:text-white dark:hover:text-white transition-colors">
-              <MapPin className="w-4 h-4 text-[var(--color-primary)] dark:text-white" />
-              <span className="text-sm font-medium">Gulshan</span>
-            </button>
+            <Link
+              href="/account?tab=my-addresses"
+              className="flex items-center gap-1 text-gray-700 hover:text-[var(--color-primary)] dark:text-white dark:hover:text-white transition-colors"
+              title="Update current address"
+            >
+              <MapPin className="w-4 h-4 text-[var(--color-primary)] dark:text-white flex-shrink-0" />
+              <span className="text-sm font-medium truncate max-w-[140px]">
+                {currentAddress ? (currentAddress.location || currentAddress.type || 'Address') : 'Set address'}
+              </span>
+            </Link>
 
             <Button 
               variant="outline" 
@@ -670,17 +705,17 @@ export default function Navbar() {
           className="md:hidden border-t border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-lg"
         >
           <div className="container mx-auto px-4 py-4 space-y-1">
-            {/* Location */}
-            <button
-              onClick={() => {
-                setShowMobileMenu(false)
-                // Add location change functionality
-              }}
+            {/* Location - link to saved addresses */}
+            <Link
+              href="/account?tab=my-addresses"
+              onClick={() => setShowMobileMenu(false)}
               className="w-full flex items-center gap-3 px-4 py-3 text-left text-gray-700 hover:bg-gray-50 dark:text-white dark:hover:bg-gray-700 rounded-lg transition-colors"
             >
               <MapPin className="w-5 h-5 text-[var(--color-primary)] dark:text-white flex-shrink-0" />
-              <span className="font-medium">Gulshan</span>
-            </button>
+              <span className="font-medium truncate">
+                {currentAddress ? (currentAddress.location || currentAddress.type || 'Address') : 'Set address'}
+              </span>
+            </Link>
 
             {/* All Services */}
             <button

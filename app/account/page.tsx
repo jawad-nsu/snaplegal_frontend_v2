@@ -1,14 +1,18 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
-import { User, Edit2, Home, FileText, Trash2, Upload, X, Tag, Gift, Sparkles, TrendingUp } from 'lucide-react'
+import { useSearchParams } from 'next/navigation'
+import { User, Edit2, Home, FileText, Trash2, Upload, X, Tag, Gift, Sparkles, TrendingUp, Building2, Plus, Check } from 'lucide-react'
 import Navbar from '@/components/navbar'
 import { LogoSpinner } from '@/components/logo-spinner'
 
+const CURRENT_ADDRESS_KEY = 'snaplegal_current_address'
+
 export default function AccountPage() {
   const { data: session, status } = useSession()
+  const searchParams = useSearchParams()
   const [activeTab, setActiveTab] = useState('my-account')
   const [documents, setDocuments] = useState([
     { id: '1', name: 'National ID', fileName: 'national-id.pdf', uploadDate: '2024-01-15' },
@@ -20,12 +24,13 @@ export default function AccountPage() {
   const [newDocName, setNewDocName] = useState('')
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [showAddressModal, setShowAddressModal] = useState(false)
+  const [editingAddressId, setEditingAddressId] = useState<string | null>(null)
   const [addressType, setAddressType] = useState('')
   const [addressLocation, setAddressLocation] = useState('')
-  const [addresses, setAddresses] = useState([
-    { id: '1', type: 'Home', location: 'Gulshan' },
-    { id: '2', type: 'Add Work', location: '' },
-  ])
+  const [addresses, setAddresses] = useState<Array<{ id: string; type: string; location: string; isDefault?: boolean }>>([])
+  const [addressesLoading, setAddressesLoading] = useState(true)
+  const [addressesSaving, setAddressesSaving] = useState(false)
+  const [currentAddressId, setCurrentAddressId] = useState<string | null>(null)
   const [promotions] = useState([
     {
       id: '1',
@@ -79,6 +84,92 @@ export default function AccountPage() {
     { id: 'my-addresses', label: 'My Addresses' },
     { id: 'my-promotions', label: 'My Promotions' },
   ]
+
+  // Sync active tab from URL (e.g. /account?tab=my-addresses)
+  useEffect(() => {
+    const tab = searchParams.get('tab')
+    if (tab && menuItems.some((m) => m.id === tab)) setActiveTab(tab)
+  }, [searchParams])
+
+  // Fetch addresses from DB when authenticated
+  useEffect(() => {
+    if (status !== 'authenticated' || !session?.user?.id) {
+      setAddressesLoading(false)
+      setAddresses([])
+      return
+    }
+    let cancelled = false
+    setAddressesLoading(true)
+    fetch('/api/account/addresses')
+      .then((res) => res.ok ? res.json() : Promise.reject(new Error('Failed to fetch')))
+      .then((data) => {
+        if (cancelled) return
+        const list = (data.addresses || []).map((a: { id: string; type: string; location: string; isDefault?: boolean }) => ({
+          id: a.id,
+          type: a.type,
+          location: a.location,
+          isDefault: a.isDefault,
+        }))
+        setAddresses(list)
+        const defaultAddr = list.find((a: { isDefault?: boolean }) => a.isDefault) || list[0]
+        if (defaultAddr) {
+          setCurrentAddressId(defaultAddr.id)
+          persistCurrentAddress(defaultAddr)
+        } else {
+          setCurrentAddressId(null)
+          persistCurrentAddress(null)
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setAddresses([])
+      })
+      .finally(() => {
+        if (!cancelled) setAddressesLoading(false)
+      })
+    return () => { cancelled = true }
+  }, [status, session?.user?.id])
+
+  // If current address id is not in the list anymore (e.g. deleted), clear it
+  useEffect(() => {
+    if (currentAddressId && !addresses.some((a) => a.id === currentAddressId)) {
+      setCurrentAddressId(null)
+      persistCurrentAddress(null)
+    }
+  }, [addresses, currentAddressId])
+
+  const persistCurrentAddress = (address: { id: string; type: string; location: string } | null) => {
+    if (typeof window === 'undefined') return
+    if (address) {
+      localStorage.setItem(CURRENT_ADDRESS_KEY, JSON.stringify({ id: address.id, type: address.type, location: address.location }))
+    } else {
+      localStorage.removeItem(CURRENT_ADDRESS_KEY)
+    }
+    window.dispatchEvent(new CustomEvent('snaplegal_current_address_updated'))
+  }
+
+  const handleSetCurrentAddress = async (address: { id: string; type: string; location: string }) => {
+    const prev = currentAddressId
+    setCurrentAddressId(address.id)
+    persistCurrentAddress(address)
+    try {
+      const res = await fetch(`/api/account/addresses/${address.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isDefault: true }),
+      })
+      if (!res.ok) {
+        setCurrentAddressId(prev)
+        persistCurrentAddress(addresses.find((a) => a.id === prev) || null)
+      } else {
+        setAddresses((addrs) =>
+          addrs.map((a) => ({ ...a, isDefault: a.id === address.id }))
+        )
+      }
+    } catch {
+      setCurrentAddressId(prev)
+      persistCurrentAddress(addresses.find((a) => a.id === prev) || null)
+    }
+  }
 
   // Get user info from session
   const userInfo = {
@@ -139,18 +230,114 @@ export default function AccountPage() {
     }
   }
 
-  const handleAddAddress = () => {
-    if (addressType) {
-      const newAddress = {
-        id: Date.now().toString(),
-        type: addressType,
-        location: addressLocation,
+  const handleAddAddress = async () => {
+    if (!addressType.trim()) return
+    setAddressesSaving(true)
+    try {
+      if (editingAddressId) {
+        const res = await fetch(`/api/account/addresses/${editingAddressId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: addressType.trim(), location: addressLocation.trim() }),
+        })
+        if (!res.ok) throw new Error('Update failed')
+        const data = await res.json()
+        setAddresses((addrs) =>
+          addrs.map((addr) =>
+            addr.id === editingAddressId
+              ? { ...addr, type: data.address.type, location: data.address.location }
+              : addr
+          )
+        )
+        if (currentAddressId === editingAddressId) {
+          persistCurrentAddress({ id: editingAddressId, type: data.address.type, location: data.address.location })
+        }
+      } else {
+        const isFirst = addresses.length === 0
+        const res = await fetch('/api/account/addresses', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: addressType.trim(),
+            location: addressLocation.trim(),
+            isDefault: isFirst,
+          }),
+        })
+        if (!res.ok) throw new Error('Create failed')
+        const data = await res.json()
+        const newAddr = {
+          id: data.address.id,
+          type: data.address.type,
+          location: data.address.location,
+          isDefault: data.address.isDefault,
+        }
+        setAddresses((addrs) => {
+          const next = [...addrs, newAddr]
+          return next.sort((a, b) => (b.isDefault ? 1 : 0) - (a.isDefault ? 1 : 0))
+        })
+        if (isFirst) {
+          setCurrentAddressId(newAddr.id)
+          persistCurrentAddress(newAddr)
+          window.dispatchEvent(new CustomEvent('snaplegal_current_address_updated'))
+        }
       }
-      setAddresses([...addresses, newAddress])
       setShowAddressModal(false)
+      setEditingAddressId(null)
       setAddressType('')
       setAddressLocation('')
+    } catch {
+      alert('Failed to save address. Please try again.')
+    } finally {
+      setAddressesSaving(false)
     }
+  }
+
+  const handleEditAddress = (address: { id: string; type: string; location: string }) => {
+    setEditingAddressId(address.id)
+    setAddressType(address.type)
+    setAddressLocation(address.location)
+    setShowAddressModal(true)
+  }
+
+  const handleDeleteAddress = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this address?')) return
+    setAddressesSaving(true)
+    try {
+      const res = await fetch(`/api/account/addresses/${id}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error('Delete failed')
+      const next = addresses.filter((addr) => addr.id !== id)
+      setAddresses(next)
+      if (currentAddressId === id) {
+        const first = next[0]
+        if (first) {
+          setCurrentAddressId(first.id)
+          persistCurrentAddress(first)
+          await fetch(`/api/account/addresses/${first.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ isDefault: true }),
+          })
+          window.dispatchEvent(new CustomEvent('snaplegal_current_address_updated'))
+        } else {
+          setCurrentAddressId(null)
+          persistCurrentAddress(null)
+        }
+      }
+    } catch {
+      alert('Failed to delete address. Please try again.')
+    } finally {
+      setAddressesSaving(false)
+    }
+  }
+
+  const hasAddressType = (type: string) =>
+    addresses.some(addr => addr.type.toLowerCase().trim() === type.toLowerCase())
+
+  const openAddAddressWithType = (type: 'Home' | 'Work') => {
+    setEditingAddressId(null)
+    setAddressType(type)
+    setAddressLocation('')
+    setShowAddressModal(true)
   }
 
   return (
@@ -392,34 +579,126 @@ export default function AccountPage() {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 gap-4 sm:gap-0">
                   <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Saved Addresses</h1>
                   <button 
-                    onClick={() => setShowAddressModal(true)}
-                    className="px-4 sm:px-6 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:opacity-90 transition-colors font-medium text-sm sm:text-base whitespace-nowrap"
+                    onClick={() => {
+                      setEditingAddressId(null)
+                      setAddressType('')
+                      setAddressLocation('')
+                      setShowAddressModal(true)
+                    }}
+                    disabled={addressesSaving || (status === 'authenticated' && addressesLoading)}
+                    className="px-4 sm:px-6 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:opacity-90 transition-colors font-medium text-sm sm:text-base whitespace-nowrap disabled:opacity-60 disabled:cursor-not-allowed"
                   >
                     Add New Address
                   </button>
                 </div>
 
-                {/* Address Cards */}
+                {addressesLoading && status === 'authenticated' && (
+                  <div className="flex justify-center py-8">
+                    <LogoSpinner fullPage={false} size="sm" message="Loading addresses..." />
+                  </div>
+                )}
+                {!addressesLoading && status === 'unauthenticated' && (
+                  <p className="text-gray-600 py-4">Sign in to view and manage your addresses.</p>
+                )}
+                {!addressesLoading && status === 'authenticated' && (
+                <>
+                {/* Address Cards: Add Home, Add Work (if missing), then saved addresses */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                  {addresses.map((address) => (
-                    <div
-                      key={address.id}
-                      className="border-2 border-gray-200 rounded-lg p-4 sm:p-6 hover:border-[var(--color-primary)] transition-colors cursor-pointer"
+                  {!hasAddressType('Home') && (
+                    <button
+                      type="button"
+                      onClick={() => openAddAddressWithType('Home')}
+                      className="border-2 border-dashed border-gray-300 rounded-lg p-4 sm:p-6 hover:border-[var(--color-primary)] hover:bg-gray-50/50 transition-colors text-left flex items-center gap-3 sm:gap-4"
                     >
-                      <div className="flex items-start gap-3 sm:gap-4">
-                        <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[var(--color-neutral)] rounded-lg flex items-center justify-center flex-shrink-0">
-                          <Home className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--color-primary)]" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1">{address.type}</h3>
-                          {address.location && (
-                            <p className="text-sm sm:text-base text-gray-600 break-words">{address.location}</p>
-                          )}
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[var(--color-neutral)] rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Plus className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--color-primary)]" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-base sm:text-lg font-bold text-gray-900">Add Home</h3>
+                        <p className="text-sm text-gray-500">Add your home address</p>
+                      </div>
+                      <Home className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 flex-shrink-0" />
+                    </button>
+                  )}
+                  {!hasAddressType('Work') && (
+                    <button
+                      type="button"
+                      onClick={() => openAddAddressWithType('Work')}
+                      className="border-2 border-dashed border-gray-300 rounded-lg p-4 sm:p-6 hover:border-[var(--color-primary)] hover:bg-gray-50/50 transition-colors text-left flex items-center gap-3 sm:gap-4"
+                    >
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[var(--color-neutral)] rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Plus className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--color-primary)]" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-base sm:text-lg font-bold text-gray-900">Add Work</h3>
+                        <p className="text-sm text-gray-500">Add your work address</p>
+                      </div>
+                      <Building2 className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 flex-shrink-0" />
+                    </button>
+                  )}
+                  {addresses.map((address) => {
+                    const isCurrent = currentAddressId === address.id
+                    return (
+                      <div
+                        key={address.id}
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => handleSetCurrentAddress(address)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleSetCurrentAddress(address)}
+                        className={`border-2 rounded-lg p-4 sm:p-6 transition-all cursor-pointer text-left ${
+                          isCurrent
+                            ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/10 ring-2 ring-[var(--color-primary)]/30'
+                            : 'border-gray-200 hover:border-[var(--color-primary)] hover:bg-gray-50/50'
+                        }`}
+                      >
+                        <div className="flex items-start gap-3 sm:gap-4">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[var(--color-neutral)] rounded-lg flex items-center justify-center flex-shrink-0">
+                            {address.type.toLowerCase().trim() === 'work' ? (
+                              <Building2 className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--color-primary)]" />
+                            ) : (
+                              <Home className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--color-primary)]" />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <h3 className="text-base sm:text-lg font-bold text-gray-900">{address.type}</h3>
+                              {isCurrent && (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-[var(--color-primary)] text-white">
+                                  <Check className="w-3 h-3" />
+                                  Current address
+                                </span>
+                              )}
+                            </div>
+                            {address.location && (
+                              <p className="text-sm sm:text-base text-gray-600 break-words mt-1">{address.location}</p>
+                            )}
+                            {/* {!isCurrent && (
+                              <p className="text-xs text-[var(--color-primary)] mt-2 font-medium">Click to set as current address</p>
+                            )} */}
+                          </div>
+                          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                            <button
+                              onClick={() => handleEditAddress(address)}
+                              className="p-1.5 sm:p-2 text-gray-600 hover:text-[var(--color-primary)] transition-colors"
+                              title="Edit"
+                            >
+                              <Edit2 className="w-4 h-4 sm:w-5 sm:h-5" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteAddress(address.id)}
+                              className="p-1.5 sm:p-2 text-gray-600 hover:text-red-600 transition-colors"
+                              title="Delete"
+                            >
+                              <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
+                </>
+                )}
               </div>
             )}
 
@@ -491,15 +770,18 @@ export default function AccountPage() {
               </div>
             )}
 
-            {/* Add Address Modal */}
+            {/* Add / Edit Address Modal */}
             {showAddressModal && (
               <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
                 <div className="bg-white rounded-lg p-4 sm:p-6 max-w-md w-full my-auto">
                   <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg sm:text-xl font-bold text-gray-900">Add New Address</h2>
+                    <h2 className="text-lg sm:text-xl font-bold text-gray-900">
+                      {editingAddressId ? 'Edit Address' : 'Add New Address'}
+                    </h2>
                     <button
                       onClick={() => {
                         setShowAddressModal(false)
+                        setEditingAddressId(null)
                         setAddressType('')
                         setAddressLocation('')
                       }}
@@ -536,14 +818,15 @@ export default function AccountPage() {
                     <div className="flex flex-col sm:flex-row gap-3">
                       <button
                         onClick={handleAddAddress}
-                        disabled={!addressType}
+                        disabled={!addressType.trim() || addressesSaving}
                         className="flex-1 bg-[var(--color-primary)] text-white py-2.5 sm:py-2 rounded-lg hover:opacity-90 transition-colors font-medium disabled:bg-gray-300 disabled:cursor-not-allowed text-sm sm:text-base"
                       >
-                        Add Address
+                        {addressesSaving ? 'Saving...' : editingAddressId ? 'Save Changes' : 'Add Address'}
                       </button>
                       <button
                         onClick={() => {
                           setShowAddressModal(false)
+                          setEditingAddressId(null)
                           setAddressType('')
                           setAddressLocation('')
                         }}
