@@ -184,7 +184,7 @@ const categories = [
             {trendingServices.map((service) => (
               <div
                 key={service.id}
-                className="group cursor-pointer rounded-xl md:rounded-2xl overflow-hidden bg-white shadow-sm md:shadow-md hover:shadow-md md:hover:shadow-2xl transition-all duration-300 border border-gray-100"
+                className="group cursor-pointer rounded-xl md:rounded-2xl overflow-hidden bg-white shadow-sm md:shadow-md hover:shadow-md md:hover:shadow-2xl transition-all duration-300 border border-gray-100 flex flex-col"
                 onClick={() => router.push(`/services/${service.slug}`)}
               >
                 <div className="md:hidden">
@@ -195,26 +195,28 @@ const categories = [
                     <h3 className="text-sm sm:text-base font-medium text-gray-900 leading-tight">{service.title}</h3>
                   </div>
                 </div>
-                <div className="hidden md:block">
-                  <div className="relative h-56 overflow-hidden p-3">
+                <div className="hidden md:flex md:flex-col md:flex-1 md:min-h-0">
+                  <div className="relative h-56 overflow-hidden p-3 flex-shrink-0">
                     <div className="relative h-full w-full rounded-xl overflow-hidden">
                       <Image src={service.image || '/placeholder.svg'} alt={service.title} fill className="object-cover group-hover:scale-110 transition-transform duration-300" />
                     </div>
                   </div>
-                  <div className="p-5">
-                    <div className="flex items-start justify-between mb-2">
-                      <h3 className="font-bold text-lg text-gray-900 leading-tight">{service.title}</h3>
-                      <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg flex-shrink-0 ml-2">
-                        <Star size={16} className="fill-yellow-400 text-yellow-400" />
-                        <span className="font-semibold text-sm">{service.rating}</span>
+                  <div className="p-5 flex flex-col flex-1 min-h-0">
+                    <div className="flex-1 min-h-0">
+                      <div className="flex items-start justify-between mb-2">
+                        <h3 className="font-bold text-lg text-gray-900 leading-tight">{service.title}</h3>
+                        <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg flex-shrink-0 ml-2">
+                          <Star size={16} className="fill-yellow-400 text-yellow-400" />
+                          <span className="font-semibold text-sm">{service.rating}</span>
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-4 line-clamp-2">{service.description}</p>
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="text-sm text-gray-600"><Clock size={16} className="inline mr-1" />{service.deliveryTime}</span>
+                        <span className="text-sm font-semibold text-gray-900">Starting at {service.startingPrice}</span>
                       </div>
                     </div>
-                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">{service.description}</p>
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="text-sm text-gray-600"><Clock size={16} className="inline mr-1" />{service.deliveryTime}</span>
-                      <span className="text-sm font-semibold text-gray-900">Starting at {service.startingPrice}</span>
-                    </div>
-                    <button onClick={(e) => handleBookNow(e, service)} className="w-full mt-6 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer">
+                    <button onClick={(e) => handleBookNow(e, service)} className="w-full mt-auto bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer flex-shrink-0">
                       Book Now
                     </button>
                   </div>
@@ -251,7 +253,7 @@ const categories = [
                 {row.services.map((service) => (
                   <div
                     key={service.id}
-                    className="group cursor-pointer rounded-xl md:rounded-2xl overflow-hidden bg-white shadow-sm md:shadow-md hover:shadow-md md:hover:shadow-2xl transition-all duration-300 border border-gray-100"
+                    className="group cursor-pointer rounded-xl md:rounded-2xl overflow-hidden bg-white shadow-sm md:shadow-md hover:shadow-md md:hover:shadow-2xl transition-all duration-300 border border-gray-100 flex flex-col"
                     onClick={() => router.push(`/services/${service.slug}`)}
                   >
                     <div className="md:hidden">
@@ -262,26 +264,28 @@ const categories = [
                         <h3 className="text-sm sm:text-base font-medium text-gray-900 leading-tight">{service.title}</h3>
                       </div>
                     </div>
-                    <div className="hidden md:block">
-                      <div className="relative h-56 overflow-hidden p-3">
+                    <div className="hidden md:flex md:flex-col md:flex-1 md:min-h-0">
+                      <div className="relative h-56 overflow-hidden p-3 flex-shrink-0">
                         <div className="relative h-full w-full rounded-xl overflow-hidden">
                           <Image src={service.image || '/placeholder.svg'} alt={service.title} fill className="object-cover group-hover:scale-110 transition-transform duration-300" />
                         </div>
                       </div>
-                      <div className="p-5">
-                        <div className="flex items-start justify-between mb-2">
-                          <h3 className="font-bold text-lg text-gray-900 leading-tight">{service.title}</h3>
-                          <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg flex-shrink-0 ml-2">
-                            <Star size={16} className="fill-yellow-400 text-yellow-400" />
-                            <span className="font-semibold text-sm">{service.rating}</span>
+                      <div className="p-5 flex flex-col flex-1 min-h-0">
+                        <div className="flex-1 min-h-0">
+                          <div className="flex items-start justify-between mb-2">
+                            <h3 className="font-bold text-lg text-gray-900 leading-tight">{service.title}</h3>
+                            <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg flex-shrink-0 ml-2">
+                              <Star size={16} className="fill-yellow-400 text-yellow-400" />
+                              <span className="font-semibold text-sm">{service.rating}</span>
+                            </div>
+                          </div>
+                          <p className="text-sm text-gray-600 mb-4 line-clamp-2">{service.description}</p>
+                          <div className="flex items-center justify-between mb-4">
+                            <span className="text-sm text-gray-600"><Clock size={16} className="inline mr-1" />{service.deliveryTime}</span>
+                            <span className="text-sm font-semibold text-gray-900">Starting at {service.startingPrice}</span>
                           </div>
                         </div>
-                        <p className="text-sm text-gray-600 mb-4 line-clamp-2">{service.description}</p>
-                        <div className="flex items-center justify-between mb-4">
-                          <span className="text-sm text-gray-600"><Clock size={16} className="inline mr-1" />{service.deliveryTime}</span>
-                          <span className="text-sm font-semibold text-gray-900">Starting at {service.startingPrice}</span>
-                        </div>
-                        <button onClick={(e) => handleBookNow(e, service)} className="w-full mt-6 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer">
+                        <button onClick={(e) => handleBookNow(e, service)} className="w-full mt-auto bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer flex-shrink-0">
                           Book Now
                         </button>
                       </div>
@@ -307,7 +311,7 @@ const categories = [
             {recommended.map((service) => (
               <div
                 key={service.id}
-                className="group cursor-pointer rounded-xl md:rounded-2xl overflow-hidden bg-white shadow-sm md:shadow-md hover:shadow-md md:hover:shadow-2xl transition-all duration-300 border border-gray-100"
+                className="group cursor-pointer rounded-xl md:rounded-2xl overflow-hidden bg-white shadow-sm md:shadow-md hover:shadow-md md:hover:shadow-2xl transition-all duration-300 border border-gray-100 flex flex-col"
                 onClick={() => router.push(`/services/${service.slug}`)}
               >
                 <div className="md:hidden">
@@ -318,26 +322,28 @@ const categories = [
                     <h3 className="text-sm sm:text-base font-medium text-gray-900 leading-tight">{service.title}</h3>
                   </div>
                 </div>
-                <div className="hidden md:block">
-                  <div className="relative h-56 overflow-hidden p-3">
+                <div className="hidden md:flex md:flex-col md:flex-1 md:min-h-0">
+                  <div className="relative h-56 overflow-hidden p-3 flex-shrink-0">
                     <div className="relative h-full w-full rounded-xl overflow-hidden">
                       <Image src={service.image || '/placeholder.svg'} alt={service.title} fill className="object-cover group-hover:scale-110 transition-transform duration-300" />
                     </div>
                   </div>
-                  <div className="p-5">
-                    <div className="flex items-start justify-between mb-2">
-                      <h3 className="font-bold text-lg text-gray-900 leading-tight">{service.title}</h3>
-                      <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg flex-shrink-0 ml-2">
-                        <Star size={16} className="fill-yellow-400 text-yellow-400" />
-                        <span className="font-semibold text-sm">{service.rating}</span>
+                  <div className="p-5 flex flex-col flex-1 min-h-0">
+                    <div className="flex-1 min-h-0">
+                      <div className="flex items-start justify-between mb-2">
+                        <h3 className="font-bold text-lg text-gray-900 leading-tight">{service.title}</h3>
+                        <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg flex-shrink-0 ml-2">
+                          <Star size={16} className="fill-yellow-400 text-yellow-400" />
+                          <span className="font-semibold text-sm">{service.rating}</span>
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-4 line-clamp-2">{service.description}</p>
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="text-sm text-gray-600"><Clock size={16} className="inline mr-1" />{service.deliveryTime}</span>
+                        <span className="text-sm font-semibold text-gray-900">Starting at {service.startingPrice}</span>
                       </div>
                     </div>
-                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">{service.description}</p>
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="text-sm text-gray-600"><Clock size={16} className="inline mr-1" />{service.deliveryTime}</span>
-                      <span className="text-sm font-semibold text-gray-900">Starting at {service.startingPrice}</span>
-                    </div>
-                    <button onClick={(e) => handleBookNow(e, service)} className="w-full mt-6 bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer">
+                    <button onClick={(e) => handleBookNow(e, service)} className="w-full mt-auto bg-[var(--color-primary)] hover:opacity-90 text-white font-semibold py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer flex-shrink-0">
                       Book Now
                     </button>
                   </div>
