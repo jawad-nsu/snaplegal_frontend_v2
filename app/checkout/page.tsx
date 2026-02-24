@@ -220,10 +220,12 @@ export default function CheckoutPage() {
                 <span className="text-gray-600">Delivery Charge</span>
                 <span className="font-medium text-gray-900">৳{deliveryCharge.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between text-xs sm:text-sm">
-                <span className="text-green-600">Discount</span>
-                <span className="font-medium text-green-600">-৳{totalDiscount.toFixed(2)}</span>
-              </div>
+              {totalDiscount > 0 && (
+                <div className="flex justify-between text-xs sm:text-sm">
+                  <span className="text-green-600">Discount</span>
+                  <span className="font-medium text-green-600">-৳{totalDiscount.toFixed(2)}</span>
+                </div>
+              )}
               {promoDiscount > 0 && promoCode && (
                 <div className="flex justify-between text-xs sm:text-sm text-green-600">
                   <span>Promo ({promoCode})</span>
